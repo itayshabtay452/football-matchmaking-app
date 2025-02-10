@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "338962797040",
+    "project_id": "soccergamesfinder",
+    "storage_bucket": "soccergamesfinder.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:338962797040:android:8045d0f65d5cdfc7c80d35",
+        "android_client_info": {
+          "package_name": "com.example.soccergamesfinder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCfZDdcLNtNce9OwBogD1ACmA9vYxppx7k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
