@@ -50,22 +50,22 @@ class AuthViewModel(private val repository: AuthRepository = AuthRepository()) :
 
     // פונקציה להשלמת פרופיל המשתמש (במידה והרישום הראשוני בוצע רק עם אימייל וסיסמה)
     fun completeProfile(
-        fullName: String,
+        firstName: String,
+        lastName: String,
+        age: String,
+        nickName: String,
         location: String,
-        travelDistance: String,
-        freeHours: String,
-        skillLevel: String,
         imageUri: String
     ) {
         viewModelScope.launch {
 
             _uiState.value = AuthUiState.Loading
             val result = repository.completeProfile(
-                fullName = fullName,
+                firstName = firstName,
+                lastName = lastName,
+                age = age,
+                nickName = nickName,
                 location = location,
-                travelDistance = travelDistance,
-                freeHours = freeHours,
-                skillLevel = skillLevel,
                 imageUri = imageUri
             )
             _uiState.value = if (result.isSuccess)

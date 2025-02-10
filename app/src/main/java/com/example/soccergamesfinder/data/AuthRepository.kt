@@ -32,11 +32,11 @@ class AuthRepository {
 
     // פונקציה להשלמת פרופיל המשתמש – עדכון שאר הפרטים במסד הנתונים (Firestore)
     suspend fun completeProfile(
-        fullName: String,
+        firstName: String,
+        lastName: String,
+        age: String,
+        nickName: String,
         location: String,
-        travelDistance: String,
-        freeHours: String,
-        skillLevel: String,
         imageUri: String
     ): Result<Unit> {
         return try {
@@ -44,11 +44,11 @@ class AuthRepository {
             val uid = auth.currentUser?.uid ?: throw Exception("משתמש לא זמין")
             // בניית מפת הנתונים לשמירה במסד הנתונים
             val userData = hashMapOf(
-                "fullName" to fullName,
+                "firstName" to firstName,
+                "lastName" to lastName,
+                "age" to age,
+                "nickName" to nickName,
                 "location" to location,
-                "travelDistance" to travelDistance,
-                "freeHours" to freeHours,
-                "skillLevel" to skillLevel,
                 "imageUri" to imageUri
             )
             // כתיבה למסמך במסד הנתונים באוסף "users" תחת המסמך שמסומן ב-UID של המשתמש

@@ -1,9 +1,10 @@
 package com.example.soccergamesfinder.ui.auth
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -13,14 +14,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.soccergamesfinder.R
 import com.example.soccergamesfinder.viewmodel.AuthUiState
 import com.example.soccergamesfinder.viewmodel.AuthViewModel
-import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,14 +27,16 @@ fun ProfileCompletionScreen(
     authViewModel: AuthViewModel = viewModel(),
     onProfileCompleteSuccess: () -> Unit
 ) {
+    // ניהול מצב ה-UI דרך ה-ViewModel
     val uiState by authViewModel.uiState.collectAsState()
 
-    var fullName by remember { mutableStateOf("") }
+    // שדות הפרופיל החדשים
+    var firstName by remember { mutableStateOf("") }
+    var lastName by remember { mutableStateOf("") }
+    var age by remember { mutableStateOf("") }
+    var nickName by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("") }
-    var travelDistance by remember { mutableStateOf("") }
-    var freeHours by remember { mutableStateOf("") }
-    var skillLevel by remember { mutableStateOf("") }
-    var imageUri by remember { mutableStateOf("") } // placeholder עבור URI של התמונה
+    var imageUri by remember { mutableStateOf("") } // כאן ניתן לשמור את נתיב התמונה
 
     LaunchedEffect(uiState) {
         if (uiState is AuthUiState.Success) {
@@ -45,23 +46,24 @@ fun ProfileCompletionScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // תמונת רקע – ודא שקובץ "login" נמצא ב-res/drawable
+        // רקע – ודא שיש לך תמונה בשם "login" ב-res/drawable
         Image(
             painter = painterResource(id = R.drawable.login),
             contentDescription = "Background",
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
-        // שכבת overlay שחורה עם שקיפות לשיפור קריאות הטקסט
+        // שכבת overlay עם רקע שחור שקוף לשיפור קריאות הטקסט
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Black.copy(alpha = 0.5f))
         )
-        // טופס הפרופיל מוצג במרכז המסך
+        // עטיפת התוכן בגלילה כדי שלא ייחתך, במקרה שהמסך ארוך
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 32.dp)
                 .align(Alignment.Center),
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -69,15 +71,13 @@ fun ProfileCompletionScreen(
         ) {
             Text(
                 text = "השלם פרופיל",
-                style = TextStyle(
-                    fontSize = 32.sp,
-                    color = MaterialTheme.colorScheme.primary,
-                )
+                style = TextStyle(fontSize = 32.sp, color = MaterialTheme.colorScheme.primary)
             )
+            // שדה שם פרטי
             OutlinedTextField(
-                value = fullName,
-                onValueChange = { fullName = it },
-                label = { Text("שם מלא") },
+                value = firstName,
+                onValueChange = { firstName = it },
+                label = { Text("שם פרטי") },
                 modifier = Modifier.fillMaxWidth(),
                 colors = TextFieldDefaults.outlinedTextFieldColors(
                     containerColor = Color.Transparent,
@@ -87,6 +87,49 @@ fun ProfileCompletionScreen(
                     unfocusedLabelColor = Color.White
                 )
             )
+            // שדה שם משפחה
+            OutlinedTextField(
+                value = lastName,
+                onValueChange = { lastName = it },
+                label = { Text("שם משפחה") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    containerColor = Color.Transparent,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = Color.White,
+                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                    unfocusedLabelColor = Color.White
+                )
+            )
+            // שדה גיל
+            OutlinedTextField(
+                value = age,
+                onValueChange = { age = it },
+                label = { Text("גיל") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    containerColor = Color.Transparent,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = Color.White,
+                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                    unfocusedLabelColor = Color.White
+                )
+            )
+            // שדה כינוי
+            OutlinedTextField(
+                value = nickName,
+                onValueChange = { nickName = it },
+                label = { Text("כינוי") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    containerColor = Color.Transparent,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = Color.White,
+                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                    unfocusedLabelColor = Color.White
+                )
+            )
+            // שדה מיקום
             OutlinedTextField(
                 value = location,
                 onValueChange = { location = it },
@@ -100,51 +143,24 @@ fun ProfileCompletionScreen(
                     unfocusedLabelColor = Color.White
                 )
             )
-            OutlinedTextField(
-                value = travelDistance,
-                onValueChange = { travelDistance = it },
-                label = { Text("עד כמה אתה מוכן לנסוע (ק\"מ)") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    containerColor = Color.Transparent,
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = Color.White,
-                    focusedLabelColor = MaterialTheme.colorScheme.primary,
-                    unfocusedLabelColor = Color.White
-                )
-            )
-            OutlinedTextField(
-                value = freeHours,
-                onValueChange = { freeHours = it },
-                label = { Text("שעות פנוי לשחק") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    containerColor = Color.Transparent,
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = Color.White,
-                    focusedLabelColor = MaterialTheme.colorScheme.primary,
-                    unfocusedLabelColor = Color.White
-                )
-            )
-            SkillLevelDropdown(
-                selectedLevel = skillLevel,
-                onLevelSelected = { skillLevel = it }
-            )
+            // כפתור לבחירת תמונה – ניתן להוסיף לוגיקה לבחירת תמונה מהגלריה או מצלמה
             Button(
-                onClick = { /* כאן ניתן להוסיף לוגיקה לבחירת תמונה */ },
+                onClick = { /* הוסף כאן לוגיקה לבחירת תמונה */ },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text("בחר תמונה", color = MaterialTheme.colorScheme.onPrimary)
             }
+            // כפתור לשמירת הפרופיל
             Button(
                 onClick = {
+                    // קריאה לפונקציה להשלמת פרופיל עם השדות החדשים
                     authViewModel.completeProfile(
-                        fullName = fullName,
+                        firstName = firstName,
+                        lastName = lastName,
+                        age = age,
+                        nickName = nickName,
                         location = location,
-                        travelDistance = travelDistance,
-                        freeHours = freeHours,
-                        skillLevel = skillLevel,
                         imageUri = imageUri
                     )
                 },
@@ -153,6 +169,7 @@ fun ProfileCompletionScreen(
             ) {
                 Text("שמור פרופיל", color = MaterialTheme.colorScheme.onSecondary)
             }
+            // הצגת הודעת שגיאה אם קיימת
             if (uiState is AuthUiState.Error) {
                 Text(
                     text = (uiState as AuthUiState.Error).message,
