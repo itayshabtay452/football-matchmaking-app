@@ -5,9 +5,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,48 +21,41 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.soccergamesfinder.R
-import com.example.soccergamesfinder.viewmodel.AuthUiState
-import com.example.soccergamesfinder.viewmodel.AuthViewModel
+import com.example.soccergamesfinder.ui.components.InputFieldWithError
+import com.example.soccergamesfinder.ui.components.AgeDropdown
+import com.example.soccergamesfinder.viewmodel.ProfileViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileCompletionScreen(
-    authViewModel: AuthViewModel = viewModel(),
-    onProfileCompleteSuccess: () -> Unit
+    profileViewModel: ProfileViewModel = viewModel(),
+    onProfileCompleteSuccess: () -> Unit = {}
 ) {
-    // ניהול מצב ה-UI דרך ה-ViewModel
-    val uiState by authViewModel.uiState.collectAsState()
+    // קריאה למצב הטופס מה-ViewModel (ProfileFormState)
+    val formState = profileViewModel.profileFormState.collectAsState().value
+    val saveSuccess = profileViewModel.profileSaveSuccess.collectAsState().value
 
-    // שדות הפרופיל החדשים
-    var firstName by remember { mutableStateOf("") }
-    var lastName by remember { mutableStateOf("") }
-    var age by remember { mutableStateOf("") }
-    var nickName by remember { mutableStateOf("") }
-    var location by remember { mutableStateOf("") }
-    var imageUri by remember { mutableStateOf("") } // כאן ניתן לשמור את נתיב התמונה
-
-    LaunchedEffect(uiState) {
-        if (uiState is AuthUiState.Success) {
+    LaunchedEffect(saveSuccess) {
+        if (saveSuccess) {
             onProfileCompleteSuccess()
-            authViewModel.resetState()
+            profileViewModel.resetProfileSaveSuccess()
         }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // רקע – ודא שיש לך תמונה בשם "login" ב-res/drawable
+        // תמונת רקע (נניח שיש לך תמונה בשם "login" ב-res/drawable)
         Image(
             painter = painterResource(id = R.drawable.login),
             contentDescription = "Background",
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
-        // שכבת overlay עם רקע שחור שקוף לשיפור קריאות הטקסט
+        // שכבת overlay שחורה עם שקיפות
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Black.copy(alpha = 0.5f))
         )
-        // עטיפת התוכן בגלילה כדי שלא ייחתך, במקרה שהמסך ארוך
+        // הטופס במרכז – עטיפה בגלילה, עם Padding והתאמה מלאה לרוחב
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -73,109 +69,66 @@ fun ProfileCompletionScreen(
                 text = "השלם פרופיל",
                 style = TextStyle(fontSize = 32.sp, color = MaterialTheme.colorScheme.primary)
             )
-            // שדה שם פרטי
-            OutlinedTextField(
-                value = firstName,
-                onValueChange = { firstName = it },
-                label = { Text("שם פרטי") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    containerColor = Color.Transparent,
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = Color.White,
-                    focusedLabelColor = MaterialTheme.colorScheme.primary,
-                    unfocusedLabelColor = Color.White
-                )
+
+            // שדה "שם פרטי"
+            InputFieldWithError(
+                value = formState.firstName,
+                onValueChange = { profileViewModel.onFirstNameChanged(it) },
+                label = "שם פרטי",
+                error = formState.firstNameError,
+                modifier = Modifier.fillMaxWidth()
             )
-            // שדה שם משפחה
-            OutlinedTextField(
-                value = lastName,
-                onValueChange = { lastName = it },
-                label = { Text("שם משפחה") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    containerColor = Color.Transparent,
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = Color.White,
-                    focusedLabelColor = MaterialTheme.colorScheme.primary,
-                    unfocusedLabelColor = Color.White
-                )
+
+            // שדה "שם משפחה"
+            InputFieldWithError(
+                value = formState.lastName,
+                onValueChange = { profileViewModel.onLastNameChanged(it) },
+                label = "שם משפחה",
+                error = formState.lastNameError,
+                modifier = Modifier.fillMaxWidth()
             )
-            // שדה גיל
-            OutlinedTextField(
-                value = age,
-                onValueChange = { age = it },
-                label = { Text("גיל") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    containerColor = Color.Transparent,
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = Color.White,
-                    focusedLabelColor = MaterialTheme.colorScheme.primary,
-                    unfocusedLabelColor = Color.White
-                )
+
+            // Dropdown לבחירת גיל (טווח 14–60)
+            AgeDropdown(
+                selectedAge = formState.selectedAge,
+                onAgeSelected = { profileViewModel.onAgeChanged(it) },
+                error = formState.ageError,
+                modifier = Modifier.fillMaxWidth()
             )
-            // שדה כינוי
-            OutlinedTextField(
-                value = nickName,
-                onValueChange = { nickName = it },
-                label = { Text("כינוי") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    containerColor = Color.Transparent,
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = Color.White,
-                    focusedLabelColor = MaterialTheme.colorScheme.primary,
-                    unfocusedLabelColor = Color.White
-                )
+
+            // שדה "כינוי"
+            InputFieldWithError(
+                value = formState.nickName,
+                onValueChange = { profileViewModel.onNickNameChanged(it) },
+                label = "כינוי",
+                error = formState.nickNameError,
+                modifier = Modifier.fillMaxWidth()
             )
-            // שדה מיקום
-            OutlinedTextField(
-                value = location,
-                onValueChange = { location = it },
-                label = { Text("מיקום") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    containerColor = Color.Transparent,
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = Color.White,
-                    focusedLabelColor = MaterialTheme.colorScheme.primary,
-                    unfocusedLabelColor = Color.White
-                )
+
+            // שדה "מיקום"
+            InputFieldWithError(
+                value = formState.location,
+                onValueChange = { profileViewModel.onLocationChanged(it) },
+                label = "מיקום",
+                error = formState.locationError,
+                modifier = Modifier.fillMaxWidth()
             )
-            // כפתור לבחירת תמונה – ניתן להוסיף לוגיקה לבחירת תמונה מהגלריה או מצלמה
+
+            // שדה "תמונה" – בינתיים מטפלים בו כמו טקסט (ניתן להוסיף לוגיקה לבחירת תמונה בהמשך)
+            InputFieldWithError(
+                value = formState.imageUri,
+                onValueChange = { profileViewModel.onImageUriChanged(it) },
+                label = "תמונה",
+                error = formState.imageUriError,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // כפתור "שמור פרופיל"
             Button(
-                onClick = { /* הוסף כאן לוגיקה לבחירת תמונה */ },
+                onClick = { profileViewModel.saveProfile() },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("בחר תמונה", color = MaterialTheme.colorScheme.onPrimary)
-            }
-            // כפתור לשמירת הפרופיל
-            Button(
-                onClick = {
-                    // קריאה לפונקציה להשלמת פרופיל עם השדות החדשים
-                    authViewModel.completeProfile(
-                        firstName = firstName,
-                        lastName = lastName,
-                        age = age,
-                        nickName = nickName,
-                        location = location,
-                        imageUri = imageUri
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
             ) {
                 Text("שמור פרופיל", color = MaterialTheme.colorScheme.onSecondary)
-            }
-            // הצגת הודעת שגיאה אם קיימת
-            if (uiState is AuthUiState.Error) {
-                Text(
-                    text = (uiState as AuthUiState.Error).message,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium
-                )
             }
         }
     }
