@@ -13,6 +13,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -102,7 +103,14 @@ fun ProfileCompletionScreen(
                 onValueChange = { profileViewModel.onNickNameChanged(it) },
                 label = "כינוי",
                 error = formState.nickNameError,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onFocusChanged { focusState ->
+                        // כאשר השדה מאבד פוקוס, נבצע בדיקה לייחודיות
+                        if (!focusState.isFocused) {
+                            profileViewModel.checkNicknameUnique(formState.nickName)
+                        }
+                    }
             )
 
             // שדה "מיקום"

@@ -30,41 +30,4 @@ class AuthRepository {
         }
     }
 
-    // פונקציה להשלמת פרופיל המשתמש – עדכון שאר הפרטים במסד הנתונים (Firestore)
-    suspend fun completeProfile(
-        firstName: String,
-        lastName: String,
-        age: String,
-        nickName: String,
-        location: String,
-        imageUri: String
-    ): Result<Unit> {
-        return try {
-            // קבלת ה-UID של המשתמש הנוכחי
-            val uid = auth.currentUser?.uid ?: throw Exception("משתמש לא זמין")
-            // בניית מפת הנתונים לשמירה במסד הנתונים
-            val userData = hashMapOf(
-                "firstName" to firstName,
-                "lastName" to lastName,
-                "age" to age,
-                "nickName" to nickName,
-                "location" to location,
-                "imageUri" to imageUri
-            )
-            // כתיבה למסמך במסד הנתונים באוסף "users" תחת המסמך שמסומן ב-UID של המשתמש
-            firestore.collection("users").document(uid).set(userData).await()
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    // פונקציה לבדיקה אם המשתמש כבר השלים את הפרופיל
-    suspend fun isProfileComplete(): Boolean {
-        val uid = auth.currentUser?.uid ?: return false
-        val doc = firestore.collection("users").document(uid).get().await()
-        return doc.exists() &&
-                doc.getString("fullName")?.isNotEmpty() == true &&
-                doc.getString("location")?.isNotEmpty() == true
-    }
 }

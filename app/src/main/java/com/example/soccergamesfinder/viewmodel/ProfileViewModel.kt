@@ -1,8 +1,12 @@
 package com.example.soccergamesfinder.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.soccergamesfinder.data.ProfileRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 data class ProfileFormState(
     val firstName: String = "",
@@ -19,7 +23,9 @@ data class ProfileFormState(
     val imageUriError: String? = null
 )
 
-class ProfileViewModel : ViewModel() {
+class ProfileViewModel(
+    private val repository: ProfileRepository = ProfileRepository()
+) : ViewModel() {
     private val _profileFormState = MutableStateFlow(ProfileFormState())
     val profileFormState: StateFlow<ProfileFormState> = _profileFormState
 
@@ -47,11 +53,17 @@ class ProfileViewModel : ViewModel() {
         )
     }
 
+    // עדכון לכינוי: בדיקת פורמט (ללא רווחים, רק תווים באנגלית, מספרים ותווים) ובדיקה מול Firebase
     fun onNickNameChanged(newValue: String) {
-        _profileFormState.value = _profileFormState.value.copy(
-            nickName = newValue,
-            nickNameError = if (newValue.isBlank()) "יש להזין כינוי" else null
-        )
+        // בדיקת פורמט – מאפשרים תווים מ־'!' ועד '~'
+        val allowedRegex = "^[\\x21-\\x7E]*$".toRegex()
+        val formatError = if (!newValue.matches(allowedRegex)) {
+            "הכינוי יכול להכיל אותיות, מספרים ותווים בלבד (ללא רווחים)"
+        } else null
+
+        _profileFormState.update {
+            it.copy(nickName = newValue, nickNameError = formatError)
+        }
     }
 
     fun onLocationChanged(newValue: String) {
@@ -73,35 +85,73 @@ class ProfileViewModel : ViewModel() {
         var valid = true
 
         if (state.firstName.isBlank()) {
-            _profileFormState.value = state.copy(firstNameError = "יש להזין שם פרטי")
+            _profileFormState.update { it.copy(firstNameError = "יש להזין שם פרטי") }
             valid = false
         }
         if (state.lastName.isBlank()) {
-            _profileFormState.value = state.copy(lastNameError = "יש להזין שם משפחה")
+            _profileFormState.update { it.copy(lastNameError = "יש להזין שם משפחה") }
             valid = false
         }
         if (state.selectedAge.isBlank()) {
-            _profileFormState.value = state.copy(ageError = "יש לבחור גיל")
+            _profileFormState.update { it.copy(ageError = "יש לבחור גיל") }
             valid = false
         }
         if (state.nickName.isBlank()) {
-            _profileFormState.value = state.copy(nickNameError = "יש להזין כינוי")
+            _profileFormState.update { it.copy(nickNameError = "יש להזין כינוי") }
             valid = false
         }
         if (state.location.isBlank()) {
-            _profileFormState.value = state.copy(locationError = "יש להזין מיקום")
+            _profileFormState.update { it.copy(locationError = "יש להזין מיקום") }
             valid = false
         }
         if (state.imageUri.isBlank()) {
-            _profileFormState.value = state.copy(imageUriError = "יש לבחור תמונה")
+            _profileFormState.update { it.copy(imageUriError = "יש לבחור תמונה") }
             valid = false
         }
 
         if (valid) {
-            _profileSaveSuccess.value = true
+            // ביצוע השמירה במסד הנתונים נעשה בתוך קורוטינה כדי לטפל בפעולות אסינכרוניות
+            viewModelScope.launch {
+                    // בונים את המפה של הנתונים
+                    val data = hashMapOf(
+                        "firstName" to state.firstName,
+                        "lastName" to state.lastName,
+                        "selectedAge" to state.selectedAge,
+                        "nickName" to state.nickName,
+                        "location" to state.location,
+                        "imageUri" to state.imageUri
+                    )
+
+                    repository.completeProfile(data)
+
+                    _profileSaveSuccess.value = true
+
+            }
         }
     }
+
     fun resetProfileSaveSuccess() {
         _profileSaveSuccess.value = false
+    }
+
+    fun checkNicknameUnique(nickName: String) {
+        // רק אם הכינוי אינו ריק ועבר את בדיקת הפורמט
+        val allowedRegex = "^[\\x21-\\x7E]+$".toRegex()
+        if (nickName.isNotBlank() && nickName.matches(allowedRegex)) {
+            viewModelScope.launch {
+                val isTaken = repository.isNicknameTaken(nickName)
+                if (isTaken) {
+                    _profileFormState.update { current ->
+                        current.copy(nickNameError = "כינוי זה כבר בשימוש, אנא בחר כינוי אחר")
+                    }
+                } else {
+                    _profileFormState.update { current ->
+                        if (current.nickNameError == "כינוי זה כבר בשימוש, אנא בחר כינוי אחר")
+                            current.copy(nickNameError = null)
+                        else current
+                    }
+                }
+            }
+        }
     }
 }
