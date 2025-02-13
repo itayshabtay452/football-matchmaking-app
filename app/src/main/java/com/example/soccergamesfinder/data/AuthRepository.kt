@@ -8,7 +8,6 @@ import kotlinx.coroutines.tasks.await
 
 class AuthRepository {
     private val auth: FirebaseAuth = Firebase.auth
-    private val firestore = Firebase.firestore
 
     // פונקציה לאימות (Sign In)
     suspend fun signIn(email: String, password: String): Result<Unit> {
@@ -28,6 +27,10 @@ class AuthRepository {
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    fun logout() {
+            auth.signOut()
     }
 
 }

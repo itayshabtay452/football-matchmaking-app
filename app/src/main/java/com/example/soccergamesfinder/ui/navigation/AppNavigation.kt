@@ -7,7 +7,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.soccergamesfinder.ui.auth.LoginScreen
 import com.example.soccergamesfinder.ui.auth.ProfileCompletionScreen
 import com.example.soccergamesfinder.ui.auth.RegisterScreen
-import com.example.soccergamesfinder.ui.home.HomeScreen
+import com.example.soccergamesfinder.ui.HomeScreen
 
 object Routes {
     const val Login = "login"
@@ -24,7 +24,7 @@ fun AppNavigation() {
         composable(Routes.Login) {
             LoginScreen(
                 onLoginSuccess = {
-                    // נניח שכאן נבדוק אם הפרופיל הושלם, אבל לעת עתה, נלך ישירות למסך הבית:
+                    // נניח שכאן נבדוק אם הפרופיל הושלם, אבל לעת עתה ננווט ישירות למסך הבית:
                     navController.navigate(Routes.Home) {
                         popUpTo(Routes.Login) { inclusive = true }
                     }
@@ -37,7 +37,7 @@ fun AppNavigation() {
         composable(Routes.Register) {
             RegisterScreen(
                 onRegisterSuccess = {
-                    // לאחר ההרשמה (רק אימייל וסיסמה), נוודא שהמשתמש ימלא את פרופילו
+                    // לאחר ההרשמה (אימייל וסיסמה בלבד), נוודא שהמשתמש ימלא את פרופילו
                     navController.navigate(Routes.ProfileCompletion) {
                         popUpTo(Routes.Login) { inclusive = false }
                     }
@@ -57,15 +57,7 @@ fun AppNavigation() {
             )
         }
         composable(Routes.Home) {
-            HomeScreen(
-                onSignOut = {
-                    navController.navigate(Routes.Login) {
-                        popUpTo(Routes.Home) { inclusive = true }
-                    }
-                },
-                onCreateGame = { /* ניווט למסך יצירת משחק */ },
-                onGameSelected = { gameId -> /* ניווט למסך פרטי משחק */ }
-            )
+            HomeScreen(navController = navController)
         }
     }
 }
