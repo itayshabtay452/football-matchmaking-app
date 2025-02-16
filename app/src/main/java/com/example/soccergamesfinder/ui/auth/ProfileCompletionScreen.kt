@@ -113,24 +113,6 @@ fun ProfileCompletionScreen(
                     }
             )
 
-            // שדה "מיקום"
-            InputFieldWithError(
-                value = formState.location,
-                onValueChange = { profileViewModel.onLocationChanged(it) },
-                label = "מיקום",
-                error = formState.locationError,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            // שדה "תמונה" – בינתיים מטפלים בו כמו טקסט (ניתן להוסיף לוגיקה לבחירת תמונה בהמשך)
-            InputFieldWithError(
-                value = formState.imageUri,
-                onValueChange = { profileViewModel.onImageUriChanged(it) },
-                label = "תמונה",
-                error = formState.imageUriError,
-                modifier = Modifier.fillMaxWidth()
-            )
-
             // כפתור "שמור פרופיל"
             Button(
                 onClick = { profileViewModel.saveProfile() },

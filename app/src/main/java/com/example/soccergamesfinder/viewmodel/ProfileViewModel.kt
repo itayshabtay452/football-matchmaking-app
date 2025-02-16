@@ -13,14 +13,10 @@ data class ProfileFormState(
     val lastName: String = "",
     val selectedAge: String = "",
     val nickName: String = "",
-    val location: String = "",
-    val imageUri: String = "",
     val firstNameError: String? = null,
     val lastNameError: String? = null,
     val ageError: String? = null,
     val nickNameError: String? = null,
-    val locationError: String? = null,
-    val imageUriError: String? = null
 )
 
 class ProfileViewModel(
@@ -66,20 +62,6 @@ class ProfileViewModel(
         }
     }
 
-    fun onLocationChanged(newValue: String) {
-        _profileFormState.value = _profileFormState.value.copy(
-            location = newValue,
-            locationError = if (newValue.isBlank()) "יש להזין מיקום" else null
-        )
-    }
-
-    fun onImageUriChanged(newValue: String) {
-        _profileFormState.value = _profileFormState.value.copy(
-            imageUri = newValue,
-            imageUriError = if (newValue.isBlank()) "יש לבחור תמונה" else null
-        )
-    }
-
     fun saveProfile() {
         val state = _profileFormState.value
         var valid = true
@@ -100,14 +82,6 @@ class ProfileViewModel(
             _profileFormState.update { it.copy(nickNameError = "יש להזין כינוי") }
             valid = false
         }
-        if (state.location.isBlank()) {
-            _profileFormState.update { it.copy(locationError = "יש להזין מיקום") }
-            valid = false
-        }
-        if (state.imageUri.isBlank()) {
-            _profileFormState.update { it.copy(imageUriError = "יש לבחור תמונה") }
-            valid = false
-        }
 
         if (valid) {
             // ביצוע השמירה במסד הנתונים נעשה בתוך קורוטינה כדי לטפל בפעולות אסינכרוניות
@@ -117,9 +91,7 @@ class ProfileViewModel(
                         "firstName" to state.firstName,
                         "lastName" to state.lastName,
                         "selectedAge" to state.selectedAge,
-                        "nickName" to state.nickName,
-                        "location" to state.location,
-                        "imageUri" to state.imageUri
+                        "nickName" to state.nickName
                     )
 
                     repository.completeProfile(data)

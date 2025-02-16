@@ -8,12 +8,14 @@ import com.example.soccergamesfinder.ui.auth.LoginScreen
 import com.example.soccergamesfinder.ui.auth.ProfileCompletionScreen
 import com.example.soccergamesfinder.ui.auth.RegisterScreen
 import com.example.soccergamesfinder.ui.HomeScreen
+import com.example.soccergamesfinder.ui.ProfileDetailsScreen
 
 object Routes {
     const val Login = "login"
     const val Register = "register"
     const val ProfileCompletion = "profileCompletion"
     const val Home = "home"
+    const val ProfileDetails = "profile_details_screen" // נתיב למסך צפייה בפרופיל
 }
 
 @Composable
@@ -24,7 +26,6 @@ fun AppNavigation() {
         composable(Routes.Login) {
             LoginScreen(
                 onLoginSuccess = {
-                    // נניח שכאן נבדוק אם הפרופיל הושלם, אבל לעת עתה ננווט ישירות למסך הבית:
                     navController.navigate(Routes.Home) {
                         popUpTo(Routes.Login) { inclusive = true }
                     }
@@ -37,7 +38,6 @@ fun AppNavigation() {
         composable(Routes.Register) {
             RegisterScreen(
                 onRegisterSuccess = {
-                    // לאחר ההרשמה (אימייל וסיסמה בלבד), נוודא שהמשתמש ימלא את פרופילו
                     navController.navigate(Routes.ProfileCompletion) {
                         popUpTo(Routes.Login) { inclusive = false }
                     }
@@ -58,6 +58,10 @@ fun AppNavigation() {
         }
         composable(Routes.Home) {
             HomeScreen(navController = navController)
+        }
+        // הוספת מסך צפייה בפרטי המשתמש
+        composable(Routes.ProfileDetails) {
+            ProfileDetailsScreen(navController = navController)
         }
     }
 }
