@@ -9,13 +9,15 @@ import com.example.soccergamesfinder.ui.auth.ProfileCompletionScreen
 import com.example.soccergamesfinder.ui.auth.RegisterScreen
 import com.example.soccergamesfinder.ui.HomeScreen
 import com.example.soccergamesfinder.ui.ProfileDetailsScreen
+import com.example.soccergamesfinder.ui.FieldsListScreen
 
 object Routes {
     const val Login = "login"
     const val Register = "register"
     const val ProfileCompletion = "profileCompletion"
     const val Home = "home"
-    const val ProfileDetails = "profile_details_screen" // נתיב למסך צפייה בפרופיל
+    const val ProfileDetails = "profile_details_screen"
+    const val FieldsList = "fields_list_screen"
 }
 
 @Composable
@@ -59,9 +61,13 @@ fun AppNavigation() {
         composable(Routes.Home) {
             HomeScreen(navController = navController)
         }
-        // הוספת מסך צפייה בפרטי המשתמש
+
         composable(Routes.ProfileDetails) {
             ProfileDetailsScreen(navController = navController)
+        }
+
+        composable(Routes.FieldsList) {
+            FieldsListScreen(navController = navController)
         }
     }
 }

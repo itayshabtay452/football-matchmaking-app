@@ -97,14 +97,14 @@ fun HomeScreen(
                     Text("צפה בפרופיל", color = Color.White)
                 }
                 ElevatedButton(
-                    onClick = { navController.navigate("open_games_screen") },
+                    onClick = { navController.navigate("fields_list_screen") },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.elevatedButtonColors(
                         containerColor = Color.White.copy(alpha = 0.3f)
                     )
                 ) {
-                    Text("משחקים פתוחים", color = Color.White)
+                    Text("מצא מגרשי כדורגל", color = Color.White)
                 }
                 ElevatedButton(
                     onClick = { navController.navigate("new_game_screen") },

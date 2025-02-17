@@ -58,6 +58,8 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.database)
+    implementation(libs.androidx.runtime.livedata)
+    implementation(libs.play.services.location)
 
     // תלות לבדיקות יחידה (unit tests)
     testImplementation(libs.junit)
