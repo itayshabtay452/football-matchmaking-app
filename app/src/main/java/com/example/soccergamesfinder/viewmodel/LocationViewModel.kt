@@ -1,41 +1,25 @@
 package com.example.soccergamesfinder.viewmodel
 
-import android.Manifest
-import android.content.Context
-import android.content.pm.PackageManager
-import android.location.Location
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.soccergamesfinder.data.LocationService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import com.example.soccergamesfinder.data.LocationRepository
 
-class LocationViewModel : ViewModel() {
-    private val _location = MutableStateFlow<Location?>(null)
-    val location: StateFlow<Location?> = _location
+class LocationViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val _hasLocationPermission = MutableStateFlow(false)
-    val hasLocationPermission: StateFlow<Boolean> = _hasLocationPermission
+    private val locationRepository = LocationRepository(application.applicationContext)
 
-    fun checkLocationPermission(context: Context) {
-        _hasLocationPermission.value = ContextCompat.checkSelfPermission(
-            context, Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-    }
+    private val _userLocation = MutableStateFlow<Pair<Double, Double>?>(null)
+    val userLocation: StateFlow<Pair<Double, Double>?> = _userLocation
 
-    fun updatePermissionStatus(isGranted: Boolean) {
-        _hasLocationPermission.value = isGranted
-    }
-
-    fun requestLocation(context: Context) {
-        if (_hasLocationPermission.value) {
-            viewModelScope.launch {
-                val locationService = LocationService(context)
-                val userLocation = locationService.getCurrentLocation()
-                _location.value = userLocation
-            }
+    fun loadUserLocation() {
+        viewModelScope.launch {
+            val location = locationRepository.getCurrentLocation()
+            _userLocation.value = location
         }
     }
 }
+

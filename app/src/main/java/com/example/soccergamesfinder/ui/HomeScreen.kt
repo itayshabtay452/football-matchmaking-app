@@ -10,6 +10,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -21,22 +24,24 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.soccergamesfinder.R
 import com.example.soccergamesfinder.viewmodel.HomeViewModel
+import com.example.soccergamesfinder.viewmodel.LocationViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     navController: NavController,
-    homeViewModel: HomeViewModel = viewModel()
+    homeViewModel: HomeViewModel = viewModel(),
+    locationViewModel: LocationViewModel = viewModel()
 ) {
+    val userLocation by locationViewModel.userLocation.collectAsState()
+
     Box(modifier = Modifier.fillMaxSize()) {
-        // רקע עם תמונה
         Image(
             painter = painterResource(id = R.drawable.home),
             contentDescription = "Home Background",
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
-        // שכבת overlay עם gradient כהה
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -49,7 +54,6 @@ fun HomeScreen(
                     )
                 )
         )
-        // לוח שקוף (glass effect) ללא שימוש ב־Card
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -97,7 +101,9 @@ fun HomeScreen(
                     Text("צפה בפרופיל", color = Color.White)
                 }
                 ElevatedButton(
-                    onClick = { navController.navigate("fields_list_screen") },
+                    onClick = {
+                        locationViewModel.loadUserLocation()
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.elevatedButtonColors(
@@ -116,7 +122,15 @@ fun HomeScreen(
                 ) {
                     Text("פתח מגרש חדש", color = Color.White)
                 }
+
+                // אחרי שיש מיקום, עבור אוטומטית למסך המגרשים:
+                LaunchedEffect(userLocation) {
+                    userLocation?.let { (lat, lng) ->
+                        navController.navigate("fields_screen/$lat/$lng")
+                    }
+                }
             }
         }
     }
 }
+

@@ -1,25 +1,23 @@
 package com.example.soccergamesfinder.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.soccergamesfinder.ui.auth.LoginScreen
 import com.example.soccergamesfinder.ui.auth.ProfileCompletionScreen
 import com.example.soccergamesfinder.ui.auth.RegisterScreen
 import com.example.soccergamesfinder.ui.HomeScreen
-import com.example.soccergamesfinder.ui.ProfileDetailsScreen
-import com.example.soccergamesfinder.ui.FieldsListScreen
-import com.example.soccergamesfinder.ui.FieldDetailsScreen
+import com.example.soccergamesfinder.ui.FieldsScreen
 
 object Routes {
     const val Login = "login"
     const val Register = "register"
     const val ProfileCompletion = "profileCompletion"
     const val Home = "home"
-    const val ProfileDetails = "profile_details_screen"
-    const val FieldsList = "fields_list_screen"
-    const val FieldDetails = "field_details_screen"
+    const val Fields = "fields_screens"
 }
 
 @Composable
@@ -64,17 +62,19 @@ fun AppNavigation() {
             HomeScreen(navController = navController)
         }
 
-        composable(Routes.ProfileDetails) {
-            ProfileDetailsScreen(navController = navController)
+        composable(
+            route = "fields_screen/{latitude}/{longitude}",
+            arguments = listOf(
+                navArgument("latitude") { type = NavType.FloatType },
+                navArgument("longitude") { type = NavType.FloatType }
+            )
+        ) { backStackEntry ->
+            val latitude = backStackEntry.arguments?.getFloat("latitude")?.toDouble() ?: 0.0
+            val longitude = backStackEntry.arguments?.getFloat("longitude")?.toDouble() ?: 0.0
+
+            FieldsScreen(navController, latitude, longitude)
         }
 
-        composable(Routes.FieldsList) {
-            FieldsListScreen(navController = navController)
-        }
 
-        composable("field_details/{fieldName}") { backStackEntry ->
-            val fieldName = backStackEntry.arguments?.getString("fieldName") ?: ""
-            FieldDetailsScreen(navController, fieldName)
-        }
     }
 }
