@@ -104,7 +104,9 @@ fun AppNavigation(
             val fieldId = backStackEntry.arguments?.getString("fieldId")
             CreateGameScreen(fieldId = fieldId,
                 navController = navController,
-                fieldsViewModel = fieldsViewModel)
+                fieldsViewModel = fieldsViewModel,
+                authViewModel = authViewModel,
+                createGameViewModel = viewModel())
         }
 
 
