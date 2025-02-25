@@ -25,6 +25,7 @@ fun AppNavigation(
     launchGoogleSignIn: (Intent) -> Unit
 ) {
     val navController = rememberNavController()
+    val fieldsViewModel: FieldsViewModel = viewModel() // ViewModel משותף לכל המסכים
 
     NavHost(navController = navController, startDestination = "login") {
 
@@ -88,16 +89,25 @@ fun AppNavigation(
         }
 
         composable("fieldsList") {
-            val fieldsViewModel: FieldsViewModel = viewModel()
             val locationViewModel: LocationViewModel = viewModel()
 
             val userLocation by locationViewModel.currentLocation.collectAsState()
 
             FieldsListScreen(
                 fieldsViewModel = fieldsViewModel,
-                userLocation = userLocation
+                userLocation = userLocation,
+                navController = navController
             )
         }
+
+        composable("createGameScreen/{fieldId}") { backStackEntry ->
+            val fieldId = backStackEntry.arguments?.getString("fieldId")
+            CreateGameScreen(fieldId = fieldId,
+                navController = navController,
+                fieldsViewModel = fieldsViewModel)
+        }
+
+
 
 
 

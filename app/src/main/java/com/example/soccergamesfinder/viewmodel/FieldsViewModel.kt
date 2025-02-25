@@ -3,6 +3,7 @@ package com.example.soccergamesfinder.viewmodel
 import android.app.Application
 import android.location.Location
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import com.example.soccergamesfinder.data.Field
 import com.example.soccergamesfinder.data.toField
@@ -29,8 +30,6 @@ class FieldsViewModel(application: Application) : AndroidViewModel(application) 
                         }
                         val distance = location.distanceTo(fieldLocation) / 1000.0 // המרחק בק"מ
 
-                        println("🔹 ${field.name}: מרחק מחושב = ${"%.1f".format(distance)} ק\"מ")
-
                         field.copy(distanceFromUser = distance)
                     }.sortedBy { it.distanceFromUser }
                 } ?: loadedFields
@@ -40,8 +39,6 @@ class FieldsViewModel(application: Application) : AndroidViewModel(application) 
 
                 filteredFields.clear()
                 filteredFields.addAll(sortedFields)
-
-                println("📌 רשימת המגרשים לאחר סינון: ${filteredFields.joinToString { "${it.name} - ${it.distanceFromUser} ק\"מ" }}")
             }
     }
 
@@ -63,4 +60,9 @@ class FieldsViewModel(application: Application) : AndroidViewModel(application) 
         filteredFields.clear()
         filteredFields.addAll(_allFields)
     }
+
+    fun getFieldById(fieldId: String): Field? {
+        return _allFields.find { it.id == fieldId }
+    }
+
 }

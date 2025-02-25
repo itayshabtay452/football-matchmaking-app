@@ -19,13 +19,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.soccergamesfinder.R
 import com.example.soccergamesfinder.data.Field
 import com.example.soccergamesfinder.viewmodel.FieldsViewModel
 import com.example.soccergamesfinder.ui.components.FieldCard
 
 @Composable
-fun FieldsListScreen(fieldsViewModel: FieldsViewModel, userLocation: Location?) {
+fun FieldsListScreen(fieldsViewModel: FieldsViewModel, userLocation: Location?, navController: NavController) {
     val fields = fieldsViewModel.filteredFields
     val allFields = fieldsViewModel.allFields
 
@@ -98,20 +99,19 @@ fun FieldsListScreen(fieldsViewModel: FieldsViewModel, userLocation: Location?) 
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(fields) { field ->
-                AnimatedFieldCard(field, userLocation)
+                AnimatedFieldCard(field, userLocation, navController)
             }
         }
     }
 }
 
 @Composable
-fun AnimatedFieldCard(field: Field, userLocation: Location?) {
+fun AnimatedFieldCard(field: Field, userLocation: Location?, navController: NavController) {
     val fieldLocation = Location("").apply {
         latitude = field.latitude
         longitude = field.longitude
     }
     val distanceKm = userLocation?.distanceTo(fieldLocation)?.div(1000)?.let { "%.1f ק\"מ".format(it) } ?: "לא זמין"
-
 
     Card(
         modifier = Modifier
@@ -133,9 +133,19 @@ fun AnimatedFieldCard(field: Field, userLocation: Location?) {
             Text("תאורה: ${if (field.hasLighting) "כן" else "לא"}", fontSize = 14.sp)
             Text("בתשלום: ${if (field.paid) "כן" else "לא"}", fontSize = 14.sp)
             Text("מרחק: $distanceKm", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = { navController.navigate("createGameScreen/${field.id}") },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("צור משחק")
+            }
         }
     }
 }
+
 
 @Composable
 fun DropdownMenuField(label: String, options: List<String>, selectedOption: String?, onOptionSelected: (String?) -> Unit) {
