@@ -12,7 +12,20 @@
           "package_name": "com.example.soccergamesfinder"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "338962797040-amkhpfiej10k3vjbnvjc32393j75fr7a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.soccergamesfinder",
+            "certificate_hash": "53815a050b0af52f5f68966241af8f8c3c774308"
+          }
+        },
+        {
+          "client_id": "338962797040-5usddogbj65bmsm1fvogq8474umapuvn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCfZDdcLNtNce9OwBogD1ACmA9vYxppx7k"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "338962797040-5usddogbj65bmsm1fvogq8474umapuvn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

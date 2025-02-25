@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">soccergamesfinder</string>
+    <string name="default_web_client_id">338962797040-amkhpfiej10k3vjbnvjc32393j75fr7a.apps.googleusercontent.com</string>
+    <string name="facebook_app_id">519159604537568</string>
+    <string name="facebook_client_token">088127d371f88333f15a5d3310f57a49</string>
 </resources>

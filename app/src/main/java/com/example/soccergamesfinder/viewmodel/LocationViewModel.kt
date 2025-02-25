@@ -1,25 +1,39 @@
+// LocationViewModel.kt
 package com.example.soccergamesfinder.viewmodel
 
+import android.annotation.SuppressLint
 import android.app.Application
+import android.location.Location
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import com.example.soccergamesfinder.data.LocationRepository
 
 class LocationViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val locationRepository = LocationRepository(application.applicationContext)
+    private val fusedLocationClient: FusedLocationProviderClient =
+        LocationServices.getFusedLocationProviderClient(application)
 
-    private val _userLocation = MutableStateFlow<Pair<Double, Double>?>(null)
-    val userLocation: StateFlow<Pair<Double, Double>?> = _userLocation
+    private val _currentLocation = MutableStateFlow<Location?>(null)
+    val currentLocation = _currentLocation.asStateFlow()
 
-    fun loadUserLocation() {
+    init {
+        requestLocation() // טוען מיקום מיד כשה-ViewModel נוצר
+    }
+
+    @SuppressLint("MissingPermission")
+    fun requestLocation() {
         viewModelScope.launch {
-            val location = locationRepository.getCurrentLocation()
-            _userLocation.value = location
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location ->
+                    _currentLocation.value = location
+                }
+                .addOnFailureListener {
+                    _currentLocation.value = null // אם נכשל, שמור `null`
+                }
         }
     }
 }
-

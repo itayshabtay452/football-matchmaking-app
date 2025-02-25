@@ -1,54 +1,67 @@
 package com.example.soccergamesfinder.viewmodel
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.soccergamesfinder.data.AuthRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
+import android.app.Application
+import android.content.Intent
+import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.AndroidViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
+import com.example.soccergamesfinder.R
 
-// הגדרת מצבי ה-UI עבור תהליכי האימות והרישום
-sealed class AuthUiState {
-    object Idle : AuthUiState()
-    object Loading : AuthUiState()
-    object Success : AuthUiState()
-    data class Error(val message: String) : AuthUiState()
-}
+class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
-class AuthViewModel(private val repository: AuthRepository = AuthRepository()) : ViewModel() {
-    private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
-    val uiState: StateFlow<AuthUiState> get() = _uiState
+    private val auth: FirebaseAuth = Firebase.auth
 
-    fun signIn(email: String, password: String) {
-        viewModelScope.launch {
-            _uiState.value = AuthUiState.Loading
-            val result = repository.signIn(email, password)
-            _uiState.value = if (result.isSuccess)
-                AuthUiState.Success
-            else
-                AuthUiState.Error(result.exceptionOrNull()?.localizedMessage ?: "אירעה שגיאה בהתחברות")
+    var user = mutableStateOf(auth.currentUser)
+        private set
+
+    var errorMessage = mutableStateOf<String?>(null)
+        private set
+
+    fun register(email: String, password: String) {
+        if(email.isBlank() || password.isBlank()){
+            errorMessage.value = "יש למלא אימייל וסיסמה"
+            return
+        }
+        auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+            if (task.isSuccessful) user.value = auth.currentUser
+            else errorMessage.value = task.exception?.message
         }
     }
 
-    // פונקציה לרישום משתמש עם כל הנתונים – אימייל, סיסמה ופרטי פרופיל
-    fun register(
-        email: String,
-        password: String
-    ) {
-        viewModelScope.launch {
-            _uiState.value = AuthUiState.Loading
-            val result = repository.register(
-                email = email,
-                password = password
-            )
-            _uiState.value = if (result.isSuccess)
-                AuthUiState.Success
-            else
-                AuthUiState.Error(result.exceptionOrNull()?.localizedMessage ?: "שגיאה ברישום")
+    fun login(email: String, password: String) {
+        if(email.isBlank() || password.isBlank()){
+            errorMessage.value = "יש למלא אימייל וסיסמה"
+            return
+        }
+        auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+            if (task.isSuccessful) user.value = auth.currentUser
+            else errorMessage.value = task.exception?.message
         }
     }
 
-    fun resetState() {
-        _uiState.value = AuthUiState.Idle
+    fun getGoogleSignInIntent(): Intent {
+        val options = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getApplication<Application>().getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+        return GoogleSignIn.getClient(getApplication(), options).signInIntent
+    }
+
+    fun signInWithGoogle(idToken: String?) {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        auth.signInWithCredential(credential).addOnCompleteListener { task ->
+            if (task.isSuccessful) user.value = auth.currentUser
+            else errorMessage.value = task.exception?.message
+        }
+    }
+
+    fun logout() {
+        auth.signOut()
+        user.value = null
     }
 }

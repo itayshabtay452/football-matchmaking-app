@@ -1,35 +1,66 @@
 package com.example.soccergamesfinder.viewmodel
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.soccergamesfinder.data.FieldModel
-import com.example.soccergamesfinder.data.FieldRepository
-import com.example.soccergamesfinder.ui.utils.LocationUtils
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
+import android.app.Application
+import android.location.Location
+import androidx.compose.runtime.mutableStateListOf
+import androidx.lifecycle.AndroidViewModel
+import com.example.soccergamesfinder.data.Field
+import com.example.soccergamesfinder.data.toField
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 
-class FieldsViewModel : ViewModel() {
+class FieldsViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = FieldRepository()
+    private val firestore = Firebase.firestore
+    private val _allFields = mutableListOf<Field>() // רשימה פרטית לשמירת כל הנתונים
+    val allFields: List<Field> get() = _allFields // גישה לקריאה בלבד לנתונים
+    val filteredFields = mutableStateListOf<Field>() // הרשימה שמוצגת למשתמש
 
-    private val _fields = MutableStateFlow<List<FieldModel>>(emptyList())
-    val fields: StateFlow<List<FieldModel>> = _fields
+    fun loadFields(userLocation: Location?) {
+        firestore.collection("fields").get()
+            .addOnSuccessListener { snapshots ->
+                val loadedFields = snapshots.documents.mapNotNull { it.toField() }
 
-    fun loadFields(userLatitude: Double, userLongitude: Double) {
-        viewModelScope.launch {
-            val loadedFields = repository.getAllFields()
+                val sortedFields = userLocation?.let { location ->
+                    loadedFields.map { field ->
+                        val fieldLocation = Location("").apply {
+                            latitude = field.latitude
+                            longitude = field.longitude
+                        }
+                        val distance = location.distanceTo(fieldLocation) / 1000.0 // המרחק בק"מ
 
-            // מיון המגרשים לפי המרחק מהמשתמש
-            val sortedFields = loadedFields.sortedBy { field ->
-                LocationUtils.calculateDistance(
-                    userLatitude, userLongitude,
-                    field.latitude, field.longitude
-                )
+                        println("🔹 ${field.name}: מרחק מחושב = ${"%.1f".format(distance)} ק\"מ")
+
+                        field.copy(distanceFromUser = distance)
+                    }.sortedBy { it.distanceFromUser }
+                } ?: loadedFields
+
+                _allFields.clear()
+                _allFields.addAll(sortedFields)
+
+                filteredFields.clear()
+                filteredFields.addAll(sortedFields)
+
+                println("📌 רשימת המגרשים לאחר סינון: ${filteredFields.joinToString { "${it.name} - ${it.distanceFromUser} ק\"מ" }}")
             }
+    }
 
-            // עדכון הנתונים הזורמים ל-UI
-            _fields.value = sortedFields
+
+
+    fun filterFields(fieldSize: String?, fieldType: String?, hasLighting: Boolean?, paid: Boolean?) {
+        val filteredList = _allFields.filter { field ->
+            (fieldSize == null || field.fieldSize == fieldSize) &&
+                    (fieldType == null || field.fieldType == fieldType) &&
+                    (hasLighting == null || field.hasLighting == hasLighting) &&
+                    (paid == null || field.paid == paid)
         }
+
+        filteredFields.clear()
+        filteredFields.addAll(filteredList)
+    }
+
+    fun clearFilters() {
+        filteredFields.clear()
+        filteredFields.addAll(_allFields)
     }
 }

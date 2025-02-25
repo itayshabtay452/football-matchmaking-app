@@ -1,79 +1,105 @@
+// AppNavigation.kt
 package com.example.soccergamesfinder.ui.navigation
 
+import android.content.Intent
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavType
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.example.soccergamesfinder.ui.auth.LoginScreen
-import com.example.soccergamesfinder.ui.auth.ProfileCompletionScreen
-import com.example.soccergamesfinder.ui.auth.RegisterScreen
-import com.example.soccergamesfinder.ui.HomeScreen
-import com.example.soccergamesfinder.ui.FieldsScreen
-
-object Routes {
-    const val Login = "login"
-    const val Register = "register"
-    const val ProfileCompletion = "profileCompletion"
-    const val Home = "home"
-    const val Fields = "fields_screens"
-}
+import com.example.soccergamesfinder.ui.screens.*
+import com.example.soccergamesfinder.viewmodel.AuthViewModel
+import com.example.soccergamesfinder.viewmodel.FieldsViewModel
+import com.example.soccergamesfinder.viewmodel.LocationViewModel
+import com.example.soccergamesfinder.viewmodel.UserViewModel
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.ktx.firestore
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(
+    authViewModel: AuthViewModel,
+    userViewModel: UserViewModel,
+    locationViewModel: LocationViewModel,
+    launchGoogleSignIn: (Intent) -> Unit
+) {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = Routes.Login) {
-        composable(Routes.Login) {
+    NavHost(navController = navController, startDestination = "login") {
+
+        composable("login") {
             LoginScreen(
-                onLoginSuccess = {
-                    navController.navigate(Routes.Home) {
-                        popUpTo(Routes.Login) { inclusive = true }
+                authViewModel = authViewModel,
+                navigateToHome = {
+                    authViewModel.user.value?.uid?.let { uid ->
+                        Firebase.firestore.collection("users").document(uid).get()
+                            .addOnSuccessListener { document ->
+                                if (document.exists()) {
+                                    userViewModel.fetchUserData()
+                                    navController.navigate("home") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
+                                } else {
+                                    navController.navigate("completeProfile") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
+                                }
+                            }
                     }
                 },
-                onNavigateToRegister = {
-                    navController.navigate(Routes.Register)
-                }
+                navigateToRegister = { navController.navigate("register") },
+                launchGoogleSignIn = launchGoogleSignIn
             )
         }
-        composable(Routes.Register) {
+
+
+        composable("register") {
             RegisterScreen(
-                onRegisterSuccess = {
-                    navController.navigate(Routes.ProfileCompletion) {
-                        popUpTo(Routes.Login) { inclusive = false }
+                authViewModel = authViewModel,
+                navigateToCompleteProfile = { navController.navigate("completeProfile") }
+            )
+        }
+
+        composable("completeProfile") {
+            CompleteProfileScreen(authViewModel = authViewModel) {
+                userViewModel.fetchUserData()
+                navController.navigate("home") {
+                    popUpTo("login") { inclusive = true }
+                }
+            }
+        }
+
+        composable("home") {
+            HomeScreen(
+                userViewModel = userViewModel,
+                authViewModel = authViewModel,
+                locationViewModel = locationViewModel,
+                navigateToLogin = {
+                    navController.navigate("login") {
+                        popUpTo("home") { inclusive = true }
                     }
                 },
-                onNavigateToLogin = {
-                    navController.popBackStack()
-                }
+                navigateToFieldsList = { navController.navigate("fieldsList") },
+                navigateToCreateGame = { navController.navigate("createGame") },
+                navigateToOpenGames = { navController.navigate("openGames") },
+                navigateToCompleteProfile = { navController.navigate("completeProfile") }
             )
-        }
-        composable(Routes.ProfileCompletion) {
-            ProfileCompletionScreen(
-                onProfileCompleteSuccess = {
-                    navController.navigate(Routes.Home) {
-                        popUpTo(Routes.ProfileCompletion) { inclusive = true }
-                    }
-                }
-            )
-        }
-        composable(Routes.Home) {
-            HomeScreen(navController = navController)
         }
 
-        composable(
-            route = "fields_screen/{latitude}/{longitude}",
-            arguments = listOf(
-                navArgument("latitude") { type = NavType.FloatType },
-                navArgument("longitude") { type = NavType.FloatType }
-            )
-        ) { backStackEntry ->
-            val latitude = backStackEntry.arguments?.getFloat("latitude")?.toDouble() ?: 0.0
-            val longitude = backStackEntry.arguments?.getFloat("longitude")?.toDouble() ?: 0.0
+        composable("fieldsList") {
+            val fieldsViewModel: FieldsViewModel = viewModel()
+            val locationViewModel: LocationViewModel = viewModel()
 
-            FieldsScreen(navController, latitude, longitude)
+            val userLocation by locationViewModel.currentLocation.collectAsState()
+
+            FieldsListScreen(
+                fieldsViewModel = fieldsViewModel,
+                userLocation = userLocation
+            )
         }
+
+
 
 
     }

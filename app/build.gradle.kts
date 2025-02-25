@@ -53,6 +53,12 @@ dependencies {
     implementation(libs.firebase.auth.ktx.v2200)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.ui)
+    implementation(libs.androidx.ui.v178)
+    implementation(libs.material3)
+    implementation(libs.androidx.foundation)
+    implementation(libs.play.services.auth)
+    implementation(libs.facebook.login)
+
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
@@ -60,7 +66,6 @@ dependencies {
     implementation(libs.firebase.database)
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.play.services.location)
-
     // תלות לבדיקות יחידה (unit tests)
     testImplementation(libs.junit)
 
