@@ -23,21 +23,16 @@ import androidx.navigation.NavController
 import com.example.soccergamesfinder.R
 import com.example.soccergamesfinder.data.Field
 import com.example.soccergamesfinder.viewmodel.FieldsViewModel
-import com.example.soccergamesfinder.ui.components.FieldCard
 
 @Composable
 fun FieldsListScreen(fieldsViewModel: FieldsViewModel, userLocation: Location?, navController: NavController) {
-    val fields = fieldsViewModel.filteredFields
-    val allFields = fieldsViewModel.allFields
+    val filteredFields by fieldsViewModel.filteredFields.collectAsState()
+    val allFields by fieldsViewModel.allFields.collectAsState()
 
-    // רשימות האפשרויות הקיימות מהנתונים עצמם
-    val availableSizes = allFields.map { it.fieldSize }.distinct()
-    val availableTypes = allFields.map { it.fieldType }.distinct()
-
-    var selectedSize by remember { mutableStateOf<String?>(null) }
-    var selectedType by remember { mutableStateOf<String?>(null) }
-    var hasLighting by remember { mutableStateOf(false) }
-    var paid by remember { mutableStateOf(false) }
+    val selectedSize by fieldsViewModel.selectedSize.collectAsState()
+    val selectedType by fieldsViewModel.selectedType.collectAsState()
+    val hasLighting by fieldsViewModel.hasLighting.collectAsState()
+    val paid by fieldsViewModel.paid.collectAsState()
 
     LaunchedEffect(userLocation) {
         fieldsViewModel.loadFields(userLocation)
@@ -49,6 +44,7 @@ fun FieldsListScreen(fieldsViewModel: FieldsViewModel, userLocation: Location?, 
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        // כרטיס פילטרים
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
@@ -62,10 +58,14 @@ fun FieldsListScreen(fieldsViewModel: FieldsViewModel, userLocation: Location?, 
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                DropdownMenuField("גודל", availableSizes, selectedSize) { selectedSize = it }
-                DropdownMenuField("סוג", availableTypes, selectedType) { selectedType = it }
-                ToggleChip("תאורה", hasLighting) { hasLighting = !hasLighting }
-                ToggleChip("חינם", paid) { paid = !paid }
+                DropdownMenuField("גודל", allFields.map { it.fieldSize }.distinct(), selectedSize) {
+                    fieldsViewModel.setFilter(it, selectedType, hasLighting, paid)
+                }
+                DropdownMenuField("סוג", allFields.map { it.fieldType }.distinct(), selectedType) {
+                    fieldsViewModel.setFilter(selectedSize, it, hasLighting, paid)
+                }
+                ToggleChip("תאורה", hasLighting) { fieldsViewModel.setFilter(selectedSize, selectedType, !hasLighting, paid) }
+                ToggleChip("חינם", paid) { fieldsViewModel.setFilter(selectedSize, selectedType, hasLighting, !paid) }
             }
         }
 
@@ -74,20 +74,14 @@ fun FieldsListScreen(fieldsViewModel: FieldsViewModel, userLocation: Location?, 
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Button(
-                onClick = { fieldsViewModel.filterFields(selectedSize, selectedType, hasLighting.takeIf { it }, paid.takeIf { it }) },
+                onClick = { fieldsViewModel.applyFilters() },
                 modifier = Modifier.weight(1f)
             ) {
                 Text("סנן", fontSize = 14.sp, fontWeight = FontWeight.Bold)
             }
 
             OutlinedButton(
-                onClick = {
-                    selectedSize = null
-                    selectedType = null
-                    hasLighting = false
-                    paid = false
-                    fieldsViewModel.clearFilters()
-                },
+                onClick = { fieldsViewModel.clearFilters() },
                 modifier = Modifier.weight(1f)
             ) {
                 Text("נקה סינון", fontSize = 14.sp, fontWeight = FontWeight.Bold)
@@ -98,53 +92,13 @@ fun FieldsListScreen(fieldsViewModel: FieldsViewModel, userLocation: Location?, 
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(fields) { field ->
+            items(filteredFields) { field ->
                 AnimatedFieldCard(field, userLocation, navController)
             }
         }
     }
 }
 
-@Composable
-fun AnimatedFieldCard(field: Field, userLocation: Location?, navController: NavController) {
-    val fieldLocation = Location("").apply {
-        latitude = field.latitude
-        longitude = field.longitude
-    }
-    val distanceKm = userLocation?.distanceTo(fieldLocation)?.div(1000)?.let { "%.1f ק\"מ".format(it) } ?: "לא זמין"
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .clickable { }
-            .animateContentSize()
-            .padding(8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5)),
-        elevation = CardDefaults.cardElevation(6.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Text(field.name, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-            Text("סוג: ${field.fieldType}", fontSize = 14.sp)
-            Text("גודל: ${field.fieldSize}", fontSize = 14.sp)
-            Text("תאורה: ${if (field.hasLighting) "כן" else "לא"}", fontSize = 14.sp)
-            Text("בתשלום: ${if (field.paid) "כן" else "לא"}", fontSize = 14.sp)
-            Text("מרחק: $distanceKm", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Button(
-                onClick = { navController.navigate("createGameScreen/${field.id}") },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("צור משחק")
-            }
-        }
-    }
-}
 
 
 @Composable
@@ -181,4 +135,44 @@ fun ToggleChip(label: String, isSelected: Boolean, onToggle: () -> Unit) {
         label = { Text(label, fontSize = 12.sp) },
         modifier = Modifier.padding(horizontal = 4.dp)
     )
+}
+
+@Composable
+fun AnimatedFieldCard(field: Field, userLocation: Location?, navController: NavController) {
+    val fieldLocation = Location("").apply {
+        latitude = field.latitude
+        longitude = field.longitude
+    }
+    val distanceKm = userLocation?.distanceTo(fieldLocation)?.div(1000)?.let { "%.1f ק\"מ".format(it) } ?: "לא זמין"
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .animateContentSize()
+            .padding(8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5)),
+        elevation = CardDefaults.cardElevation(6.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(field.name, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+            Text("סוג: ${field.fieldType}", fontSize = 14.sp)
+            Text("גודל: ${field.fieldSize}", fontSize = 14.sp)
+            Text("תאורה: ${if (field.hasLighting) "כן" else "לא"}", fontSize = 14.sp)
+            Text("בתשלום: ${if (field.paid) "כן" else "לא"}", fontSize = 14.sp)
+            Text("מרחק: $distanceKm", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = { navController.navigate("createGameScreen/${field.id}") },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("צור משחק")
+            }
+        }
+    }
 }

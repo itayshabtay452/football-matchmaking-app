@@ -12,7 +12,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.soccergamesfinder.viewmodel.CreateGameViewModel
 import com.example.soccergamesfinder.viewmodel.FieldsViewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -20,21 +22,23 @@ import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateGameScreen(fieldId: String?, navController: NavController, fieldsViewModel: FieldsViewModel) {
+fun CreateGameScreen(
+    fieldId: String?,
+    navController: NavController,
+    fieldsViewModel: FieldsViewModel,
+    createGameViewModel: CreateGameViewModel = viewModel()
+) {
     val context = LocalContext.current
     val calendar = remember { Calendar.getInstance() }
 
-    var selectedDate by remember { mutableStateOf("") }
-    var selectedTimeRange by remember { mutableStateOf("") }
-    var fieldName by remember { mutableStateOf("טוען...") }
+    val selectedDate by createGameViewModel.selectedDate.collectAsState()
+    val selectedTimeRange by createGameViewModel.selectedTimeRange.collectAsState()
+    val field by createGameViewModel.field.collectAsState()
 
-
-
-    // מחכה שהנתונים ייטענו לפני שמנסה לשלוף את שם המגרש
     LaunchedEffect(fieldId) {
-            fieldId?.let { id ->
-                fieldsViewModel.getFieldById(id)?.let {
-                    fieldName = it.name
+        fieldId?.let { id ->
+            fieldsViewModel.getFieldById(id)?.let {
+                createGameViewModel.setField(it)
             }
         }
     }
@@ -42,7 +46,7 @@ fun CreateGameScreen(fieldId: String?, navController: NavController, fieldsViewM
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("יצירת משחק ב-$fieldName") },
+                title = { Text("יצירת משחק ב-${field?.name ?: "טוען..."}") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "חזור")
@@ -58,30 +62,30 @@ fun CreateGameScreen(fieldId: String?, navController: NavController, fieldsViewM
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            Text("בחר תאריך ושעה למשחק", fontSize = 20.sp, fontWeight = FontWeight.Bold)
 
-                Text("בחר תאריך ושעה למשחק", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            // בחירת תאריך
+            OutlinedButton(
+                onClick = { showDatePicker(context, calendar) { createGameViewModel.setDate(it) } },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(if (selectedDate.isEmpty()) "בחר תאריך" else "תאריך שנבחר: $selectedDate")
+            }
 
-                // בחירת תאריך
-                OutlinedButton(
-                    onClick = { showDatePicker(context, calendar) { selectedDate = it } },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(if (selectedDate.isEmpty()) "בחר תאריך" else "תאריך שנבחר: $selectedDate")
-                }
+            // בחירת טווח שעות
+            TimeRangeDropdown(selectedTimeRange) { createGameViewModel.setTimeRange(it) }
 
-                // בחירת טווח שעות
-                TimeRangeDropdown(selectedTimeRange) { selectedTimeRange = it }
-
-                Button(
-                    onClick = { /* לשמור את המשחק ב-Firebase */ },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = selectedDate.isNotEmpty() && selectedTimeRange.isNotEmpty()
-                ) {
-                    Text("שמור משחק")
-                }
+            Button(
+                onClick = { /* לשמור את המשחק ב-Firebase */ },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = selectedDate.isNotEmpty() && selectedTimeRange.isNotEmpty()
+            ) {
+                Text("שמור משחק")
+            }
         }
     }
 }
+
 
 
 
