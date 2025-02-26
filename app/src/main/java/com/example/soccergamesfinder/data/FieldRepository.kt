@@ -37,4 +37,23 @@ class FieldsRepository {
             "שגיאה בטעינה"
         }
     }
+
+    suspend fun getFieldLocationById(fieldId: String): Location? {
+        return try {
+            val snapshot = fieldsCollection.document(fieldId).get().await()
+            val latitude = snapshot.getDouble("latitude")
+            val longitude = snapshot.getDouble("longitude")
+            if (latitude != null && longitude != null) {
+                Location("").apply {
+                    this.latitude = latitude
+                    this.longitude = longitude
+                }
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
 }

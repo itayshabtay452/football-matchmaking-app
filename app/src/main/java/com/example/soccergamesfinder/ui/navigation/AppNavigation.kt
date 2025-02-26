@@ -2,6 +2,8 @@
 package com.example.soccergamesfinder.ui.navigation
 
 import android.content.Intent
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -17,6 +19,7 @@ import com.example.soccergamesfinder.viewmodel.UserViewModel
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.firestore.ktx.firestore
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun AppNavigation(
     authViewModel: AuthViewModel,
@@ -110,8 +113,12 @@ fun AppNavigation(
         }
 
         composable("openGames") {
-            OpenGamesScreen(navController = navController)
+            val locationViewModel: LocationViewModel = viewModel()
+            val userLocation by locationViewModel.currentLocation.collectAsState()
+
+            OpenGamesScreen(navController = navController, userLocation = userLocation)
         }
+
 
 
 
