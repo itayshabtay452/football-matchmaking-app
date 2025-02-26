@@ -27,6 +27,7 @@ fun OpenGamesScreen(
     userLocation: Location?
 ) {
     val openGames by openGamesViewModel.openGames.collectAsState()
+    val errorMessage by openGamesViewModel.errorMessage.collectAsState() // נעקוב אחרי הודעות שגיאה
     val maxDistanceKm by openGamesViewModel.maxDistanceKm.collectAsState()
     val userId = authViewModel.user.value?.uid ?: "" // נקבל את ה-UID של המשתמש
 
@@ -53,6 +54,18 @@ fun OpenGamesScreen(
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
+            if (errorMessage != null) {
+                AlertDialog(
+                    onDismissRequest = { openGamesViewModel.clearErrorMessage() }, // סגירת הדיאלוג
+                    confirmButton = {
+                        Button(onClick = { openGamesViewModel.clearErrorMessage() }) {
+                            Text("אישור")
+                        }
+                    },
+                    title = { Text("שגיאה") },
+                    text = { Text(errorMessage ?: "") }
+                )
+            }
             Text("סינון לפי מרחק", style = MaterialTheme.typography.titleMedium)
 
             Slider(
@@ -70,11 +83,13 @@ fun OpenGamesScreen(
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(openGames) { gameWithFieldName ->
-                        GameCard(gameWithFieldName) { gameId ->
-                            openGamesViewModel.joinGame(gameId, userId)
+                        GameCard(gameWithFieldName, userId) { gameId, gameDate ->
+                            openGamesViewModel.joinGame(gameId, userId, gameDate)
                         }
                     }
                 }
+
+
             }
         }
     }
@@ -83,14 +98,17 @@ fun OpenGamesScreen(
 
 
 @Composable
-fun GameCard(gameWithFieldName: GameWithFieldName, onJoinClick: (String) -> Unit) {
+fun GameCard(gameWithFieldName: GameWithFieldName, userId: String, onJoinClick: (String, String) -> Unit) {
     val game = gameWithFieldName.game
     val fieldName = gameWithFieldName.fieldName
+    val createdByUserName = gameWithFieldName.createdByUserName
     val distance = gameWithFieldName.distanceFromUser
 
     val playersCount = game.players.size
     val maxPlayers = game.maxPlayers
     val spotsLeft = maxPlayers - playersCount
+
+    val userAlreadyJoined = game.players.contains(userId) // האם המשתמש כבר במשחק
 
     Card(
         modifier = Modifier
@@ -104,6 +122,7 @@ fun GameCard(gameWithFieldName: GameWithFieldName, onJoinClick: (String) -> Unit
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text("מגרש: $fieldName", style = MaterialTheme.typography.titleLarge)
+            Text("נפתח על ידי: $createdByUserName", style = MaterialTheme.typography.bodyMedium)
             Text("תאריך: ${game.date}", style = MaterialTheme.typography.bodyLarge)
             Text("שעות: ${game.timeRange}", style = MaterialTheme.typography.bodyLarge)
             Text("שחקנים: $playersCount/$maxPlayers", style = MaterialTheme.typography.bodyLarge)
@@ -111,10 +130,13 @@ fun GameCard(gameWithFieldName: GameWithFieldName, onJoinClick: (String) -> Unit
                 Text("מרחק: %.1f ק\"מ".format(it), style = MaterialTheme.typography.bodyLarge)
             }
 
-            if (spotsLeft > 0) {
+            if (userAlreadyJoined) {
+                Text("כבר הצטרפת למשחק זה!", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+            } else if (spotsLeft > 0) {
                 Button(
-                    onClick = { onJoinClick(game.id) },
-                    modifier = Modifier.fillMaxWidth()
+                    onClick = { onJoinClick(game.id, game.date) },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !userAlreadyJoined // הכפתור כבוי אם המשתמש כבר במשחק
                 ) {
                     Text("הצטרף למשחק")
                 }
@@ -124,4 +146,5 @@ fun GameCard(gameWithFieldName: GameWithFieldName, onJoinClick: (String) -> Unit
         }
     }
 }
+
 

@@ -35,7 +35,7 @@ class GameRepository {
     suspend fun hasUserGameOnDate(userId: String, date: String): Boolean {
         return try {
             val querySnapshot = gamesCollection
-                .whereEqualTo("createdByUserId", userId)
+                .whereArrayContains("players", userId) // מחפש משחקים שהמשתמש כבר רשום אליהם
                 .whereEqualTo("date", date)
                 .get()
                 .await()
@@ -45,6 +45,7 @@ class GameRepository {
             false
         }
     }
+
 
     suspend fun getAllGames(): List<Game> {
         return try {

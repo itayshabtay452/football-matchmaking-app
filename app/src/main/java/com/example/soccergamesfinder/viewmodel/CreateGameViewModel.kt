@@ -67,7 +67,8 @@ class CreateGameViewModel : ViewModel() {
                     date = selectedDate.value,
                     timeRange = selectedTimeRange.value,
                     createdByUserId = userId,
-                    maxPlayers = maxPlayers.value
+                    maxPlayers = maxPlayers.value,
+                    players = listOf(userId) // המשתמש נוסף אוטומטית לרשימת המשתתפים
                 )
 
                 val success = repository.createGame(game)
