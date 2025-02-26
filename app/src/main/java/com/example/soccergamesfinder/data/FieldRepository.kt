@@ -7,6 +7,7 @@ import kotlinx.coroutines.tasks.await
 
 class FieldsRepository {
     private val firestore = Firebase.firestore
+    private val fieldsCollection = firestore.collection("fields")
 
     suspend fun getFields(userLocation: Location?): List<Field> {
         return try {
@@ -25,6 +26,15 @@ class FieldsRepository {
             } ?: loadedFields
         } catch (e: Exception) {
             emptyList()
+        }
+    }
+
+    suspend fun getFieldNameById(fieldId: String): String {
+        return try {
+            val snapshot = fieldsCollection.document(fieldId).get().await()
+            snapshot.getString("name") ?: "שם לא נמצא"
+        } catch (e: Exception) {
+            "שגיאה בטעינה"
         }
     }
 }

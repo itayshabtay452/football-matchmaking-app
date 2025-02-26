@@ -46,5 +46,15 @@ class GameRepository {
         }
     }
 
+    suspend fun getAllGames(): List<Game> {
+        return try {
+            val querySnapshot = gamesCollection.get().await()
+            querySnapshot.documents.mapNotNull { it.toGame() }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+
 
 }

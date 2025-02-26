@@ -109,6 +109,10 @@ fun AppNavigation(
                 createGameViewModel = viewModel())
         }
 
+        composable("openGames") {
+            OpenGamesScreen(navController = navController)
+        }
+
 
 
 

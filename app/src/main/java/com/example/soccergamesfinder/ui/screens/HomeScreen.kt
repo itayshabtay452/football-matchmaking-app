@@ -23,6 +23,7 @@ import com.example.soccergamesfinder.viewmodel.UserViewModel
 import com.example.soccergamesfinder.viewmodel.LocationViewModel
 import java.util.Locale
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun HomeScreen(
     userViewModel: UserViewModel,
