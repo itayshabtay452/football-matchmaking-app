@@ -119,6 +119,12 @@ fun AppNavigation(
             OpenGamesScreen(navController = navController, userLocation = userLocation)
         }
 
+        composable("gameChat/{gameId}") { backStackEntry ->
+            val gameId = backStackEntry.arguments?.getString("gameId") ?: return@composable
+            val userViewModel: UserViewModel = viewModel() // הוספת UserViewModel
+            ChatScreen(gameId, navController, userViewModel = userViewModel)
+        }
+
 
 
 

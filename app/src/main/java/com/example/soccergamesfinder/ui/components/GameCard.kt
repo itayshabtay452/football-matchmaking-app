@@ -2,17 +2,19 @@ package com.example.soccergamesfinder.ui.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.soccergamesfinder.viewmodel.GameWithFieldName
 
 @Composable
 fun GameCard(
     gameWithFieldName: GameWithFieldName,
     userId: String,
+    navController: NavController, // נוסיף את הניווט לצ'אט
     onJoinClick: (String, String) -> Unit,
     onLeaveClick: (String) -> Unit,
     onDeleteClick: (String) -> Unit
@@ -26,6 +28,8 @@ fun GameCard(
     val playersCount = game.players.size
     val maxPlayers = game.maxPlayers
     val spotsLeft = maxPlayers - playersCount
+
+    var showJoinChatError by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
@@ -76,6 +80,35 @@ fun GameCard(
                 } else {
                     Text("המשחק מלא!", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
                 }
+            }
+
+            // ✅ כפתור כניסה לצ'אט עם בדיקה
+            Button(
+                onClick = {
+                    if (isUserInGame) {
+                        navController.navigate("gameChat/${game.id}") // כניסה לצ'אט
+                    } else {
+                        showJoinChatError = true // הצגת הודעת שגיאה
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Text("כניסה לצ'אט", color = Color.White)
+            }
+
+            // ✅ הצגת הודעת שגיאה אם המשתמש לא במשחק
+            if (showJoinChatError) {
+                AlertDialog(
+                    onDismissRequest = { showJoinChatError = false },
+                    confirmButton = {
+                        Button(onClick = { showJoinChatError = false }) {
+                            Text("אישור")
+                        }
+                    },
+                    title = { Text("שגיאה") },
+                    text = { Text("עליך להיות חלק מהמשחק כדי להצטרף לצ'אט.") }
+                )
             }
         }
     }

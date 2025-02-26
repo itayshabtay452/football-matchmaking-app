@@ -78,17 +78,20 @@ fun OpenGamesScreen(
                         GameCard(
                             gameWithFieldName = gameWithFieldName,
                             userId = userId,
+                            navController = navController, // וודא שאתה מעביר את זה!
                             onJoinClick = { gameId, gameDate ->
                                 openGamesViewModel.joinGame(gameId, userId, gameDate)
                             },
                             onLeaveClick = { gameId ->
-                                openGamesViewModel.leaveGame(gameId, userId) // קריאה לעזיבת המשחק
+                                openGamesViewModel.leaveGame(gameId, userId)
                             },
                             onDeleteClick = { gameId ->
-                                openGamesViewModel.deleteGame(gameId) // קריאה למחיקת המשחק
+                                openGamesViewModel.deleteGame(gameId)
                             }
                         )
+
                     }
+
                 }
 
 

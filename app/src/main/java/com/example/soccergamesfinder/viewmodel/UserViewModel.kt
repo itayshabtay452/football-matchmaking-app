@@ -27,4 +27,15 @@ class UserViewModel : ViewModel() {
             }
         }
     }
+
+    fun getUserName(userId: String, callback: (String?) -> Unit) {
+        firestore.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                val name = document.getString("nickname") ?: "שחקן"
+                callback(name)
+            }
+            .addOnFailureListener {
+                callback("שחקן") // במקרה של שגיאה
+            }
+    }
 }
