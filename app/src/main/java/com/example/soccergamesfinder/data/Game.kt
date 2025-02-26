@@ -9,9 +9,11 @@ data class Game(
     @get:PropertyName("date") @set:PropertyName("date") var date: String = "",
     @get:PropertyName("timeRange") @set:PropertyName("timeRange") var timeRange: String = "",
     @get:PropertyName("createdByUserId") @set:PropertyName("createdByUserId") var createdByUserId: String = "",
-    @get:PropertyName("maxPlayers") @set:PropertyName("maxPlayers") var maxPlayers: Int = 10, // ברירת מחדל
-    @get:Exclude var id: String = "" // מזהה המשחק, לא נשמר ב-Firebase
+    @get:PropertyName("maxPlayers") @set:PropertyName("maxPlayers") var maxPlayers: Int = 10,
+    @get:PropertyName("players") @set:PropertyName("players") var players: List<String> = emptyList(), // רשימת המשתתפים
+    @get:Exclude var id: String = ""
 )
+
 
 fun DocumentSnapshot.toGame(): Game? {
     return try {

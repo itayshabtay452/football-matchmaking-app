@@ -9,11 +9,13 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.soccergamesfinder.viewmodel.OpenGamesViewModel
 import com.example.soccergamesfinder.data.Game
+import com.example.soccergamesfinder.viewmodel.AuthViewModel
 import com.example.soccergamesfinder.viewmodel.GameWithFieldName
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -21,10 +23,13 @@ import com.example.soccergamesfinder.viewmodel.GameWithFieldName
 fun OpenGamesScreen(
     navController: NavController,
     openGamesViewModel: OpenGamesViewModel = viewModel(),
+    authViewModel: AuthViewModel = viewModel(), // נוסיף את AuthViewModel
     userLocation: Location?
 ) {
     val openGames by openGamesViewModel.openGames.collectAsState()
     val maxDistanceKm by openGamesViewModel.maxDistanceKm.collectAsState()
+    val userId = authViewModel.user.value?.uid ?: "" // נקבל את ה-UID של המשתמש
+
 
     LaunchedEffect(userLocation) {
         openGamesViewModel.loadOpenGames(userLocation)
@@ -61,11 +66,13 @@ fun OpenGamesScreen(
             Text("הצגת משחקים עד $maxDistanceKm ק\"מ", style = MaterialTheme.typography.bodyLarge)
 
             if (openGames.isEmpty()) {
-                Text("אין משחקים פתוחים בטווח זה.", style = MaterialTheme.typography.bodyLarge)
+                Text("אין משחקים פתוחים כרגע.", style = MaterialTheme.typography.bodyLarge)
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(openGames) { gameWithFieldName ->
-                        GameCard(gameWithFieldName)
+                        GameCard(gameWithFieldName) { gameId ->
+                            openGamesViewModel.joinGame(gameId, userId)
+                        }
                     }
                 }
             }
@@ -76,10 +83,14 @@ fun OpenGamesScreen(
 
 
 @Composable
-fun GameCard(gameWithFieldName: GameWithFieldName) {
+fun GameCard(gameWithFieldName: GameWithFieldName, onJoinClick: (String) -> Unit) {
     val game = gameWithFieldName.game
     val fieldName = gameWithFieldName.fieldName
     val distance = gameWithFieldName.distanceFromUser
+
+    val playersCount = game.players.size
+    val maxPlayers = game.maxPlayers
+    val spotsLeft = maxPlayers - playersCount
 
     Card(
         modifier = Modifier
@@ -95,10 +106,22 @@ fun GameCard(gameWithFieldName: GameWithFieldName) {
             Text("מגרש: $fieldName", style = MaterialTheme.typography.titleLarge)
             Text("תאריך: ${game.date}", style = MaterialTheme.typography.bodyLarge)
             Text("שעות: ${game.timeRange}", style = MaterialTheme.typography.bodyLarge)
-            Text("שחקנים מקסימליים: ${game.maxPlayers}", style = MaterialTheme.typography.bodyLarge)
+            Text("שחקנים: $playersCount/$maxPlayers", style = MaterialTheme.typography.bodyLarge)
             distance?.let {
                 Text("מרחק: %.1f ק\"מ".format(it), style = MaterialTheme.typography.bodyLarge)
+            }
+
+            if (spotsLeft > 0) {
+                Button(
+                    onClick = { onJoinClick(game.id) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("הצטרף למשחק")
+                }
+            } else {
+                Text("המשחק מלא!", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
             }
         }
     }
 }
+

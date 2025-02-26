@@ -55,6 +55,25 @@ class GameRepository {
         }
     }
 
+    suspend fun joinGame(gameId: String, userId: String): Boolean {
+        return try {
+            val gameRef = gamesCollection.document(gameId)
+            val snapshot = gameRef.get().await()
+            val game = snapshot.toGame()
+
+            if (game != null && !game.players.contains(userId) && game.players.size < game.maxPlayers) {
+                val updatedPlayers = game.players + userId
+                gameRef.update("players", updatedPlayers).await()
+                true
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+
 
 
 }

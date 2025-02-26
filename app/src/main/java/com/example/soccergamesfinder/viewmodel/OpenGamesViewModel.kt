@@ -59,4 +59,13 @@ class OpenGamesViewModel : ViewModel() {
         }
     }
 
+    fun joinGame(gameId: String, userId: String) {
+        viewModelScope.launch {
+            val success = gameRepository.joinGame(gameId, userId)
+            if (success) {
+                loadOpenGames(_userLocation.value) // טוען מחדש כדי להציג את המשתמש החדש
+            }
+        }
+    }
+
 }
