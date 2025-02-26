@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import com.example.soccergamesfinder.ui.components.GameCard
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -55,18 +56,8 @@ fun OpenGamesScreen(
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            if (errorMessage != null) {
-                AlertDialog(
-                    onDismissRequest = { openGamesViewModel.clearErrorMessage() }, // סגירת הדיאלוג
-                    confirmButton = {
-                        Button(onClick = { openGamesViewModel.clearErrorMessage() }) {
-                            Text("אישור")
-                        }
-                    },
-                    title = { Text("שגיאה") },
-                    text = { Text(errorMessage ?: "") }
-                )
-            }
+            ErrorDialog(errorMessage) { openGamesViewModel.clearErrorMessage() }
+
             Text("סינון לפי מרחק", style = MaterialTheme.typography.titleMedium)
 
             Slider(
@@ -108,86 +99,18 @@ fun OpenGamesScreen(
     }
 }
 
-
-
 @Composable
-fun GameCard(
-    gameWithFieldName: GameWithFieldName,
-    userId: String,
-    onJoinClick: (String, String) -> Unit,
-    onLeaveClick: (String) -> Unit, // פונקציה לעזיבת משחק
-    onDeleteClick: (String) -> Unit // פונקציה למחיקת משחק
-) {
-    val game = gameWithFieldName.game
-    val fieldName = gameWithFieldName.fieldName
-    val createdByUserName = gameWithFieldName.createdByUserName
-    val distance = gameWithFieldName.distanceFromUser
-    val isUserCreator = game.createdByUserId == userId // האם המשתמש הוא היוצר של המשחק
-    val isUserInGame = game.players.contains(userId) // האם המשתמש כבר במשחק
-    val playersCount = game.players.size
-    val maxPlayers = game.maxPlayers
-    val spotsLeft = maxPlayers - playersCount
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        elevation = CardDefaults.cardElevation(6.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text("מגרש: $fieldName", style = MaterialTheme.typography.titleLarge)
-            Text("נפתח על ידי: $createdByUserName", style = MaterialTheme.typography.bodyMedium)
-            Text("תאריך: ${game.date}", style = MaterialTheme.typography.bodyLarge)
-            Text("שעות: ${game.timeRange}", style = MaterialTheme.typography.bodyLarge)
-            Text("שחקנים: $playersCount/$maxPlayers", style = MaterialTheme.typography.bodyLarge)
-            distance?.let {
-                Text("מרחק: %.1f ק\"מ".format(it), style = MaterialTheme.typography.bodyLarge)
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // ✅ אם המשתמש יצר את המשחק → רק אפשרות למחוק
-            if (isUserCreator) {
-                Button(
-                    onClick = { onDeleteClick(game.id) },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-                ) {
-                    Text("מחק משחק", color = Color.White)
+fun ErrorDialog(errorMessage: String?, onDismiss: () -> Unit) {
+    if (errorMessage != null) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            confirmButton = {
+                Button(onClick = onDismiss) {
+                    Text("אישור")
                 }
-            }
-            // ✅ אם המשתמש **לא יצר את המשחק**, יש 2 אפשרויות:
-            else {
-                // 🔹 אם המשתמש כבר במשחק → כפתור לעזיבה
-                if (isUserInGame) {
-                    Button(
-                        onClick = { onLeaveClick(game.id) },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
-                    ) {
-                        Text("עזוב משחק", color = Color.White)
-                    }
-                }
-                // 🔹 אם המשתמש לא במשחק ויש מקום → כפתור הצטרפות
-                else if (spotsLeft > 0) {
-                    Button(
-                        onClick = { onJoinClick(game.id, game.date) },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("הצטרף למשחק")
-                    }
-                } else {
-                    // 🔹 אם המשחק מלא ואין מקום
-                    Text("המשחק מלא!", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
-                }
-            }
-        }
+            },
+            title = { Text("שגיאה") },
+            text = { Text(errorMessage) }
+        )
     }
 }
-
-
-

@@ -1,5 +1,5 @@
 // AppNavigation.kt
-package com.example.soccergamesfinder.ui.navigation
+package com.example.soccergamesfinder.navigation
 
 import android.content.Intent
 import android.os.Build

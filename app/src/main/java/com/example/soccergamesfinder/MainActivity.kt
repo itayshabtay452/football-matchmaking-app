@@ -6,7 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import com.example.soccergamesfinder.ui.navigation.AppNavigation
+import com.example.soccergamesfinder.navigation.AppNavigation
 import com.example.soccergamesfinder.viewmodel.AuthViewModel
 import com.example.soccergamesfinder.viewmodel.LocationViewModel
 import com.example.soccergamesfinder.viewmodel.UserViewModel

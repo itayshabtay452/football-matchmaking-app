@@ -18,6 +18,8 @@ import androidx.navigation.NavController
 import com.example.soccergamesfinder.viewmodel.AuthViewModel
 import com.example.soccergamesfinder.viewmodel.CreateGameViewModel
 import com.example.soccergamesfinder.viewmodel.FieldsViewModel
+import com.example.soccergamesfinder.ui.components.TimeRangeDropdown
+import com.example.soccergamesfinder.utils.showDatePicker
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -124,57 +126,6 @@ fun CreateGameScreen(
                 enabled = selectedDate.isNotEmpty() && selectedTimeRange.isNotEmpty()
             ) {
                 Text("שמור משחק")
-            }
-        }
-    }
-}
-
-
-
-
-// פונקציה להצגת תיבת דיאלוג לבחירת תאריך
-fun showDatePicker(context: Context, calendar: Calendar, onDateSelected: (String) -> Unit) {
-    val datePickerDialog = DatePickerDialog(
-        context,
-        { _, year, month, dayOfMonth ->
-            val selectedCalendar = Calendar.getInstance().apply {
-                set(year, month, dayOfMonth)
-            }
-            val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-            onDateSelected(sdf.format(selectedCalendar.time))
-        },
-        calendar.get(Calendar.YEAR),
-        calendar.get(Calendar.MONTH),
-        calendar.get(Calendar.DAY_OF_MONTH)
-    )
-    datePickerDialog.show()
-}
-
-@Composable
-fun TimeRangeDropdown(selectedTimeRange: String, onTimeRangeSelected: (String) -> Unit) {
-    val timeRanges = listOf("16:00-18:00", "18:00-20:00", "20:00-22:00", "22:00-24:00")
-    var expanded by remember { mutableStateOf(false) }
-
-    Column {
-        OutlinedButton(
-            onClick = { expanded = true },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(if (selectedTimeRange.isEmpty()) "בחר טווח שעות" else "שעות שנבחרו: $selectedTimeRange")
-        }
-
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            timeRanges.forEach { range ->
-                DropdownMenuItem(
-                    text = { Text(range) },
-                    onClick = {
-                        onTimeRangeSelected(range)
-                        expanded = false
-                    }
-                )
             }
         }
     }

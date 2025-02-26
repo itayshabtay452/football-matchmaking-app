@@ -5,7 +5,7 @@ import android.location.Location
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.soccergamesfinder.data.Field
-import com.example.soccergamesfinder.data.FieldsRepository
+import com.example.soccergamesfinder.repository.FieldsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

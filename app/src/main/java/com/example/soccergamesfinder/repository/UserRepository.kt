@@ -1,4 +1,4 @@
-package com.example.soccergamesfinder.data
+package com.example.soccergamesfinder.repository
 
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase

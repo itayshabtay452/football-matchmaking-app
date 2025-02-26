@@ -7,6 +7,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import android.location.Location
+import com.example.soccergamesfinder.repository.FieldsRepository
+import com.example.soccergamesfinder.repository.GameRepository
+import com.example.soccergamesfinder.repository.UserRepository
 
 data class GameWithFieldName(
     val game: Game,

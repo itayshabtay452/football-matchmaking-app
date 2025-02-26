@@ -13,6 +13,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.example.soccergamesfinder.ui.components.FieldCard
+import com.example.soccergamesfinder.ui.components.DropdownMenuField
+import com.example.soccergamesfinder.ui.components.ToggleChip
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -93,85 +96,7 @@ fun FieldsListScreen(fieldsViewModel: FieldsViewModel, userLocation: Location?, 
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(filteredFields) { field ->
-                AnimatedFieldCard(field, userLocation, navController)
-            }
-        }
-    }
-}
-
-
-
-@Composable
-fun DropdownMenuField(label: String, options: List<String>, selectedOption: String?, onOptionSelected: (String?) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    var selectedText by remember { mutableStateOf(selectedOption ?: label) }
-
-    Box(modifier = Modifier.width(90.dp)) {
-        OutlinedButton(onClick = { expanded = true }, modifier = Modifier.fillMaxWidth()) {
-            Text(selectedText, fontSize = 12.sp)
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            options.forEach { option ->
-                DropdownMenuItem(onClick = {
-                    selectedText = option
-                    onOptionSelected(option)
-                    expanded = false
-                }, text = { Text(option, fontSize = 12.sp) })
-            }
-            DropdownMenuItem(onClick = {
-                selectedText = label
-                onOptionSelected(null)
-                expanded = false
-            }, text = { Text("נקה בחירה", fontSize = 12.sp) })
-        }
-    }
-}
-
-@Composable
-fun ToggleChip(label: String, isSelected: Boolean, onToggle: () -> Unit) {
-    FilterChip(
-        selected = isSelected,
-        onClick = onToggle,
-        label = { Text(label, fontSize = 12.sp) },
-        modifier = Modifier.padding(horizontal = 4.dp)
-    )
-}
-
-@Composable
-fun AnimatedFieldCard(field: Field, userLocation: Location?, navController: NavController) {
-    val fieldLocation = Location("").apply {
-        latitude = field.latitude
-        longitude = field.longitude
-    }
-    val distanceKm = userLocation?.distanceTo(fieldLocation)?.div(1000)?.let { "%.1f ק\"מ".format(it) } ?: "לא זמין"
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .animateContentSize()
-            .padding(8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5)),
-        elevation = CardDefaults.cardElevation(6.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Text(field.name, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-            Text("סוג: ${field.fieldType}", fontSize = 14.sp)
-            Text("גודל: ${field.fieldSize}", fontSize = 14.sp)
-            Text("תאורה: ${if (field.hasLighting) "כן" else "לא"}", fontSize = 14.sp)
-            Text("בתשלום: ${if (field.paid) "כן" else "לא"}", fontSize = 14.sp)
-            Text("מרחק: $distanceKm", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Button(
-                onClick = { navController.navigate("createGameScreen/${field.id}") },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("צור משחק")
+                FieldCard(field, userLocation, navController)
             }
         }
     }

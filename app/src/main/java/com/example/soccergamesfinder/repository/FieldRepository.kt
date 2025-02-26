@@ -1,6 +1,8 @@
-package com.example.soccergamesfinder.data
+package com.example.soccergamesfinder.repository
 
 import android.location.Location
+import com.example.soccergamesfinder.data.Field
+import com.example.soccergamesfinder.data.toField
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
