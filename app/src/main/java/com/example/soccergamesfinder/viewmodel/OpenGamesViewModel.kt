@@ -89,6 +89,26 @@ class OpenGamesViewModel : ViewModel() {
         _errorMessage.value = null
     }
 
+    fun deleteGame(gameId: String) {
+        viewModelScope.launch {
+            val success = gameRepository.deleteGame(gameId)
+            if (success) {
+                loadOpenGames(_userLocation.value) // נטען מחדש את רשימת המשחקים לאחר המחיקה
+            }
+        }
+    }
+
+    fun leaveGame(gameId: String, userId: String) {
+        viewModelScope.launch {
+            val success = gameRepository.leaveGame(gameId, userId)
+            if (success) {
+                loadOpenGames(_userLocation.value) // טוען מחדש את המשחקים לאחר עזיבה
+            }
+        }
+    }
+
+
+
 
 
 }

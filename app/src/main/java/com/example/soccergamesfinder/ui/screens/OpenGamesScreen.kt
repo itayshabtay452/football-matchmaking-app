@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -83,11 +84,23 @@ fun OpenGamesScreen(
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(openGames) { gameWithFieldName ->
-                        GameCard(gameWithFieldName, userId) { gameId, gameDate ->
-                            openGamesViewModel.joinGame(gameId, userId, gameDate)
-                        }
+                        GameCard(
+                            gameWithFieldName = gameWithFieldName,
+                            userId = userId,
+                            onJoinClick = { gameId, gameDate ->
+                                openGamesViewModel.joinGame(gameId, userId, gameDate)
+                            },
+                            onLeaveClick = { gameId ->
+                                openGamesViewModel.leaveGame(gameId, userId) // קריאה לעזיבת המשחק
+                            },
+                            onDeleteClick = { gameId ->
+                                openGamesViewModel.deleteGame(gameId) // קריאה למחיקת המשחק
+                            }
+                        )
                     }
                 }
+
+
 
 
             }
@@ -98,17 +111,22 @@ fun OpenGamesScreen(
 
 
 @Composable
-fun GameCard(gameWithFieldName: GameWithFieldName, userId: String, onJoinClick: (String, String) -> Unit) {
+fun GameCard(
+    gameWithFieldName: GameWithFieldName,
+    userId: String,
+    onJoinClick: (String, String) -> Unit,
+    onLeaveClick: (String) -> Unit, // פונקציה לעזיבת משחק
+    onDeleteClick: (String) -> Unit // פונקציה למחיקת משחק
+) {
     val game = gameWithFieldName.game
     val fieldName = gameWithFieldName.fieldName
     val createdByUserName = gameWithFieldName.createdByUserName
     val distance = gameWithFieldName.distanceFromUser
-
+    val isUserCreator = game.createdByUserId == userId // האם המשתמש הוא היוצר של המשחק
+    val isUserInGame = game.players.contains(userId) // האם המשתמש כבר במשחק
     val playersCount = game.players.size
     val maxPlayers = game.maxPlayers
     val spotsLeft = maxPlayers - playersCount
-
-    val userAlreadyJoined = game.players.contains(userId) // האם המשתמש כבר במשחק
 
     Card(
         modifier = Modifier
@@ -130,21 +148,46 @@ fun GameCard(gameWithFieldName: GameWithFieldName, userId: String, onJoinClick: 
                 Text("מרחק: %.1f ק\"מ".format(it), style = MaterialTheme.typography.bodyLarge)
             }
 
-            if (userAlreadyJoined) {
-                Text("כבר הצטרפת למשחק זה!", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-            } else if (spotsLeft > 0) {
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // ✅ אם המשתמש יצר את המשחק → רק אפשרות למחוק
+            if (isUserCreator) {
                 Button(
-                    onClick = { onJoinClick(game.id, game.date) },
+                    onClick = { onDeleteClick(game.id) },
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = !userAlreadyJoined // הכפתור כבוי אם המשתמש כבר במשחק
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
                 ) {
-                    Text("הצטרף למשחק")
+                    Text("מחק משחק", color = Color.White)
                 }
-            } else {
-                Text("המשחק מלא!", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+            }
+            // ✅ אם המשתמש **לא יצר את המשחק**, יש 2 אפשרויות:
+            else {
+                // 🔹 אם המשתמש כבר במשחק → כפתור לעזיבה
+                if (isUserInGame) {
+                    Button(
+                        onClick = { onLeaveClick(game.id) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                    ) {
+                        Text("עזוב משחק", color = Color.White)
+                    }
+                }
+                // 🔹 אם המשתמש לא במשחק ויש מקום → כפתור הצטרפות
+                else if (spotsLeft > 0) {
+                    Button(
+                        onClick = { onJoinClick(game.id, game.date) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("הצטרף למשחק")
+                    }
+                } else {
+                    // 🔹 אם המשחק מלא ואין מקום
+                    Text("המשחק מלא!", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                }
             }
         }
     }
 }
+
 
 

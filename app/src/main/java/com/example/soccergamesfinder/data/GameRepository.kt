@@ -74,6 +74,34 @@ class GameRepository {
         }
     }
 
+    suspend fun deleteGame(gameId: String): Boolean {
+        return try {
+            gamesCollection.document(gameId).delete().await()
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    suspend fun leaveGame(gameId: String, userId: String): Boolean {
+        return try {
+            val gameRef = gamesCollection.document(gameId)
+            val snapshot = gameRef.get().await()
+            val game = snapshot.toGame()
+
+            if (game != null && game.players.contains(userId)) {
+                val updatedPlayers = game.players.filter { it != userId } // מסירים את המשתמש
+                gameRef.update("players", updatedPlayers).await()
+                true
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+
 
 
 
