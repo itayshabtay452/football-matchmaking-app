@@ -1,9 +1,13 @@
 // HomeScreen.kt (מעוצב בצורה מודרנית ומקצועית עם מיקום משתמש)
 package com.example.soccergamesfinder.ui.screens
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.location.Address
 import android.location.Geocoder
 import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -17,6 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.example.soccergamesfinder.R
 import com.example.soccergamesfinder.viewmodel.AuthViewModel
 import com.example.soccergamesfinder.viewmodel.UserViewModel
@@ -39,6 +44,14 @@ fun HomeScreen(
     val location by locationViewModel.currentLocation.collectAsState()
     val context = LocalContext.current
     var address by remember { mutableStateOf("טוען מיקום...") }
+
+    val requestPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            locationViewModel.requestLocation()
+        }
+    }
 
     LaunchedEffect(location) {
         location?.let { loc ->
@@ -116,7 +129,11 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             HomeButton("📍 עדכן מיקום", Color(0xFF42A5F5)) {
-                locationViewModel.requestLocation()
+                if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    locationViewModel.requestLocation()
+                } else {
+                    requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                }
             }
             HomeButton("⚽ רשימת המגרשים", Color(0xFFAB47BC)) {
                 navigateToFieldsList()

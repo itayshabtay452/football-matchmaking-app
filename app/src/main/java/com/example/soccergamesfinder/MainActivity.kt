@@ -1,11 +1,14 @@
 // MainActivity.kt
 package com.example.soccergamesfinder
 
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import com.example.soccergamesfinder.navigation.AppNavigation
 import com.example.soccergamesfinder.viewmodel.AuthViewModel
 import com.example.soccergamesfinder.viewmodel.LocationViewModel
@@ -28,6 +31,15 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                locationViewModel.requestLocation()
+            }
+        }
+
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -41,5 +53,12 @@ class MainActivity : ComponentActivity() {
                 }
             )
         }
+        if (checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
+        } else {
+            locationViewModel.requestLocation()
+        }
+
+
     }
 }
