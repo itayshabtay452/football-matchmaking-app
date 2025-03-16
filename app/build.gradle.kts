@@ -1,18 +1,21 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
-    id("com.google.gms.google-services")
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("com.google.dagger.hilt.android") // ✅ הפעלת Hilt
+    kotlin("kapt") // ✅ הפעלת KAPT
+    id("com.google.gms.google-services") // ✅ הפעלת Firebase
 }
 
+
 android {
-    namespace = "com.example.soccergamesfinder"
-    compileSdk = 35
+    namespace = "com.example.soccergamesfinder" // ✅ ודא שתואם ל-AndroidManifest.xml
+    compileSdk = 34 // 🔹 עדיף להשתמש ב-34, כי 35 עדיין לא יציב רשמית
 
     defaultConfig {
         applicationId = "com.example.soccergamesfinder"
         minSdk = 24
-        targetSdk = 35
+        //noinspection OldTargetApi
+        targetSdk = 34 // 🔹 עדיף להתאים ל-compileSdk
         versionCode = 1
         versionName = "1.0"
 
@@ -28,54 +31,60 @@ android {
             )
         }
     }
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17 // 🔹 שדרג ל-Java 17 אם אפשר
+        targetCompatibility = JavaVersion.VERSION_17
     }
+
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17" // 🔹 עדיף 17 ליציבות וביצועים
     }
+
     buildFeatures {
         compose = true
     }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.8" // ✅ חובה כדי למנוע בעיות בקומפילציה של Jetpack Compose
+    }
+
+    packaging {
+        resources.excludes.add("META-INF/*")
+    }
+
 }
 
+
 dependencies {
-
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
+    // AndroidX Core
+    implementation(libs.androidx.core)
+    implementation(libs.androidx.lifecycle.runtime)
     implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
-    implementation(libs.firebase.auth.ktx.v2200)
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.ui)
-    implementation(libs.androidx.ui.v178)
-    implementation(libs.material3)
-    implementation(libs.androidx.foundation)
-    implementation(libs.play.services.auth)
-    implementation(libs.facebook.login)
 
+    // Jetpack Compose
+    implementation(platform(libs.compose.bom))
+    implementation(libs.compose.ui)
+    implementation(libs.compose.material)
+    implementation(libs.compose.navigation)
 
+    // Hilt Dependency Injection
+    implementation(libs.hilt)
+    kapt(libs.hiltCompiler)
+    implementation(libs.hiltNavigationCompose)
+
+    // Firebase
     implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.analytics)
-    implementation(libs.firebase.firestore.ktx)
-    implementation(libs.firebase.database)
-    implementation(libs.androidx.runtime.livedata)
-    implementation(libs.play.services.location)
-    // תלות לבדיקות יחידה (unit tests)
-    testImplementation(libs.junit)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
 
-    // אם יש בדיקות אינטגרציה, תוכל להוסיף גם:
-    androidTestImplementation(libs.androidx.junit.v121)
-    androidTestImplementation(libs.androidx.espresso.core.v361)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
+    // Coroutines
+    implementation(libs.coroutines)
+    implementation(libs.coroutines.android)
 
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.kotlinStdLib)
+    implementation(libs.googleSignIn) // ✅ שימוש ב-Google Sign-In מהקטלוג
+
+
 }
 
