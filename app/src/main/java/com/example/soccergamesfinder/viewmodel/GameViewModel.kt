@@ -19,6 +19,9 @@ class GameViewModel @Inject constructor(
     private val _games = MutableStateFlow<List<Game>>(emptyList())
     val games: StateFlow<List<Game>> get() = _games.asStateFlow()
 
+    private val _game = MutableStateFlow<Game?>(null)
+    val game: StateFlow<Game?> get() = _game.asStateFlow()
+
     fun loadGames(fieldId: String) {
         viewModelScope.launch {
             _games.value = repository.getGamesForField(fieldId)
@@ -29,6 +32,12 @@ class GameViewModel @Inject constructor(
         viewModelScope.launch {
             val success = repository.createGame(game)
             if (success) loadGames(game.fieldId)
+        }
+    }
+
+    fun getGame(gameId: String) {
+        viewModelScope.launch {
+            _game.value = repository.getGameById(gameId)
         }
     }
 }

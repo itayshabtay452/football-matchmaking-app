@@ -11,6 +11,7 @@ import com.example.soccergamesfinder.ui.screens.CreateGameScreen
 import com.example.soccergamesfinder.ui.screens.HomeScreen
 import com.example.soccergamesfinder.ui.screens.LoginScreen
 import com.example.soccergamesfinder.ui.screens.FieldScreen
+import com.example.soccergamesfinder.ui.screens.GameScreen
 import com.example.soccergamesfinder.viewmodel.AuthViewModel
 import com.example.soccergamesfinder.viewmodel.FieldViewModel
 import com.example.soccergamesfinder.viewmodel.UserViewModel

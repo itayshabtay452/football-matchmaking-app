@@ -33,7 +33,6 @@ class GameRepository @Inject constructor(
         }
     }
 
-
     suspend fun createGame(game: Game): Boolean {
         return try {
             val newGameRef = firestore.collection("games").document()
@@ -43,4 +42,15 @@ class GameRepository @Inject constructor(
             false
         }
     }
+
+    suspend  fun getGameById(gameId: String): Game? {
+        return try {
+            val snapshot = firestore.collection("games").document(gameId).get().await()
+            val game = snapshot.toObject(Game::class.java)
+            game
+        } catch (e: Exception) {
+            null
+        }
+    }
+
 }
