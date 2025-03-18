@@ -36,7 +36,7 @@ fun CreateGameScreen(fieldId: String, userViewModel: UserViewModel, navigateBack
 
     val gameViewModel: GameViewModel = hiltViewModel()
     val gameValidationViewModel: GameValidationViewModel = hiltViewModel()
-    val userId = userViewModel.getId()
+    val userId by userViewModel.userId.collectAsState()
     val startTimeValidation by gameValidationViewModel.startTimeValidation.collectAsState()
     val endTimeValidation  by gameValidationViewModel.endTimeValidation.collectAsState()
     val validStartTime by gameValidationViewModel.validStartTime.collectAsState()

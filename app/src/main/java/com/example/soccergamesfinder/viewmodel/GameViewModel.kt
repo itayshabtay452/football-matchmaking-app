@@ -30,8 +30,43 @@ class GameViewModel @Inject constructor(
 
     fun createGame(game: Game) {
         viewModelScope.launch {
-            val success = repository.createGame(game)
+            val gameWithCreator = game.copy(players = listOf(game.creatorId))
+            val success = repository.createGame(gameWithCreator)
             if (success) loadGames(game.fieldId)
+        }
+    }
+
+    fun joinGame(game: Game, userId: String) {
+        if (userId !in game.players && !game.isGameFull()) {
+            viewModelScope.launch {
+                val updatedPlayers = game.players + userId
+
+                val success = repository.updatePlayersList(game.id, updatedPlayers)
+                if (success) {
+                    _game.value = _game.value?.copy(players = updatedPlayers)
+                }
+            }
+        } else {
+            println("🚫 המשחק מלא או שהמשתמש כבר רשום")
+        }
+    }
+
+
+    fun deleteGame(game: Game, userId: String) {
+        if (game.creatorId == userId) {
+            viewModelScope.launch {
+                repository.deleteGame(game.id)
+            }
+        }
+    }
+
+    fun leaveGame(game: Game, userId: String) {
+        if (userId in game.players && userId != game.creatorId) {
+            viewModelScope.launch {
+                val updatedPlayers = game.players - userId
+                repository.updatePlayersList(game.id, updatedPlayers)
+                _game.value = _game.value?.copy(players = updatedPlayers)
+            }
         }
     }
 

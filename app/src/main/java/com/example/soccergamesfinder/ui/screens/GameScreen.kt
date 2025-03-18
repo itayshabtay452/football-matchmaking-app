@@ -1,7 +1,10 @@
 package com.example.soccergamesfinder.ui.screens
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -12,18 +15,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.soccergamesfinder.viewmodel.GameViewModel
-import kotlinx.coroutines.delay
-
+import com.example.soccergamesfinder.viewmodel.UserViewModel
 
 @Composable
-fun GameScreen(gameId: String) {
+fun GameScreen(gameId: String, userViewModel: UserViewModel, navigateBack: () -> Unit) {
 
     val gameViewModel: GameViewModel = hiltViewModel()
 
     val game by gameViewModel.game.collectAsState()
+    val userId by userViewModel.userId.collectAsState()
 
     LaunchedEffect(Unit) {
-        delay(100) // עיכוב קל להבטחת שהמסך הישן ייצא לחלוטין
         gameViewModel.getGame(gameId)
     }
 
@@ -38,7 +40,38 @@ fun GameScreen(gameId: String) {
             Text("👤 יוצר המשחק: ${game!!.creatorId}")
             Text("👥 משתתפים: ${game!!.players.size}/${game!!.maxPlayers}")
             Text("📜 תיאור: ${game!!.description ?: "אין תיאור"}")
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = { userId?.let { gameViewModel.joinGame(game!!, it) } },
+                enabled = game?.isGameFull() == false && game?.players?.contains(userId) == false
+            ) {
+                Text("🚀 הצטרף למשחק")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (game!!.creatorId == userId) {
+                Button(onClick = {
+                    gameViewModel.deleteGame(game!!, userId!!)
+                    navigateBack()}) {
+                    Text("🗑️ מחק משחק")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (userId in game!!.players && userId != game!!.creatorId) {
+                Button(onClick = {
+                    userId?.let { gameViewModel.leaveGame(game!!, it) } }) {
+                    Text("🚪 עזוב משחק")
+                }
+            }
+
+
         }
+
     }
 }
 

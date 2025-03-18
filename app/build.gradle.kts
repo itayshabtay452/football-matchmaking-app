@@ -67,9 +67,12 @@ dependencies {
     implementation(libs.compose.ui)
     implementation(libs.compose.material)
     implementation(libs.compose.navigation)
+    implementation (libs.google.accompanist.navigation.animation)
+
 
     // Hilt Dependency Injection
     implementation(libs.hilt)
+    implementation(libs.play.services.location)
     kapt(libs.hiltCompiler)
     implementation(libs.hiltNavigationCompose)
 

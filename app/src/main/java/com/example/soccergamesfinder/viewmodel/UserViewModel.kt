@@ -1,6 +1,7 @@
 package com.example.soccergamesfinder.viewmodel
 
 import android.content.Intent
+import android.location.Location
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -25,10 +26,14 @@ class UserViewModel @Inject constructor(
     private val _userExists = MutableStateFlow<Boolean?>(null)
     val userExists: StateFlow<Boolean?> get() = _userExists
 
+    private val _userId = MutableStateFlow<String?>(null)
+    val userId: StateFlow<String?> get() = _userId
+
 
     fun loadUser() {
         viewModelScope.launch {
             _user.value = userRepository.getUser()
+            _userId.value = getId()
         }
     }
 
@@ -38,10 +43,13 @@ class UserViewModel @Inject constructor(
         }
     }
 
-    fun saveUser(user: User) {
+    fun saveUser(name: String,nickname: String, age: Int?, city: String, latitude: Double?, longitude: Double?) {
         viewModelScope.launch {
-            userRepository.createUser(user)
-            _user.value = user
+            val userProfile = age?.let { User(it, city, name, nickname,latitude, longitude) }
+            if (userProfile != null) {
+                userRepository.createUser(userProfile)
+                _user.value = userProfile
+            }
         }
     }
 
@@ -50,7 +58,7 @@ class UserViewModel @Inject constructor(
         _user.value = null
     }
 
-    fun getId(): String? {
+    private fun getId(): String? {
         return userRepository.getUserId()
     }
 }

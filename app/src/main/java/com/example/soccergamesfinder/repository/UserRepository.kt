@@ -13,20 +13,18 @@ class UserRepository @Inject constructor(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore
 ) {
-    suspend fun createUser(user: User) {
+    suspend fun createUser(user: User?) {
         val userId = auth.currentUser?.uid ?: throw Exception("User not authenticated")
-        firestore.collection("users").document(userId).set(user).await()
+        if (user != null) {
+            firestore.collection("users").document(userId).set(user).await()
+        }
     }
 
     suspend fun getUser(): User? {
         val userId = auth.currentUser?.uid ?: return null
         val document = firestore.collection("users").document(userId).get().await()
-        return User(
-            name = document.getString("name") ?: "",
-            nickname = document.getString("nickname") ?: "",
-            age = document.getLong("age")?.toInt() ?: 0,
-            city = document.getString("city") ?: ""
-        )
+        val user = document.toObject(User::class.java)
+        return user
     }
 
     suspend fun hasUserData(): Boolean {

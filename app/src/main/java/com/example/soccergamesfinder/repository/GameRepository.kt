@@ -43,6 +43,29 @@ class GameRepository @Inject constructor(
         }
     }
 
+
+    suspend fun deleteGame(gameId: String): Boolean {
+        return try {
+            firestore.collection("games").document(gameId).delete().await()
+            true
+        } catch (e: Exception) {
+            println("⚠️ שגיאה במחיקת המשחק: ${e.message}")
+            false
+        }
+    }
+
+    suspend fun updatePlayersList(gameId: String, updatedPlayers: List<String>): Boolean {
+        return try {
+            firestore.collection("games").document(gameId)
+                .update("players", updatedPlayers)
+                .await()
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+
     suspend  fun getGameById(gameId: String): Game? {
         return try {
             val snapshot = firestore.collection("games").document(gameId).get().await()

@@ -17,6 +17,10 @@ data class Game(
 ){
     fun getFormattedStartTime(): String = formatTimestampToString(startTime)
     fun getFormattedEndTime(): String = formatTimestampToString(endTime)
+
+    fun isGameFull(): Boolean {
+        return players.size >= maxPlayers
+    }
 }
 
 fun formatTimestampToString(timestamp: Timestamp?): String {
@@ -24,3 +28,7 @@ fun formatTimestampToString(timestamp: Timestamp?): String {
     val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) // ✅ פורמט תאריך
     return sdf.format(timestamp.toDate()) // ✅ המרת `Timestamp` ל- `String`
 }
+
+
+
+

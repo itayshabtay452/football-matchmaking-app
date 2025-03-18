@@ -1,12 +1,11 @@
 package com.example.soccergamesfinder.ui.screens
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.soccergamesfinder.data.Field
@@ -25,9 +24,16 @@ fun HomeScreen(authViewModel: AuthViewModel,userViewModel: UserViewModel,
     val fields by fieldViewModel.fields.collectAsState()
     val isLoading by fieldViewModel.isLoading.collectAsState()
 
+
     LaunchedEffect(Unit){
         userViewModel.loadUser()
-        fieldViewModel.loadFields(reset = true)
+    }
+
+    LaunchedEffect(user){
+        if (user != null)
+        {
+            fieldViewModel.loadNearbyFields(user?.latitude, user?.longitude)
+        }
     }
 
     Column(modifier = Modifier.padding(16.dp)) {
@@ -42,25 +48,33 @@ fun HomeScreen(authViewModel: AuthViewModel,userViewModel: UserViewModel,
         Text("מתקנים זמינים", style = MaterialTheme.typography.headlineSmall)
 
         Box(modifier = Modifier.weight(1f)) {
-            if (fields.isEmpty()) {
-                Text("❌ אין מתקנים זמינים", color = MaterialTheme.colorScheme.error)
-            } else {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(fields) { field ->
-                        FieldItem(field, navigateToField)
+            when {
+                isLoading -> {
+                    // 🌀 טוען...
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
                     }
-                    item {
-                        if (isLoading) {
-                            CircularProgressIndicator(modifier = Modifier.padding(16.dp))
-                        } else {
-                            Button(
-                                onClick = { fieldViewModel.loadFields() },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp)
-                            ) {
-                                Text("🔄 טען עוד")
-                            }
+                }
+
+                fields.isEmpty() -> {
+                    // ❌ אין מתקנים
+                    Text("❌ אין מתקנים זמינים", color = MaterialTheme.colorScheme.error)
+                }
+
+                else -> {
+                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        items(fields) { field ->
+                            FieldItem(field, navigateToField)
+                        }
+                        item {
+                                Button(
+                                    onClick = { fieldViewModel.loadMoreFields() },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp)
+                                ) {
+                                    Text("🔄 טען עוד")
+                                }
                         }
                     }
                 }
@@ -73,7 +87,6 @@ fun HomeScreen(authViewModel: AuthViewModel,userViewModel: UserViewModel,
         Button(onClick = {
             authViewModel.logout()
             userViewModel.logout()
-            fieldViewModel.resetFields()
             navigateToLogin()
         }) {
             Text("התנתקות")
@@ -90,7 +103,7 @@ fun FieldItem(field: Field, navigateToField: (String) -> Unit) {
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = field.name, style = MaterialTheme.typography.titleMedium)
+            field.name?.let { Text(text = it, style = MaterialTheme.typography.titleMedium) }
             Text(text = "גודל: ${field.size}", style = MaterialTheme.typography.bodyMedium)
             Text(text = "כתובת: ${field.address}", style = MaterialTheme.typography.bodySmall)
 

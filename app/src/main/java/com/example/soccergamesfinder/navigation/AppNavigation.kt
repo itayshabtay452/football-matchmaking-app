@@ -15,22 +15,36 @@ import com.example.soccergamesfinder.ui.screens.GameScreen
 import com.example.soccergamesfinder.viewmodel.AuthViewModel
 import com.example.soccergamesfinder.viewmodel.FieldViewModel
 import com.example.soccergamesfinder.viewmodel.UserViewModel
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
+import androidx.navigation.NavBackStackEntry
+import com.example.soccergamesfinder.viewmodel.LocationViewModel
 
 
 @Composable
-fun AppNavigation(authViewModel: AuthViewModel, userViewModel: UserViewModel, fieldViewModel: FieldViewModel) {
+fun AppNavigation(authViewModel: AuthViewModel, userViewModel: UserViewModel,
+                  fieldViewModel: FieldViewModel, locationViewModel: LocationViewModel) {
     val navController = rememberNavController()
 
     NavHost(
         navController = navController,
         startDestination = "login"
     ) {
-        composable("login"){
+        composable("login",
+            enterTransition = defaultEnterTransition(),
+            exitTransition = defaultExitTransition(),
+            popEnterTransition = defaultPopEnterTransition(),
+            popExitTransition = defaultPopExitTransition()){
             LoginScreen(authViewModel,userViewModel, navigateToHome = {navController.navigate("home")},
                 navigateToCompleteProfile= {navController.navigate("complete_profile")})
         }
 
-        composable("home") {
+        composable("home",
+            enterTransition = defaultEnterTransition(),
+            exitTransition = defaultExitTransition(),
+            popEnterTransition = defaultPopEnterTransition(),
+            popExitTransition = defaultPopExitTransition()
+            ) {
             HomeScreen(authViewModel,userViewModel,fieldViewModel,
                 navigateToLogin = {
                     navController.navigate("login") {
@@ -44,13 +58,17 @@ fun AppNavigation(authViewModel: AuthViewModel, userViewModel: UserViewModel, fi
                 )}
 
         composable("complete_profile"){
-            CompleteProfileScreen(userViewModel,
-                navigateToHome = {navController.navigate("home")})
+            CompleteProfileScreen(userViewModel, navigateToHome = {navController.navigate("home")},
+                locationViewModel)
         }
 
         composable(
             "fieldScreen/{fieldId}",
-            arguments = listOf(navArgument("fieldId") { type = NavType.StringType })
+            arguments = listOf(navArgument("fieldId") { type = NavType.StringType }),
+            enterTransition = defaultEnterTransition(),
+            exitTransition = defaultExitTransition(),
+            popEnterTransition = defaultPopEnterTransition(),
+            popExitTransition = defaultPopExitTransition()
         ) { backStackEntry ->
             val fieldId = backStackEntry.arguments?.getString("fieldId") ?: ""
             FieldScreen(
@@ -65,7 +83,11 @@ fun AppNavigation(authViewModel: AuthViewModel, userViewModel: UserViewModel, fi
 
         composable(
             "createGame/{fieldId}",
-            arguments = listOf(navArgument("fieldId") { type = NavType.StringType })
+            arguments = listOf(navArgument("fieldId") { type = NavType.StringType }),
+            enterTransition = defaultEnterTransition(),
+            exitTransition = defaultExitTransition(),
+            popEnterTransition = defaultPopEnterTransition(),
+            popExitTransition = defaultPopExitTransition()
         ) { backStackEntry ->
             val fieldId = backStackEntry.arguments?.getString("fieldId") ?: ""
             CreateGameScreen(fieldId = fieldId, userViewModel = userViewModel,
@@ -74,12 +96,33 @@ fun AppNavigation(authViewModel: AuthViewModel, userViewModel: UserViewModel, fi
 
         composable(
             "gameScreen/{gameId}",
-            arguments = listOf(navArgument("gameId") { type = NavType.StringType })
+            arguments = listOf(navArgument("gameId") { type = NavType.StringType }),
+            enterTransition = defaultEnterTransition(),
+            exitTransition = defaultExitTransition(),
+            popEnterTransition = defaultPopEnterTransition(),
+            popExitTransition = defaultPopExitTransition()
         ) { backStackEntry ->
             val gameId = backStackEntry.arguments?.getString("gameId") ?: ""
-            GameScreen(gameId)
+            GameScreen(gameId, userViewModel = userViewModel, navigateBack = {navController.popBackStack()})
         }
-
 
     }
 }
+
+
+
+@OptIn(ExperimentalAnimationApi::class)
+fun defaultEnterTransition(): (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition) =
+    { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(300)) }
+
+@OptIn(ExperimentalAnimationApi::class)
+fun defaultExitTransition(): (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition) =
+    { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(300)) }
+
+@OptIn(ExperimentalAnimationApi::class)
+fun defaultPopEnterTransition(): (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition) =
+    { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(300)) }
+
+@OptIn(ExperimentalAnimationApi::class)
+fun defaultPopExitTransition(): (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition) =
+    { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(300)) }
