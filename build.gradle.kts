@@ -1,6 +1,15 @@
 plugins {
-    id("com.android.application") version "8.2.0" apply false
-    id("org.jetbrains.kotlin.android") version "1.9.22" apply false // ✅ רק פעם אחת!
-    id("com.google.dagger.hilt.android") version "2.48" apply false
-    id("com.google.gms.google-services") version "4.4.0" apply false
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.hilt.android.gradle) apply false
+    alias(libs.plugins.google.services) apply false
+    alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.compose) apply false
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
 }

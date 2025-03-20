@@ -1,6 +1,7 @@
 package com.example.soccergamesfinder.ui.screens
 
 import android.Manifest
+import android.net.Uri
 import android.util.Log
 import com.example.soccergamesfinder.viewmodel.UserViewModel
 import com.example.soccergamesfinder.data.User
@@ -13,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.example.soccergamesfinder.utils.ValidationResult
 import com.example.soccergamesfinder.viewmodel.LocationViewModel
 
 
@@ -23,16 +25,33 @@ fun CompleteProfileScreen(userViewModel: UserViewModel, navigateToHome: () -> Un
     var name by remember { mutableStateOf("") }
     var nickname by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
-    var city by remember { mutableStateOf("") }
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var imageSize by remember { mutableStateOf<Long?>(null) }
 
     val user by userViewModel.user.collectAsState()
     val userLocation by locationViewModel.userLocation.collectAsState()
+
+    val nameValidation by userViewModel.nameValidation.collectAsState()
+    val nicknameValidation by userViewModel.nicknameValidation.collectAsState()
+    val ageValidation by userViewModel.ageValidation.collectAsState()
+    val locationValidation by userViewModel.locationValidation.collectAsState()
+    val imageValidation by userViewModel.imageValidation.collectAsState()
+
+
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
             locationViewModel.fetchUserLocation()
+        }
+    }
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri -> imageUri = uri
+        if (uri != null){
+            imageSize = userViewModel.getImageSize(uri)
         }
     }
 
@@ -51,27 +70,59 @@ fun CompleteProfileScreen(userViewModel: UserViewModel, navigateToHome: () -> Un
     }
 
     Column(modifier = Modifier.padding(16.dp)) {
-        TextField(value = name, onValueChange = { name = it }, label = { Text("שם") })
-        TextField(value = nickname, onValueChange = { nickname = it }, label = { Text("כינוי") })
-        TextField(value = age, onValueChange = { age = it }, label = { Text("גיל") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("שם") },
+            isError = nameValidation is ValidationResult.Error,
+            supportingText = { (nameValidation as? ValidationResult.Error)?.message?.let { Text(it) } }
         )
-        TextField(value = city, onValueChange = { city = it }, label = { Text("עיר") })
-        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = nickname,
+            onValueChange = { nickname = it },
+            label = { Text("כינוי") },
+            isError = nicknameValidation is ValidationResult.Error,
+            supportingText = { (nicknameValidation as? ValidationResult.Error)?.message?.let { Text(it) } }
+        )
+
+        OutlinedTextField(
+            value = age,
+            onValueChange = { age = it },
+            label = { Text("גיל") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            isError = ageValidation is ValidationResult.Error,
+            supportingText = { (ageValidation as? ValidationResult.Error)?.message?.let { Text(it) } }
+        )
 
         Button(onClick = { locationViewModel.requestLocationPermission() }) {
             Text("📍 אפשר גישה למיקום")
         }
 
-            Button(onClick = {
-                val ageInt = age.toIntOrNull() ?: 0
-                userViewModel.saveUser(name, nickname, ageInt, city,
-                    userLocation?.first, userLocation?.second
-                )
-            }) {
-                Text("עדכן פרופיל")
-            }
+        if (locationValidation is ValidationResult.Error) {
+            Text((locationValidation as ValidationResult.Error).message, color = MaterialTheme.colorScheme.error)
         }
+
+        Button(onClick = { imagePickerLauncher.launch("image/*") }) {
+            Text("📷 בחר תמונת פרופיל")
+        }
+
+        imageUri?.let {
+            Text("✅ תמונה נבחרה!", style = MaterialTheme.typography.bodyMedium)
+        }
+
+        if (imageValidation is ValidationResult.Error) {
+            Text((imageValidation as ValidationResult.Error).message, color = MaterialTheme.colorScheme.error)
+        }
+
+        Button(onClick = {
+            userViewModel.validateAndSaveUser(
+                name, nickname, age.toIntOrNull(),
+                userLocation?.first, userLocation?.second, imageUri, imageSize
+            )
+        }) {
+            Text("עדכן פרופיל")
+        }
+
     }
-
-
+}
