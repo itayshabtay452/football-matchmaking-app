@@ -3,11 +3,14 @@ package com.example.soccergamesfinder.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.example.soccergamesfinder.data.Field
 import com.example.soccergamesfinder.viewmodel.AuthViewModel
 import com.example.soccergamesfinder.viewmodel.FieldViewModel
@@ -37,10 +40,21 @@ fun HomeScreen(authViewModel: AuthViewModel,userViewModel: UserViewModel,
     }
 
     Column(modifier = Modifier.padding(16.dp)) {
-        Text("ברוך הבא לאפליקציה!", style = MaterialTheme.typography.headlineMedium)
-        Text("שם: ${user?.name ?: "לא זמין"}")
-        Text("עיר: ${user?.city ?: "לא זמין"}")
-        Text("גיל: ${user?.age ?: "לא ידוע"}")
+        user?.let {
+            Text(text = "👤 שם: ${it.name}", style = MaterialTheme.typography.bodyLarge)
+            Text(text = "📛 כינוי: ${it.nickname}", style = MaterialTheme.typography.bodyLarge)
+            Text(text = "🎂 גיל: ${it.age}", style = MaterialTheme.typography.bodyLarge)
+
+            it.profileImageUrl?.let { imageUrl ->
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = "תמונת פרופיל",
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(CircleShape)
+                )
+            } ?: Text(text = "❌ לא נבחרה תמונת פרופיל")
+        } ?: Text(text = "🔄 טוען נתוני משתמש...")
 
 
         Spacer(modifier = Modifier.height(16.dp))

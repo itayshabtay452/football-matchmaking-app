@@ -45,7 +45,6 @@ class FieldViewModel @Inject constructor(
 
 
             allFields = fetchedFields?.map { newField ->
-                println("📍 שם: ${newField.name}, גודל: ${newField.size}, כתובת: ${newField.address}")
                 val distance = newField.latitude?.let {
                     newField.longitude?.let { it1 ->
                         calculateDistance(latitude, longitude,
