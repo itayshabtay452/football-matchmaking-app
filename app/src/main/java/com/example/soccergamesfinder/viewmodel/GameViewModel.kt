@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.soccergamesfinder.data.Game
 import com.example.soccergamesfinder.repository.GameRepository
+import com.example.soccergamesfinder.utils.GameValidator
+import com.example.soccergamesfinder.utils.ValidationResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,13 +24,16 @@ class GameViewModel @Inject constructor(
     private val _game = MutableStateFlow<Game?>(null)
     val game: StateFlow<Game?> get() = _game.asStateFlow()
 
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> get() = _errorMessage.asStateFlow()
+
     fun loadGames(fieldId: String) {
         viewModelScope.launch {
             _games.value = repository.getGamesForField(fieldId)
         }
     }
 
-    fun createGame(game: Game) {
+    private fun createGame(game: Game) {
         viewModelScope.launch {
             val gameWithCreator = game.copy(players = listOf(game.creatorId))
             val success = repository.createGame(gameWithCreator)
@@ -36,18 +41,39 @@ class GameViewModel @Inject constructor(
         }
     }
 
-    fun joinGame(game: Game, userId: String) {
-        if (userId !in game.players && !game.isGameFull()) {
-            viewModelScope.launch {
-                val updatedPlayers = game.players + userId
+    fun validateAndCreateGame(newGame: Game, userId: String,
+                              onResult: (ValidationResult) -> Unit) {
+        _errorMessage.value = null
+        viewModelScope.launch {
+            val userGames = repository.getUserGames(userId)
+            val validationResult = GameValidator.validateGameSlot(newGame, _games.value, userGames)
 
-                val success = repository.updatePlayersList(game.id, updatedPlayers)
-                if (success) {
-                    _game.value = _game.value?.copy(players = updatedPlayers)
-                }
+            if (validationResult is ValidationResult.Success) {
+                createGame(newGame)
+                loadGames(newGame.fieldId)
+                onResult(ValidationResult.Success)
+            } else {
+                _errorMessage.value = (validationResult as ValidationResult.Error).message
+                onResult(validationResult)
             }
-        } else {
-            println("🚫 המשחק מלא או שהמשתמש כבר רשום")
+        }
+    }
+
+    fun validateAndJoinGame(game: Game, userId: String, onResult: (ValidationResult) -> Unit) {
+        _errorMessage.value = null
+        viewModelScope.launch {
+            val userGames = repository.getUserGames(userId)
+            val validationResult = GameValidator.validateJoinGame(game, userId, userGames)
+
+            if (validationResult is ValidationResult.Success) {
+                val updatedPlayers = game.players + userId
+                repository.updatePlayersList(game.id, updatedPlayers)
+                _game.value = _game.value?.copy(players = updatedPlayers)
+                onResult(ValidationResult.Success)
+            } else {
+                _errorMessage.value = (validationResult as ValidationResult.Error).message
+                onResult(validationResult)
+             }
         }
     }
 
@@ -75,4 +101,5 @@ class GameViewModel @Inject constructor(
             _game.value = repository.getGameById(gameId)
         }
     }
+
 }

@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.soccergamesfinder.utils.ValidationResult
 import com.example.soccergamesfinder.viewmodel.GameViewModel
 import com.example.soccergamesfinder.viewmodel.UserViewModel
 
@@ -24,6 +25,7 @@ fun GameScreen(gameId: String, userViewModel: UserViewModel, navigateBack: () ->
 
     val game by gameViewModel.game.collectAsState()
     val userId by userViewModel.userId.collectAsState()
+    val errorMessage by gameViewModel.errorMessage.collectAsState()
 
     LaunchedEffect(Unit) {
         gameViewModel.getGame(gameId)
@@ -44,10 +46,26 @@ fun GameScreen(gameId: String, userViewModel: UserViewModel, navigateBack: () ->
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { userId?.let { gameViewModel.joinGame(game!!, it) } },
+                onClick = {
+                    userId?.let {
+                        gameViewModel.validateAndJoinGame(game!!, it) { result ->
+                            if (result is ValidationResult.Success) {
+                                navigateBack()
+                            }
+                        }
+                    }
+                },
                 enabled = game?.isGameFull() == false && game?.players?.contains(userId) == false
             ) {
                 Text("🚀 הצטרף למשחק")
+            }
+
+            if (!errorMessage.isNullOrEmpty()) {
+                Text(
+                    text = errorMessage!!,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))

@@ -13,7 +13,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +40,7 @@ fun CreateGameScreen(fieldId: String, userViewModel: UserViewModel, navigateBack
     val endTimeValidation  by gameValidationViewModel.endTimeValidation.collectAsState()
     val validStartTime by gameValidationViewModel.validStartTime.collectAsState()
     val validEndTime by gameValidationViewModel.validEndTime.collectAsState()
+    val errorMessage by gameViewModel.errorMessage.collectAsState()
 
     var selectedDate by remember { mutableStateOf("") }
     var selectedStartTime by remember { mutableStateOf("") }
@@ -97,15 +97,23 @@ fun CreateGameScreen(fieldId: String, userViewModel: UserViewModel, navigateBack
                         maxPlayers = maxPlayers.toIntOrNull() ?: 10, // ברירת מחדל ל-10 משתתפים אם הערך אינו תקין
                         description = if (description.isNotBlank()) description else null // תיאור אופציונלי
                     )
-                    gameViewModel.createGame(game)
-                    navigateBack()
+                gameViewModel.validateAndCreateGame(game, userId!!) { result ->
+                    if (result is ValidationResult.Success) {
+                        navigateBack()
+                    }
+                }
+
             },
             enabled = validStartTime != null && validEndTime != null
         ) {
             Text("🎮 צור משחק")
         }
+
+        if (!errorMessage.isNullOrEmpty()) {
+            Text(text = errorMessage!!, color = MaterialTheme.colorScheme.error)
+        }
+        }
     }
-}
 
 @SuppressLint("DefaultLocale")
 @Composable
