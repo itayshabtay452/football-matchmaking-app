@@ -3,6 +3,7 @@ package com.example.soccergamesfinder.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.soccergamesfinder.data.Field
+import com.example.soccergamesfinder.data.FieldFilterState
 import com.example.soccergamesfinder.repository.FieldRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,6 +29,9 @@ class FieldViewModel @Inject constructor(
 
     private val _field = MutableStateFlow<Field?>(null)
     val field: StateFlow<Field?> get() = _field.asStateFlow()
+
+    private val _filterState = MutableStateFlow(FieldFilterState())
+    val filterState: StateFlow<FieldFilterState> get() = _filterState.asStateFlow()
 
     private val batchSize = 20
     private var lastIndex = 0
@@ -74,6 +78,52 @@ class FieldViewModel @Inject constructor(
         _fields.value = allFields.subList(0, nextIndex)
         lastIndex = nextIndex
     }
+
+    fun applyFilters() {
+        val currentFilterState = _filterState.value
+
+        val filteredFields = allFields.filter { field ->
+            (!currentFilterState.lighting || field.lighting == "כן") &&
+                    (!currentFilterState.parking || field.parking == "כן") &&
+                    (!currentFilterState.fencing || field.fencing == "כן") &&
+                    (currentFilterState.nameQuery.isBlank() || field.name?.contains(currentFilterState.nameQuery, ignoreCase = true) == true) &&
+                    (currentFilterState.size == null || field.size == currentFilterState.size) &&
+                    (currentFilterState.maxDistanceKm == null || field.distance != null && field.distance <= currentFilterState.maxDistanceKm)
+        }
+
+        _fields.value = filteredFields
+    }
+
+    fun updateLightingFilter(value: Boolean) {
+        _filterState.value = _filterState.value.copy(lighting = value)
+        applyFilters()
+    }
+
+    fun updateParkingFilter(value: Boolean) {
+        _filterState.value = _filterState.value.copy(parking = value)
+        applyFilters()
+    }
+
+    fun updateFencingFilter(value: Boolean) {
+        _filterState.value = _filterState.value.copy(fencing = value)
+        applyFilters()
+    }
+
+    fun updateNameQuery(query: String) {
+        _filterState.value = _filterState.value.copy(nameQuery = query)
+        applyFilters()
+    }
+
+    fun updateSizeFilter(size: String?) {
+        _filterState.value = _filterState.value.copy(size = size)
+        applyFilters()
+    }
+
+    fun updateMaxDistanceKm(distance: Double?) {
+        _filterState.value = _filterState.value.copy(maxDistanceKm = distance)
+        applyFilters()
+    }
+
 
     private fun calculateDistance(
         lat1: Double, lon1: Double,

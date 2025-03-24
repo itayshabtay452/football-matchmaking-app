@@ -21,6 +21,7 @@ class FieldRepository @Inject constructor(
                 .whereLessThanOrEqualTo("longitude", longitude + 0.5)
                 .get().await()
 
+
             val fieldList = result.documents.map { doc ->
                 Field(
                     id = doc.id,
