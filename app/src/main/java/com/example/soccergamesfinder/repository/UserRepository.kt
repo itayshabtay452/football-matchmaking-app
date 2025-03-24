@@ -50,4 +50,13 @@ class UserRepository @Inject constructor(
             null
         }
     }
+
+    suspend fun getUserById(userId: String): User? {
+        return try {
+            val document = firestore.collection("users").document(userId).get().await()
+            document.toObject(User::class.java)
+        } catch (e: Exception) {
+            null
+        }
+    }
 }
