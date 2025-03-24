@@ -36,4 +36,6 @@ data class Field(
     val longitude: Double? = null,
 
     val distance: Double? = null
+
+
 )
