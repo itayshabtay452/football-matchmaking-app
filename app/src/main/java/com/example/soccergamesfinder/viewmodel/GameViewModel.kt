@@ -3,7 +3,9 @@ package com.example.soccergamesfinder.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.soccergamesfinder.data.Game
+import com.example.soccergamesfinder.data.User
 import com.example.soccergamesfinder.repository.GameRepository
+import com.example.soccergamesfinder.repository.UserRepository
 import com.example.soccergamesfinder.utils.GameValidator
 import com.example.soccergamesfinder.utils.ValidationResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,7 +17,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class GameViewModel @Inject constructor(
-    private val repository: GameRepository
+    private val repository: GameRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _games = MutableStateFlow<List<Game>>(emptyList())
@@ -26,6 +29,12 @@ class GameViewModel @Inject constructor(
 
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> get() = _errorMessage.asStateFlow()
+
+    private val _creator = MutableStateFlow<User?>(null)
+    val creator: StateFlow<User?> get() = _creator.asStateFlow()
+
+    private val _participants = MutableStateFlow<List<User>>(emptyList())
+    val participants: StateFlow<List<User>> get() = _participants.asStateFlow()
 
     fun loadGames(fieldId: String) {
         viewModelScope.launch {
@@ -99,6 +108,15 @@ class GameViewModel @Inject constructor(
     fun getGame(gameId: String) {
         viewModelScope.launch {
             _game.value = repository.getGameById(gameId)
+        }
+    }
+
+    fun loadGameUsers(game: Game) {
+        viewModelScope.launch {
+            _creator.value = userRepository.getUserById(game.creatorId)
+
+            val users = game.players.mapNotNull { userRepository.getUserById(it) }
+            _participants.value = users
         }
     }
 
