@@ -11,30 +11,33 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.soccergamesfinder.utils.ValidationResult
 import com.example.soccergamesfinder.viewmodel.LocationViewModel
-import com.example.soccergamesfinder.viewmodel.UserViewModel
+import com.example.soccergamesfinder.viewmodel.UserProfileViewModel
 
 @Composable
 fun CompleteProfileScreen(
-    userViewModel: UserViewModel,
     navigateToHome: () -> Unit,
     locationViewModel: LocationViewModel
 ) {
+    val profileViewModel: UserProfileViewModel = hiltViewModel()
+
+
     var name by remember { mutableStateOf("") }
     var nickname by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var imageSize by remember { mutableStateOf<Long?>(null) }
 
-    val user by userViewModel.user.collectAsState()
+    val userCreated by profileViewModel.userCreated.collectAsState()
     val userLocation by locationViewModel.userLocation.collectAsState()
 
-    val nameValidation by userViewModel.nameValidation.collectAsState()
-    val nicknameValidation by userViewModel.nicknameValidation.collectAsState()
-    val ageValidation by userViewModel.ageValidation.collectAsState()
-    val locationValidation by userViewModel.locationValidation.collectAsState()
-    val imageValidation by userViewModel.imageValidation.collectAsState()
+    val nameValidation by profileViewModel.nameValidation.collectAsState()
+    val nicknameValidation by profileViewModel.nicknameValidation.collectAsState()
+    val ageValidation by profileViewModel.ageValidation.collectAsState()
+    val locationValidation by profileViewModel.locationValidation.collectAsState()
+    val imageValidation by profileViewModel.imageValidation.collectAsState()
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -49,7 +52,7 @@ fun CompleteProfileScreen(
     ) { uri ->
         imageUri = uri
         if (uri != null) {
-            imageSize = userViewModel.getImageSize(uri)
+            imageSize = profileViewModel.getImageSize(uri)
         }
     }
 
@@ -61,9 +64,10 @@ fun CompleteProfileScreen(
         }
     }
 
-    LaunchedEffect(user) {
-        if (user != null) {
+    LaunchedEffect(userCreated) {
+        if (userCreated) {
             navigateToHome()
+            profileViewModel.resetUserCreatedFlag()
         }
     }
 
@@ -84,7 +88,7 @@ fun CompleteProfileScreen(
         )
 
         SubmitButton {
-            userViewModel.validateAndSaveUser(
+            profileViewModel.validateAndSaveUser(
                 name, nickname, age.toIntOrNull(),
                 userLocation?.first, userLocation?.second, imageUri, imageSize
             )

@@ -35,7 +35,7 @@ fun AppNavigation(authViewModel: AuthViewModel, userViewModel: UserViewModel,
             exitTransition = defaultExitTransition(),
             popEnterTransition = defaultPopEnterTransition(),
             popExitTransition = defaultPopExitTransition()){
-            LoginScreen(authViewModel,userViewModel, navigateToHome = {navController.navigate("home")},
+            LoginScreen(authViewModel, navigateToHome = {navController.navigate("home")},
                 navigateToCompleteProfile= {navController.navigate("complete_profile")})
         }
 
@@ -58,7 +58,7 @@ fun AppNavigation(authViewModel: AuthViewModel, userViewModel: UserViewModel,
                 )}
 
         composable("complete_profile"){
-            CompleteProfileScreen(userViewModel, navigateToHome = {navController.navigate("home")},
+            CompleteProfileScreen( navigateToHome = {navController.navigate("home")},
                 locationViewModel)
         }
 

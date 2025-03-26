@@ -3,7 +3,6 @@ package com.example.soccergamesfinder.ui.screens
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -11,18 +10,17 @@ import com.example.soccergamesfinder.ui.components.login.ErrorMessage
 import com.example.soccergamesfinder.ui.components.login.LoginButtons
 import com.example.soccergamesfinder.ui.components.login.LoginForm
 import com.example.soccergamesfinder.viewmodel.AuthViewModel
-import com.example.soccergamesfinder.viewmodel.UserViewModel
 
 
 @Composable
-fun LoginScreen(authViewModel: AuthViewModel,userViewModel: UserViewModel, navigateToHome: () -> Unit,
+fun LoginScreen(authViewModel: AuthViewModel, navigateToHome: () -> Unit,
                 navigateToCompleteProfile: () -> Unit) {
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val user by authViewModel.user.collectAsState()
     val errorMessage by authViewModel.errorMessage.collectAsState()
-    val userExists by userViewModel.userExists.collectAsState()
+    val userExists by authViewModel.userExists.collectAsState()
 
 
 
@@ -34,8 +32,7 @@ fun LoginScreen(authViewModel: AuthViewModel,userViewModel: UserViewModel, navig
 
     LaunchedEffect(user) {
         if (user != null){
-            authViewModel.clearErrorMessage()
-            userViewModel.checkIfUserExists()
+            authViewModel.checkIfUserExists()
         }
     }
 

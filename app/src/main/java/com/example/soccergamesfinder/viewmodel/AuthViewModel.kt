@@ -15,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val userRepository: UserRepository // ⬅️ חדש
 ) : ViewModel() {
 
     private val _user = MutableStateFlow<FirebaseUser?>(authRepository.getCurrentUser())
@@ -23,6 +24,10 @@ class AuthViewModel @Inject constructor(
 
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> get() = _errorMessage
+
+    private val _userExists = MutableStateFlow<Boolean?>(null)
+    val userExists: StateFlow<Boolean?> get() = _userExists
+
 
     fun login(email: String, password: String) {
         viewModelScope.launch {
@@ -62,13 +67,17 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun clearErrorMessage() {
-        _errorMessage.value = null
-    }
-
     fun logout() {
         authRepository.logout()
         _user.value = null
+        _errorMessage.value = null
+        _userExists.value = null
+    }
+
+    fun checkIfUserExists() {
+        viewModelScope.launch {
+            _userExists.value = userRepository.hasUserData()
+        }
     }
 
 
