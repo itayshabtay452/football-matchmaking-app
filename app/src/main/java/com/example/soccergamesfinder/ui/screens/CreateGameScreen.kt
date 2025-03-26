@@ -15,10 +15,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.soccergamesfinder.data.Game
 import com.example.soccergamesfinder.ui.components.creategame.CreateGameButton
-import com.example.soccergamesfinder.ui.components.creategame.TitleSection
+import com.example.soccergamesfinder.ui.components.field.FieldHeaderSection
 import com.example.soccergamesfinder.ui.components.game.GameDetailsForm
 import com.example.soccergamesfinder.utils.ValidationResult
-import com.example.soccergamesfinder.viewmodel.FieldViewModel
+import com.example.soccergamesfinder.viewmodel.FieldDetailsViewModel
 import com.example.soccergamesfinder.viewmodel.GameViewModel
 import com.example.soccergamesfinder.viewmodel.UserViewModel
 import com.example.soccergamesfinder.viewmodel.GameValidationViewModel
@@ -28,9 +28,10 @@ import com.example.soccergamesfinder.viewmodel.GameValidationViewModel
 fun CreateGameScreen(fieldId: String, userViewModel: UserViewModel, navigateBack: () -> Unit){
 
     val gameViewModel: GameViewModel = hiltViewModel()
-    val fieldViewModel: FieldViewModel = hiltViewModel()
+    val fieldDetailsViewModel: FieldDetailsViewModel = hiltViewModel()
     val gameValidationViewModel: GameValidationViewModel = hiltViewModel()
-    val field by fieldViewModel.field.collectAsState()
+
+    val uiState by fieldDetailsViewModel.uiState.collectAsState()
     val userId by userViewModel.userId.collectAsState()
     val startTimeValidation by gameValidationViewModel.startTimeValidation.collectAsState()
     val endTimeValidation  by gameValidationViewModel.endTimeValidation.collectAsState()
@@ -45,12 +46,12 @@ fun CreateGameScreen(fieldId: String, userViewModel: UserViewModel, navigateBack
     var description by remember { mutableStateOf("") }
 
     LaunchedEffect(fieldId) {
-        fieldViewModel.loadField(fieldId)
+        fieldDetailsViewModel.loadField(fieldId)
     }
 
     Column(modifier = Modifier.padding(16.dp)) {
 
-        TitleSection(field?.name)
+        FieldHeaderSection(uiState)
 
         GameDetailsForm(
             selectedDate = selectedDate,

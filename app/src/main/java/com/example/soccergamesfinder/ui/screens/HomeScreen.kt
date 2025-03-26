@@ -5,25 +5,26 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.soccergamesfinder.data.FieldFilterState
 import com.example.soccergamesfinder.ui.components.home.FieldListSection
 import com.example.soccergamesfinder.ui.components.home.FilterBar
 import com.example.soccergamesfinder.ui.components.home.LogoutButton
 import com.example.soccergamesfinder.ui.components.home.UserProfileSection
 import com.example.soccergamesfinder.viewmodel.AuthViewModel
-import com.example.soccergamesfinder.viewmodel.FieldViewModel
+import com.example.soccergamesfinder.viewmodel.FieldListViewModel
 import com.example.soccergamesfinder.viewmodel.UserViewModel
 
 @Composable
 fun HomeScreen(authViewModel: AuthViewModel,userViewModel: UserViewModel,
-               fieldViewModel: FieldViewModel, navigateToLogin: () -> Unit,
+               navigateToLogin: () -> Unit,
                 navigateToField: (String) -> Unit)
 {
+    val fieldListViewModel: FieldListViewModel = hiltViewModel()
 
     val user by userViewModel.user.collectAsState()
-    val fields by fieldViewModel.fields.collectAsState()
-    val isLoading by fieldViewModel.isLoading.collectAsState()
-    val filterState by fieldViewModel.filterState.collectAsState()
+    val uiState by fieldListViewModel.uiState.collectAsState()
+
 
     LaunchedEffect(Unit){
         userViewModel.loadUser()
@@ -32,7 +33,7 @@ fun HomeScreen(authViewModel: AuthViewModel,userViewModel: UserViewModel,
     LaunchedEffect(user){
         if (user != null)
         {
-            fieldViewModel.loadNearbyFields(user?.latitude, user?.longitude)
+            fieldListViewModel.loadNearbyFields(user?.latitude, user?.longitude)
         }
     }
 
@@ -43,20 +44,20 @@ fun HomeScreen(authViewModel: AuthViewModel,userViewModel: UserViewModel,
 
         item {
             FilterSection(
-                filterState = filterState,
-                onLightingChanged = { fieldViewModel.updateLightingFilter(it) },
-                onParkingChanged = { fieldViewModel.updateParkingFilter(it) },
-                onFencingChanged = { fieldViewModel.updateFencingFilter(it) },
-                onNameQueryChanged = { fieldViewModel.updateNameQuery(it) },
-                onSizeChanged = { fieldViewModel.updateSizeFilter(it) },
-                onMaxDistanceChanged = { fieldViewModel.updateMaxDistanceKm(it.toDoubleOrNull()) }
+                filterState = uiState.filterState,
+                onLightingChanged = { fieldListViewModel.updateLighting(it) },
+                onParkingChanged = { fieldListViewModel.updateParking(it) },
+                onFencingChanged = { fieldListViewModel.updateFencing(it) },
+                onNameQueryChanged = { fieldListViewModel.updateNameQuery(it) },
+                onSizeChanged = { fieldListViewModel.updateSize(it) },
+                onMaxDistanceChanged = { fieldListViewModel.updateMaxDistance(it.toDoubleOrNull()) }
             )
         }
 
         FieldListSection(
-            isLoading = isLoading,
-            fields = fields,
-            onLoadMore = { fieldViewModel.loadMoreFields() },
+            isLoading = uiState.isLoading,
+            fields = uiState.fields,
+            onLoadMore = { fieldListViewModel.loadMoreFields() },
             onFieldClick = navigateToField
         )
 

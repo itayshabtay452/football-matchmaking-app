@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,12 +13,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.soccergamesfinder.data.Game
 import com.example.soccergamesfinder.ui.components.game.GameActions
 import com.example.soccergamesfinder.ui.components.game.GameChatSection
-import com.example.soccergamesfinder.ui.components.game.GameInfoSection
+import com.example.soccergamesfinder.ui.components.game.GameInfoWithField
 import com.example.soccergamesfinder.utils.ValidationResult
-import com.example.soccergamesfinder.viewmodel.FieldViewModel
+import com.example.soccergamesfinder.viewmodel.FieldDetailsViewModel
 import com.example.soccergamesfinder.viewmodel.GameViewModel
 import com.example.soccergamesfinder.viewmodel.UserViewModel
 
@@ -27,10 +25,10 @@ import com.example.soccergamesfinder.viewmodel.UserViewModel
 fun GameScreen(gameId: String, userViewModel: UserViewModel, navigateBack: () -> Unit) {
 
     val gameViewModel: GameViewModel = hiltViewModel()
-    val fieldViewModel: FieldViewModel = hiltViewModel()
+    val fieldDetailsViewModel: FieldDetailsViewModel = hiltViewModel()
 
     val game by gameViewModel.game.collectAsState()
-    val field by fieldViewModel.field.collectAsState()
+    val uiState by fieldDetailsViewModel.uiState.collectAsState()
     val creator by gameViewModel.creator.collectAsState()
     val participants by gameViewModel.participants.collectAsState()
     val userId by userViewModel.userId.collectAsState()
@@ -41,16 +39,21 @@ fun GameScreen(gameId: String, userViewModel: UserViewModel, navigateBack: () ->
 
     LaunchedEffect(game) {
         game?.let {
-            fieldViewModel.loadField(it.fieldId)
+            fieldDetailsViewModel.loadField(it.fieldId)
             gameViewModel.loadGameUsers(it)
         }
     }
 
     Column(modifier = Modifier.padding(16.dp)) {
-        if (game == null || field == null) {
+        if (game == null) {
             Text(text = "Loading...", style = MaterialTheme.typography.headlineMedium)
         } else {
-            GameInfoSection(game!!, field!!, creator, participants)
+            GameInfoWithField(
+                game = game!!,
+                uiState = uiState,
+                creator = creator,
+                participants = participants
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -74,7 +77,7 @@ fun GameScreen(gameId: String, userViewModel: UserViewModel, navigateBack: () ->
             )
         }
 
-        if (game != null && userId != null && userId in game!!.players) {
+        if (game != null && userId in game!!.players) {
             GameChatSection(gameId = gameId, userId = userId!!)
         }
     }

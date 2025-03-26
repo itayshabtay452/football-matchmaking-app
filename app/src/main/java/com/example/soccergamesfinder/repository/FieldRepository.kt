@@ -2,8 +2,6 @@ package com.example.soccergamesfinder.repository
 
 import com.example.soccergamesfinder.data.Field
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton

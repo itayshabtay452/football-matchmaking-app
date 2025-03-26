@@ -13,7 +13,6 @@ import com.example.soccergamesfinder.ui.screens.LoginScreen
 import com.example.soccergamesfinder.ui.screens.FieldScreen
 import com.example.soccergamesfinder.ui.screens.GameScreen
 import com.example.soccergamesfinder.viewmodel.AuthViewModel
-import com.example.soccergamesfinder.viewmodel.FieldViewModel
 import com.example.soccergamesfinder.viewmodel.UserViewModel
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
@@ -23,7 +22,7 @@ import com.example.soccergamesfinder.viewmodel.LocationViewModel
 
 @Composable
 fun AppNavigation(authViewModel: AuthViewModel, userViewModel: UserViewModel,
-                  fieldViewModel: FieldViewModel, locationViewModel: LocationViewModel) {
+                  locationViewModel: LocationViewModel) {
     val navController = rememberNavController()
 
     NavHost(
@@ -45,7 +44,7 @@ fun AppNavigation(authViewModel: AuthViewModel, userViewModel: UserViewModel,
             popEnterTransition = defaultPopEnterTransition(),
             popExitTransition = defaultPopExitTransition()
             ) {
-            HomeScreen(authViewModel,userViewModel,fieldViewModel,
+            HomeScreen(authViewModel,userViewModel,
                 navigateToLogin = {
                     navController.navigate("login") {
                         popUpTo("home") { inclusive = true }
@@ -72,7 +71,7 @@ fun AppNavigation(authViewModel: AuthViewModel, userViewModel: UserViewModel,
         ) { backStackEntry ->
             val fieldId = backStackEntry.arguments?.getString("fieldId") ?: ""
             FieldScreen(
-                fieldId = fieldId, fieldViewModel = fieldViewModel,
+                fieldId = fieldId,
                 navigateToCreateGame = { fieldId -> navController.navigate("createGame/$fieldId")
                 },
                 navigateToGame = {gameId: String ->

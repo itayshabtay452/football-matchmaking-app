@@ -6,7 +6,6 @@ import androidx.activity.compose.setContent
 import com.example.soccergamesfinder.navigation.AppNavigation
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.soccergamesfinder.viewmodel.AuthViewModel
-import com.example.soccergamesfinder.viewmodel.FieldViewModel
 import com.example.soccergamesfinder.viewmodel.LocationViewModel
 import com.example.soccergamesfinder.viewmodel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -19,10 +18,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             val authViewModel: AuthViewModel = hiltViewModel()
             val userViewModel: UserViewModel = hiltViewModel()
-            val fieldViewModel: FieldViewModel = hiltViewModel()
             val locationViewModel: LocationViewModel = hiltViewModel()
 
-            AppNavigation(authViewModel, userViewModel, fieldViewModel, locationViewModel)
+            AppNavigation(authViewModel, userViewModel, locationViewModel)
         }
     }
 }
