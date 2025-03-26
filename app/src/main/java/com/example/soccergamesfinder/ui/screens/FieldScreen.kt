@@ -6,10 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,6 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.soccergamesfinder.ui.components.field.FieldHeader
+import com.example.soccergamesfinder.ui.components.field.GameListSection
 import com.example.soccergamesfinder.viewmodel.FieldViewModel
 import com.example.soccergamesfinder.viewmodel.GameViewModel
 
@@ -41,62 +40,23 @@ fun FieldScreen(
         gameViewModel.loadGames(fieldId)
     }
 
-
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
     } else {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = "📍 ${field?.name ?: "שם לא זמין"}",
-                style = MaterialTheme.typography.headlineMedium
-            )
-            Text(
-                text = "📌 כתובת: ${field?.address ?: "כתובת לא זמינה"}",
-                style = MaterialTheme.typography.bodyLarge
-            )
+
+            FieldHeader(field)
 
             Spacer(modifier = Modifier.height(16.dp))
+
             Text("🎮 משחקים פתוחים:", style = MaterialTheme.typography.headlineSmall)
 
-            Box(modifier = Modifier.weight(1f)) {
-                if (games.isEmpty()) {
-                    Text("אין משחקים פתוחים כרגע.", color = MaterialTheme.colorScheme.error)
-                } else {
-                    LazyColumn() {
-                        items(games) { game ->
-                            Card(modifier = Modifier.padding(8.dp)) {
-                                Column(modifier = Modifier.padding(16.dp)) {
-                                    Text(
-                                        text = "📆 ${game.getFormattedStartTime()}",
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
-                                    Text(
-                                        text = "👤 ${game.players.size}/${game.maxPlayers} משתתפים",
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                    Text(
-                                        text = "📜 ${game.description ?: "ללא תיאור"}",
-                                        style = MaterialTheme.typography.bodySmall
-                                    )
+            Spacer(modifier = Modifier.height(8.dp))
 
-                                    Spacer(modifier = Modifier.height(8.dp))
+            GameListSection(games = games, onGameClick = navigateToGame)
 
-                                    Button(
-                                        onClick = { navigateToGame(game.id) },
-                                        modifier = Modifier.align(Alignment.End)
-                                    ) {
-                                        Text("🔍 צפה במשחק")
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                }
-
-            }
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(onClick = { navigateToCreateGame(fieldId) }) {

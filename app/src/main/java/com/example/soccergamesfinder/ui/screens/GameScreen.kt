@@ -15,6 +15,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.soccergamesfinder.data.Game
+import com.example.soccergamesfinder.ui.components.game.GameActions
+import com.example.soccergamesfinder.ui.components.game.GameChatSection
+import com.example.soccergamesfinder.ui.components.game.GameInfoSection
 import com.example.soccergamesfinder.utils.ValidationResult
 import com.example.soccergamesfinder.viewmodel.FieldViewModel
 import com.example.soccergamesfinder.viewmodel.GameViewModel
@@ -47,16 +50,8 @@ fun GameScreen(gameId: String, userViewModel: UserViewModel, navigateBack: () ->
         if (game == null || field == null) {
             Text(text = "Loading...", style = MaterialTheme.typography.headlineMedium)
         } else {
-            Text("🎮 משחק במגרש", style = MaterialTheme.typography.headlineMedium)
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("📍 מגרש: ${field?.name ?: "שם לא זמין"}")
-            Text("📌 כתובת: ${field?.address ?: "כתובת לא זמינה"}")
-            Text("👤 יוצר המשחק: ${creator?.name ?: "לא ידוע"}")
+            GameInfoSection(game!!, field!!, creator, participants)
 
-            Text("👥 משתתפים (${participants.size}/${game!!.maxPlayers}):")
-            participants.forEach {
-                Text("- ${it.nickname}")
-            }
             Spacer(modifier = Modifier.height(16.dp))
 
             GameActions(
@@ -78,43 +73,10 @@ fun GameScreen(gameId: String, userViewModel: UserViewModel, navigateBack: () ->
                         }
             )
         }
+
         if (game != null && userId != null && userId in game!!.players) {
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = "💬 צ'אט המשחק",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-
-            ChatScreen(gameId = gameId, userId = userId!!)
+            GameChatSection(gameId = gameId, userId = userId!!)
         }
     }
-}
-
-@Composable
-fun GameActions(game: Game, userId: String, onJoin: () -> Unit, onLeave: () -> Unit,
-                onDelete: () -> Unit) {
-
-    when {
-        userId == game.creatorId -> {
-            Button(onClick = onDelete) {
-                Text("Delete Game")
-            }
-        }
-        userId in game.players -> {
-            Button(onClick = onLeave) {
-                Text("Leave Game")
-            }
-        }
-        else -> {
-            Button(onClick = onJoin, enabled = !game.isGameFull()) {
-                Text("Join Game")
-            }
-        }
-    }
-
-
-
 }
 

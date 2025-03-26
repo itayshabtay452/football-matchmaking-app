@@ -2,9 +2,6 @@ package com.example.soccergamesfinder.ui.screens
 
 import android.Manifest
 import android.net.Uri
-import android.util.Log
-import com.example.soccergamesfinder.viewmodel.UserViewModel
-import com.example.soccergamesfinder.data.User
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
@@ -16,12 +13,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.soccergamesfinder.utils.ValidationResult
 import com.example.soccergamesfinder.viewmodel.LocationViewModel
-
+import com.example.soccergamesfinder.viewmodel.UserViewModel
 
 @Composable
-fun CompleteProfileScreen(userViewModel: UserViewModel, navigateToHome: () -> Unit,
-                          locationViewModel: LocationViewModel) {
-
+fun CompleteProfileScreen(
+    userViewModel: UserViewModel,
+    navigateToHome: () -> Unit,
+    locationViewModel: LocationViewModel
+) {
     var name by remember { mutableStateOf("") }
     var nickname by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
@@ -37,8 +36,6 @@ fun CompleteProfileScreen(userViewModel: UserViewModel, navigateToHome: () -> Un
     val locationValidation by userViewModel.locationValidation.collectAsState()
     val imageValidation by userViewModel.imageValidation.collectAsState()
 
-
-
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -49,8 +46,9 @@ fun CompleteProfileScreen(userViewModel: UserViewModel, navigateToHome: () -> Un
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
-    ) { uri -> imageUri = uri
-        if (uri != null){
+    ) { uri ->
+        imageUri = uri
+        if (uri != null) {
             imageSize = userViewModel.getImageSize(uri)
         }
     }
@@ -70,59 +68,94 @@ fun CompleteProfileScreen(userViewModel: UserViewModel, navigateToHome: () -> Un
     }
 
     Column(modifier = Modifier.padding(16.dp)) {
-        OutlinedTextField(
-            value = name,
-            onValueChange = { name = it },
-            label = { Text("שם") },
-            isError = nameValidation is ValidationResult.Error,
-            supportingText = { (nameValidation as? ValidationResult.Error)?.message?.let { Text(it) } }
+        NameField(name, nameValidation) { name = it }
+        NicknameField(nickname, nicknameValidation) { nickname = it }
+        AgeField(age, ageValidation) { age = it }
+
+        LocationPermissionButton(
+            onClick = { locationViewModel.requestLocationPermission() },
+            validation = locationValidation
         )
 
-        OutlinedTextField(
-            value = nickname,
-            onValueChange = { nickname = it },
-            label = { Text("כינוי") },
-            isError = nicknameValidation is ValidationResult.Error,
-            supportingText = { (nicknameValidation as? ValidationResult.Error)?.message?.let { Text(it) } }
+        ImagePickerSection(
+            imageUri = imageUri,
+            imageValidation = imageValidation,
+            onPickImage = { imagePickerLauncher.launch("image/*") }
         )
 
-        OutlinedTextField(
-            value = age,
-            onValueChange = { age = it },
-            label = { Text("גיל") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            isError = ageValidation is ValidationResult.Error,
-            supportingText = { (ageValidation as? ValidationResult.Error)?.message?.let { Text(it) } }
-        )
-
-        Button(onClick = { locationViewModel.requestLocationPermission() }) {
-            Text("📍 אפשר גישה למיקום")
-        }
-
-        if (locationValidation is ValidationResult.Error) {
-            Text((locationValidation as ValidationResult.Error).message, color = MaterialTheme.colorScheme.error)
-        }
-
-        Button(onClick = { imagePickerLauncher.launch("image/*") }) {
-            Text("📷 בחר תמונת פרופיל")
-        }
-
-        imageUri?.let {
-            Text("✅ תמונה נבחרה!", style = MaterialTheme.typography.bodyMedium)
-        }
-
-        if (imageValidation is ValidationResult.Error) {
-            Text((imageValidation as ValidationResult.Error).message, color = MaterialTheme.colorScheme.error)
-        }
-
-        Button(onClick = {
+        SubmitButton {
             userViewModel.validateAndSaveUser(
                 name, nickname, age.toIntOrNull(),
                 userLocation?.first, userLocation?.second, imageUri, imageSize
             )
-        }) {
-            Text("עדכן פרופיל")
         }
+    }
+}
 
+@Composable
+fun NameField(name: String, validation: ValidationResult, onValueChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = name,
+        onValueChange = onValueChange,
+        label = { Text("שם") },
+        isError = validation is ValidationResult.Error,
+        supportingText = { (validation as? ValidationResult.Error)?.message?.let { Text(it) } }
+    )
+}
+
+@Composable
+fun NicknameField(nickname: String, validation: ValidationResult, onValueChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = nickname,
+        onValueChange = onValueChange,
+        label = { Text("כינוי") },
+        isError = validation is ValidationResult.Error,
+        supportingText = { (validation as? ValidationResult.Error)?.message?.let { Text(it) } }
+    )
+}
+
+@Composable
+fun AgeField(age: String, validation: ValidationResult, onValueChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = age,
+        onValueChange = onValueChange,
+        label = { Text("גיל") },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        isError = validation is ValidationResult.Error,
+        supportingText = { (validation as? ValidationResult.Error)?.message?.let { Text(it) } }
+    )
+}
+
+@Composable
+fun LocationPermissionButton(onClick: () -> Unit, validation: ValidationResult) {
+    Button(onClick = onClick) {
+        Text("📍 אפשר גישה למיקום")
+    }
+    if (validation is ValidationResult.Error) {
+        Text(validation.message, color = MaterialTheme.colorScheme.error)
+    }
+}
+
+@Composable
+fun ImagePickerSection(
+    imageUri: Uri?,
+    imageValidation: ValidationResult,
+    onPickImage: () -> Unit
+) {
+    Button(onClick = onPickImage) {
+        Text("📷 בחר תמונת פרופיל")
+    }
+    imageUri?.let {
+        Text("✅ תמונה נבחרה!", style = MaterialTheme.typography.bodyMedium)
+    }
+    if (imageValidation is ValidationResult.Error) {
+        Text(imageValidation.message, color = MaterialTheme.colorScheme.error)
+    }
+}
+
+@Composable
+fun SubmitButton(onClick: () -> Unit) {
+    Button(onClick = onClick) {
+        Text("עדכן פרופיל")
     }
 }

@@ -7,6 +7,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.soccergamesfinder.ui.components.login.ErrorMessage
+import com.example.soccergamesfinder.ui.components.login.LoginButtons
+import com.example.soccergamesfinder.ui.components.login.LoginForm
 import com.example.soccergamesfinder.viewmodel.AuthViewModel
 import com.example.soccergamesfinder.viewmodel.UserViewModel
 
@@ -44,26 +47,28 @@ fun LoginScreen(authViewModel: AuthViewModel,userViewModel: UserViewModel, navig
             else
                 navigateToCompleteProfile()
         }
-
     }
 
 
     Column(modifier = Modifier.padding(16.dp)) {
-        TextField(value = email, onValueChange = { email = it }, label = { Text("אימייל") })
-        TextField(value = password, onValueChange = { password = it }, label = { Text("סיסמה") })
-        errorMessage?.let {
-            Text(text = it, color = MaterialTheme.colorScheme.error)
-        }
-        Button(onClick = { authViewModel.login(email, password) }) {
-            Text("התחבר")
-        }
-        Button(onClick = { authViewModel.register(email, password) }) {
-            Text("הרשמה")
-        }
+        LoginForm(
+            email = email,
+            password = password,
+            onEmailChange = { email = it },
+            onPasswordChange = { password = it }
+        )
         Spacer(modifier = Modifier.height(8.dp))
-        Button(onClick = { googleSignInLauncher.launch(authViewModel.getGoogleSignInIntent()) }) {
-            Text("התחבר עם Google")
-        }
+
+        ErrorMessage(message = errorMessage)
+        Spacer(modifier = Modifier.height(8.dp))
+
+        LoginButtons(
+            onLogin = { authViewModel.login(email, password) },
+            onRegister = { authViewModel.register(email, password) },
+            onGoogleLogin = {
+                googleSignInLauncher.launch(authViewModel.getGoogleSignInIntent())
+            }
+        )
     }
 
 }
