@@ -28,7 +28,7 @@ class FieldListViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(FieldListUiState())
     val uiState: StateFlow<FieldListUiState> = _uiState.asStateFlow()
 
-    private val batchSize = 20
+    private val batchSize = 10
     private var lastIndex = 0
     private var allFields = listOf<Field>()
 
@@ -76,23 +76,8 @@ class FieldListViewModel @Inject constructor(
         applyFiltersAndLoad()
     }
 
-
-    fun updateParking(value: Boolean) {
-        val currentFilter = _uiState.value.filterState.copy(parking = value)
-        _uiState.value = _uiState.value.copy(filterState = currentFilter)
-        lastIndex = 0
-        applyFiltersAndLoad()
-    }
-
-    fun updateFencing(value: Boolean) {
-        val currentFilter = _uiState.value.filterState.copy(fencing = value)
-        _uiState.value = _uiState.value.copy(filterState = currentFilter)
-        lastIndex = 0
-        applyFiltersAndLoad()
-    }
-
-    fun updateNameQuery(value: String) {
-        val currentFilter = _uiState.value.filterState.copy(nameQuery = value)
+    fun updateCity(value: String?) {
+        val currentFilter = _uiState.value.filterState.copy(city = value)
         _uiState.value = _uiState.value.copy(filterState = currentFilter)
         lastIndex = 0
         applyFiltersAndLoad()
@@ -105,9 +90,16 @@ class FieldListViewModel @Inject constructor(
         applyFiltersAndLoad()
     }
 
-    fun updateMaxDistance(value: Double?) {
+    fun updateMaxDistance(value: Double) {
         val currentFilter = _uiState.value.filterState.copy(maxDistanceKm = value)
         _uiState.value = _uiState.value.copy(filterState = currentFilter)
+        lastIndex = 0
+        applyFiltersAndLoad()
+    }
+
+
+    fun resetFilters() {
+        _uiState.value = _uiState.value.copy(filterState = FieldFilterState())
         lastIndex = 0
         applyFiltersAndLoad()
     }

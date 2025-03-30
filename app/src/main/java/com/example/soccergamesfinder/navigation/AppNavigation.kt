@@ -53,7 +53,7 @@ fun AppNavigation(authViewModel: AuthViewModel, userViewModel: UserViewModel,
                 navigateToField = {fieldId -> navController.navigate("fieldScreen/$fieldId") {
                     popUpTo("home") {inclusive = false}
                     launchSingleTop = true }
-                }
+                }, navigateToAddField = {}
                 )}
 
         composable("complete_profile"){

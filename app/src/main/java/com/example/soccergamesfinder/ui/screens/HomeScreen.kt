@@ -2,93 +2,146 @@ package com.example.soccergamesfinder.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.soccergamesfinder.data.FieldFilterState
+import coil.compose.AsyncImage
+import com.example.soccergamesfinder.data.User
 import com.example.soccergamesfinder.ui.components.home.FieldListSection
 import com.example.soccergamesfinder.ui.components.home.FilterBar
-import com.example.soccergamesfinder.ui.components.home.LogoutButton
-import com.example.soccergamesfinder.ui.components.home.UserProfileSection
 import com.example.soccergamesfinder.viewmodel.AuthViewModel
 import com.example.soccergamesfinder.viewmodel.FieldListViewModel
 import com.example.soccergamesfinder.viewmodel.UserViewModel
 
 @Composable
-fun HomeScreen(authViewModel: AuthViewModel,userViewModel: UserViewModel,
-               navigateToLogin: () -> Unit,
-                navigateToField: (String) -> Unit)
-{
+fun HomeScreen(
+    authViewModel: AuthViewModel,
+    userViewModel: UserViewModel,
+    navigateToLogin: () -> Unit,
+    navigateToField: (String) -> Unit,
+    navigateToAddField: () -> Unit
+) {
     val fieldListViewModel: FieldListViewModel = hiltViewModel()
 
     val user by userViewModel.user.collectAsState()
     val uiState by fieldListViewModel.uiState.collectAsState()
+    var filtersExpanded by remember { mutableStateOf(false) } // 🔻 כברירת מחדל סגור
 
-
-    LaunchedEffect(Unit){
+    // טען משתמש
+    LaunchedEffect(Unit) {
         userViewModel.loadUser()
     }
 
-    LaunchedEffect(user){
-        if (user != null)
-        {
-            fieldListViewModel.loadNearbyFields(user?.latitude, user?.longitude)
+    // טען מגרשים לפי מיקום
+    LaunchedEffect(user) {
+        user?.let {
+            fieldListViewModel.loadNearbyFields(it.latitude, it.longitude)
         }
     }
 
-    LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        item {
-            UserProfileSection(user)
-        }
-
-        item {
-            FilterSection(
-                filterState = uiState.filterState,
-                onLightingChanged = { fieldListViewModel.updateLighting(it) },
-                onParkingChanged = { fieldListViewModel.updateParking(it) },
-                onFencingChanged = { fieldListViewModel.updateFencing(it) },
-                onNameQueryChanged = { fieldListViewModel.updateNameQuery(it) },
-                onSizeChanged = { fieldListViewModel.updateSize(it) },
-                onMaxDistanceChanged = { fieldListViewModel.updateMaxDistance(it.toDoubleOrNull()) }
+    Scaffold(
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = navigateToAddField,
+                content = { Text("📤 מכיר מגרש שלא קיים אצלנו?") }
             )
         }
+    ) { padding ->
+        LazyColumn(
+            contentPadding = padding,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            item {
+                UserHeader(user = user) {
+                    authViewModel.logout()
+                    userViewModel.logout()
+                    navigateToLogin()
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+            }
 
-        FieldListSection(
-            isLoading = uiState.isLoading,
-            fields = uiState.fields,
-            onLoadMore = { fieldListViewModel.loadMoreFields() },
-            onFieldClick = navigateToField
-        )
+            item {
+                FilterToggleHeader(
+                    expanded = filtersExpanded,
+                    onToggle = { filtersExpanded = !filtersExpanded }
+                )
+                if (filtersExpanded) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    FilterBar(
+                        filterState = uiState.filterState,
+                        onCityChanged = { fieldListViewModel.updateCity(it) },
+                        onLightingChanged = { fieldListViewModel.updateLighting(it) },
+                        onSizeChanged = { fieldListViewModel.updateSize(it) },
+                        onMaxDistanceChanged = { fieldListViewModel.updateMaxDistance(it) },
+                        onResetFilters = { fieldListViewModel.resetFilters() }
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
+
+            item {
+                Text("🗺️ מגרשים באיזור שלך", style = MaterialTheme.typography.headlineSmall)
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            FieldListSection(
+                isLoading = uiState.isLoading,
+                fields = uiState.fields,
+                onLoadMore = { fieldListViewModel.loadMoreFields() },
+                onFieldClick = navigateToField
+            )
+        }
+    }
+}
 
 
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
-            LogoutButton(authViewModel = authViewModel, userViewModel = userViewModel,
-                onLogout = navigateToLogin)
-
+@Composable
+fun FilterToggleHeader(expanded: Boolean, onToggle: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text("🔍 סינון מגרשים", style = MaterialTheme.typography.titleMedium)
+        TextButton(onClick = onToggle) {
+            Text(if (expanded) "הסתר" else "הצג")
         }
     }
 }
 
 @Composable
-fun FilterSection(
-    filterState: FieldFilterState,
-    onLightingChanged: (Boolean) -> Unit,
-    onParkingChanged: (Boolean) -> Unit,
-    onFencingChanged: (Boolean) -> Unit,
-    onNameQueryChanged: (String) -> Unit,
-    onSizeChanged: (String?) -> Unit,
-    onMaxDistanceChanged: (String) -> Unit
-) {
-    Spacer(modifier = Modifier.height(16.dp))
-    FilterBar(
-        filterState = filterState,
-        onLightingChanged = onLightingChanged,
-        onParkingChanged = onParkingChanged,
-        onFencingChanged = onFencingChanged,
-        onNameQueryChanged = onNameQueryChanged,
-        onSizeChanged = onSizeChanged,
-        onMaxDistanceChanged = onMaxDistanceChanged
-    )
+fun UserHeader(user: User?, onLogout: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (user?.profileImageUrl != null) {
+                AsyncImage(
+                    model = user.profileImageUrl,
+                    contentDescription = "Profile",
+                    modifier = Modifier
+                        .size(48.dp)
+                        .padding(end = 8.dp)
+                )
+            }
+            Text("שלום, ${user?.nickname ?: "משתמש"}", style = MaterialTheme.typography.titleMedium)
+        }
+
+        TextButton(onClick = onLogout) {
+            Text("🚪 התנתק")
+        }
+    }
 }
