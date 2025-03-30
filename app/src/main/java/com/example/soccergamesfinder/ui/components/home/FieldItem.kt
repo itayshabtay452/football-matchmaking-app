@@ -19,11 +19,8 @@ fun FieldItem(field: Field, onClick: (String) -> Unit) {
                 Text("🏟️ ${field.name ?: "לא ידוע"}", style = MaterialTheme.typography.titleMedium)
                 Text("📍 ${field.address ?: "לא ידוע"}")
                 Text("📐 גודל: ${field.size ?: "לא ידוע"}")
-                Text("🚧 גידור: ${field.fencing ?: "לא ידוע"}")
                 Text("💡 תאורה: ${field.lighting ?: "לא ידוע"}")
-                Text("🅿️ חניה: ${field.parking ?: "לא ידוע"}")
-                Text("📞 טלפון: ${field.phone ?: "לא זמין"}")
-                Text("📧 מייל: ${field.email ?: "לא זמין"}")
+
 
                 field.distance?.let {
                     Text("📏 מרחק: ${"%.2f".format(it)} ק\"מ")

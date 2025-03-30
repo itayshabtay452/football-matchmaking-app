@@ -18,6 +18,7 @@ import com.example.soccergamesfinder.ui.components.home.FieldListSection
 import com.example.soccergamesfinder.ui.components.home.FilterBar
 import com.example.soccergamesfinder.viewmodel.AuthViewModel
 import com.example.soccergamesfinder.viewmodel.FieldListViewModel
+import com.example.soccergamesfinder.viewmodel.FieldDetailsViewModel
 import com.example.soccergamesfinder.viewmodel.UserViewModel
 
 @Composable
@@ -29,7 +30,6 @@ fun HomeScreen(
     navigateToAddField: () -> Unit
 ) {
     val fieldListViewModel: FieldListViewModel = hiltViewModel()
-
     val user by userViewModel.user.collectAsState()
     val uiState by fieldListViewModel.uiState.collectAsState()
     var filtersExpanded by remember { mutableStateOf(false) } // 🔻 כברירת מחדל סגור
@@ -145,3 +145,4 @@ fun UserHeader(user: User?, onLogout: () -> Unit) {
         }
     }
 }
+
