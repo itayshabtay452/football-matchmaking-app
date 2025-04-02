@@ -7,34 +7,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
 // כאן תוכל להוסיף ייבוא ל-ViewModels אם תזדקק להם בהמשך
 
 object DemoScreens {
-
-    @Composable
-    fun LoginScreen(
-        navigateToHome: () -> Unit,
-        navigateToCompleteProfile: () -> Unit
-    ) {
-        // ניתן ליצור את ה-ViewModel כאן עם hiltViewModel(), אם יש צורך.
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Button(onClick = navigateToHome) {
-                Text("Login Screen - לחץ לעבור ל-Home")
-            }
-        }
-    }
-
-    @Composable
-    fun CompleteProfileScreen(
-        navigateToHome: () -> Unit
-    ) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Button(onClick = navigateToHome) {
-                Text("Complete Profile Screen - לחץ לעבור ל-Home")
-            }
-        }
-    }
 
     @Composable
     fun HomeScreen(

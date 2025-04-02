@@ -6,6 +6,10 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import android.content.Context
+import com.example.soccergamesfinder.services.GoogleSignInService
+import com.example.soccergamesfinder.services.GoogleSignInServiceImpl
+import com.example.soccergamesfinder.services.LocationService
+import com.example.soccergamesfinder.services.LocationServiceImpl
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.FirebaseAuth
@@ -14,6 +18,7 @@ import com.google.firebase.storage.FirebaseStorage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -51,7 +56,24 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideGoogleSignInService(
+        googleClient: GoogleSignInClient
+    ): GoogleSignInService {
+        return GoogleSignInServiceImpl(googleClient)
+    }
+
+    @Provides
+    @Singleton
     fun provideFusedLocationProviderClient(application: Application): FusedLocationProviderClient {
         return LocationServices.getFusedLocationProviderClient(application)
+    }
+
+    @Provides
+    @Singleton
+    fun provideLocationService(
+        fusedLocationProviderClient: FusedLocationProviderClient,
+        @ApplicationContext context: Context
+    ): LocationService {
+        return LocationServiceImpl(fusedLocationProviderClient, context)
     }
 }

@@ -5,7 +5,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import com.example.soccergamesfinder.ui.screens.DemoScreens
+import com.example.soccergamesfinder.ui.screens.login.LoginScreen
+import com.example.soccergamesfinder.ui.screens.profile.CompleteProfileScreen
 
 @OptIn(ExperimentalAnimationApi::class)
 fun NavGraphBuilder.authNavGraph(navController: NavController) {
@@ -20,9 +21,9 @@ fun NavGraphBuilder.authNavGraph(navController: NavController) {
             popEnterTransition = defaultPopEnterTransition(),
             popExitTransition = defaultPopExitTransition()
         ) {
-            DemoScreens.LoginScreen(
-                navigateToHome = { navController.navigate(Routes.MainGraph.route) },
-                navigateToCompleteProfile = { navController.navigate(Routes.CompleteProfile.route) }
+            LoginScreen(
+                onNavigateToHome = { navController.navigate(Routes.MainGraph.route) },
+                onNavigateToCompleteProfile = { navController.navigate(Routes.CompleteProfile.route) }
             )
         }
         composable(
@@ -32,8 +33,8 @@ fun NavGraphBuilder.authNavGraph(navController: NavController) {
             popEnterTransition = defaultPopEnterTransition(),
             popExitTransition = defaultPopExitTransition()
         ) {
-            DemoScreens.CompleteProfileScreen(
-                navigateToHome = { navController.navigate(Routes.MainGraph.route) }
+            CompleteProfileScreen(
+                onNavigateToHome = { navController.navigate(Routes.MainGraph.route) }
             )
         }
     }
