@@ -8,6 +8,8 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
 import androidx.navigation.NavType
 import com.example.soccergamesfinder.ui.screens.DemoScreens
+import com.example.soccergamesfinder.ui.screens.home.HomeScreen
+import com.example.soccergamesfinder.ui.screens.home.HomeScreenNavActions
 
 @OptIn(ExperimentalAnimationApi::class)
 fun NavGraphBuilder.mainNavGraph(navController: NavController) {
@@ -23,16 +25,19 @@ fun NavGraphBuilder.mainNavGraph(navController: NavController) {
             popEnterTransition = defaultPopEnterTransition(),
             popExitTransition = defaultPopExitTransition()
         ) {
-            DemoScreens.HomeScreen(
-                navigateToLogin = {
-                    navController.navigate(Routes.AuthGraph.route) {
-                        popUpTo(Routes.Home.route) { inclusive = true }
+            HomeScreen(
+                navActions = HomeScreenNavActions(
+                    navigateToProfile = { navController.navigate(Routes.EditProfile.route) },
+                    navigateToAllFields = { navController.navigate(Routes.AllFields.route) },
+                    navigateToAllGames = { navController.navigate(Routes.AllGames.route) },
+                    navigateToField = { fieldId -> navController.navigate("${Routes.Field.route}/$fieldId") },
+                    navigateToGame = { gameId -> navController.navigate("${Routes.Game.route}/$gameId") },
+                    navigateToLogin = {
+                        navController.navigate(Routes.AuthGraph.route) {
+                            popUpTo(Routes.Home.route) { inclusive = true }
+                        }
                     }
-                },
-                navigateToField = { fieldId ->
-                    navController.navigate("${Routes.Field.route}/$fieldId")
-                },
-                navigateToAddField = { navController.navigate(Routes.AddField.route) }
+                )
             )
         }
         // All Fields Screen

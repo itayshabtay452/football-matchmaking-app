@@ -65,6 +65,23 @@ class UserRepository @Inject constructor(
         }
     }
 
+    fun getCurrentUserId(): String? {
+        return firebaseAuth.currentUser?.uid
+    }
+
+    suspend fun getUserById(userId: String): User? {
+        return try {
+            val snapshot = firestore.collection("users")
+                .document(userId)
+                .get()
+                .await()
+
+            snapshot.toObject(User::class.java)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     /**
      * Uploads a profile image to Firebase Storage and returns its download URL.
      */

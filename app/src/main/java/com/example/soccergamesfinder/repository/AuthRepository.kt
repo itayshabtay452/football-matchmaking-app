@@ -39,6 +39,4 @@ class AuthRepository @Inject constructor(
             Result.failure(e)
         }
     }
-
-    fun getCurrentUserId(): String? = firebaseAuth.currentUser?.uid
 }

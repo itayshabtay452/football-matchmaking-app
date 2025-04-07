@@ -12,19 +12,6 @@ import androidx.compose.ui.Modifier
 object DemoScreens {
 
     @Composable
-    fun HomeScreen(
-        navigateToLogin: () -> Unit,
-        navigateToField: (String) -> Unit,
-        navigateToAddField: () -> Unit
-    ) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Button(onClick = { navigateToField("demo_field") }) {
-                Text("Home Screen - לחץ לעבור ל-Field Screen")
-            }
-        }
-    }
-
-    @Composable
     fun AllFieldsScreen(navigateToField: (String) -> Unit) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Button(onClick = { navigateToField("demo_field") }) {
