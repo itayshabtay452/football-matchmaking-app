@@ -5,17 +5,24 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.soccergamesfinder.data.Field
+import com.example.soccergamesfinder.ui.screens.creategame.CreateGameDialog
 
 @SuppressLint("DefaultLocale")
 @Composable
 fun FieldCard(
     field: Field,
-    onCreateGameClick: () -> Unit,
     onViewGamesClick: () -> Unit
 ) {
+    var showDialog by remember { mutableStateOf(false) }
+
+
     Card(
         modifier = Modifier
             .width(220.dp)
@@ -49,12 +56,18 @@ fun FieldCard(
                     Text("צפייה")
                 }
                 Button(
-                    onClick = onCreateGameClick,
+                    onClick = {showDialog = true},
                     modifier = Modifier.weight(1f)
                 ) {
                     Text("צור משחק")
                 }
             }
         }
+    }
+    if (showDialog) {
+        CreateGameDialog(
+            field = field,
+            onDismiss = { showDialog = false }
+        )
     }
 }

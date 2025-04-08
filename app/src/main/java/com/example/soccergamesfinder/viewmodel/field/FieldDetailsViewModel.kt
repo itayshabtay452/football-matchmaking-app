@@ -3,49 +3,46 @@ package com.example.soccergamesfinder.viewmodel.field
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.soccergamesfinder.data.Field
-import com.example.soccergamesfinder.data.Game
 import com.example.soccergamesfinder.repository.FieldRepository
-import com.example.soccergamesfinder.repository.GameRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class FieldDetailsState(
-    val field: Field? = null,
-    val games: List<Game> = emptyList(),
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val field: Field? = null
 )
 
 @HiltViewModel
 class FieldDetailsViewModel @Inject constructor(
-    private val fieldRepository: FieldRepository,
-    private val gameRepository: GameRepository
+    private val fieldRepository: FieldRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(FieldDetailsState())
     val state: StateFlow<FieldDetailsState> = _state.asStateFlow()
 
-    fun loadFieldDetails(fieldId: String) {
+    fun loadFieldById(fieldId: String) {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
-
-            val field = fieldRepository.getFieldById(fieldId)
-            if (field == null) {
-                _state.update { it.copy(isLoading = false, error = "Field not found") }
-                return@launch
-            }
-
-            val games = gameRepository.getGamesByFieldId(fieldId)
-
-            _state.update {
-                it.copy(
-                    isLoading = false,
-                    field = field,
-                    games = games
-                )
+            _state.value = _state.value.copy(isLoading = true, error = null)
+            try {
+                val field = fieldRepository.getFieldById(fieldId)
+                if (field != null) {
+                    _state.value = FieldDetailsState(
+                        isLoading = false,
+                        field = field
+                    )
+                } else {
+                    showError("המגרש לא נמצא")
+                }
+            } catch (e: Exception) {
+                showError("שגיאה בטעינת המגרש")
             }
         }
+    }
+
+    private fun showError(message: String) {
+        _state.value = _state.value.copy(isLoading = false, error = message)
     }
 }

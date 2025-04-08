@@ -12,7 +12,6 @@ import com.example.soccergamesfinder.data.Field
 @Composable
 fun FieldList(
     fields: List<Field>,
-    onCreateGameClick: (Field) -> Unit,
     onViewGamesClick: (Field) -> Unit
 ) {
     LazyRow(
@@ -22,7 +21,6 @@ fun FieldList(
         items(fields) { field ->
             FieldCard(
                 field = field,
-                onCreateGameClick = { onCreateGameClick(field) },
                 onViewGamesClick = { onViewGamesClick(field) }
             )
         }

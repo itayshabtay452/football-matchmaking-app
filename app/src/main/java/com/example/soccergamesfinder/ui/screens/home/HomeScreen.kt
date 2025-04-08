@@ -145,7 +145,6 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(8.dp))
             FieldList(
                 fields = state.fields.take(5),
-                onCreateGameClick = { field -> /* TODO: Create game */ },
                 onViewGamesClick = { field -> navActions.navigateToField(field.id) }
             )
         }

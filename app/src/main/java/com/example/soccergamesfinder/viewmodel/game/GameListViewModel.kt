@@ -2,6 +2,7 @@ package com.example.soccergamesfinder.viewmodel.game
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.soccergamesfinder.data.Game
 import com.example.soccergamesfinder.repository.GameRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -34,34 +35,6 @@ class GameListViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Loads games for a specific field.
-     */
-    fun loadGamesByField(fieldId: String) {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
-
-            val games = gameRepository.getGamesByFieldId(fieldId)
-            _state.update {
-                it.copy(isLoading = false, games = games)
-            }
-        }
-    }
-
-    /**
-     * Loads games for the current user.
-     */
-    fun loadGamesForCurrentUser() {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
-
-            val games = gameRepository.getGamesForCurrentUser()
-            _state.update {
-                it.copy(isLoading = false, games = games)
-            }
-        }
-    }
-
     fun updateSingleGame(gameId: String) {
         viewModelScope.launch {
             val updatedGame = gameRepository.getGameById(gameId)
@@ -75,5 +48,12 @@ class GameListViewModel @Inject constructor(
             }
         }
     }
+
+    fun addGame(game: Game) {
+        _state.update { current ->
+            current.copy(games = listOf(game) + current.games)
+        }
+    }
+
 
 }

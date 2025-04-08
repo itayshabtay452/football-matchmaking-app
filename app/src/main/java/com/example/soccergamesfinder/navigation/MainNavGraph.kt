@@ -116,23 +116,7 @@ fun NavGraphBuilder.mainNavGraph(navController: NavController) {
             val fieldId = backStackEntry.arguments?.getString("fieldId") ?: ""
             DemoScreens.FieldScreen(
                 fieldId = fieldId,
-                navigateToCreateGame = { navController.navigate("${Routes.CreateGame.route}/$it") },
                 navigateToGame = { navController.navigate("${Routes.Game.route}/$it") }
-            )
-        }
-        // Create Game Screen
-        composable(
-            route = "${Routes.CreateGame.route}/{fieldId}",
-            arguments = listOf(navArgument("fieldId") { type = NavType.StringType }),
-            enterTransition = defaultEnterTransition(),
-            exitTransition = defaultExitTransition(),
-            popEnterTransition = defaultPopEnterTransition(),
-            popExitTransition = defaultPopExitTransition()
-        ) { backStackEntry ->
-            val fieldId = backStackEntry.arguments?.getString("fieldId") ?: ""
-            DemoScreens.CreateGameScreen(
-                fieldId = fieldId,
-                navigateBack = { navController.popBackStack() }
             )
         }
         // Game Screen

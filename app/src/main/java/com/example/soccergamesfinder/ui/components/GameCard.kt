@@ -1,4 +1,3 @@
-// GameCard.kt
 package com.example.soccergamesfinder.ui.components
 
 import androidx.compose.foundation.layout.*
@@ -6,9 +5,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.soccergamesfinder.data.Game
 import com.example.soccergamesfinder.data.User
@@ -22,7 +19,7 @@ fun GameCard(
     onJoinClick: () -> Unit,
     onLeaveClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    onChatClick: () -> Unit
+    onChatClick: () -> Unit,
 ) {
     val isParticipant = currentUser?.id in game.joinedPlayers
     val isCreator = currentUser?.id == game.creatorId
@@ -35,8 +32,9 @@ fun GameCard(
     val startStr = timeFormatter.format(game.startTime.toDate())
     val endStr = timeFormatter.format(game.endTime.toDate())
 
-    val fieldName = game.field?.name ?: "מגרש לא ידוע"
-    val fieldAddress = game.field?.address ?: "כתובת לא זמינה"
+    val fieldName = game.fieldName ?: "מגרש לא ידוע"
+    val fieldAddress = game.fieldAddress ?: "כתובת לא זמינה"
+    val creatorName = game.creatorName ?: "לא ידוע"
 
     Card(
         modifier = Modifier
@@ -53,7 +51,7 @@ fun GameCard(
                 Text(fieldName, style = MaterialTheme.typography.titleMedium)
                 Text(fieldAddress, style = MaterialTheme.typography.bodySmall)
                 Text("$dateStr | $startStr - $endStr", style = MaterialTheme.typography.bodySmall)
-                Text("יוצר: ${game.creatorName ?: "לא ידוע"}", style = MaterialTheme.typography.bodySmall)
+                Text("יוצר: $creatorName", style = MaterialTheme.typography.bodySmall)
                 Text("שחקנים: ${game.joinedPlayers.size}/${game.maxPlayers}", style = MaterialTheme.typography.bodySmall)
             }
 

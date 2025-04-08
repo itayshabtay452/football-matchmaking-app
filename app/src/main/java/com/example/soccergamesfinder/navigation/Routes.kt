@@ -14,6 +14,5 @@ sealed class Routes(val route: String) {
     object UserHistory : Routes("user_history")
     object AddField : Routes("add_field")
     object Field : Routes("fieldScreen")
-    object CreateGame : Routes("createGame")
     object Game : Routes("gameScreen")
 }

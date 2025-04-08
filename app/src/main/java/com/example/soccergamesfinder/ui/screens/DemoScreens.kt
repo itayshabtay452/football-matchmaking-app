@@ -68,25 +68,9 @@ object DemoScreens {
     @Composable
     fun FieldScreen(
         fieldId: String,
-        navigateToCreateGame: (String) -> Unit,
         navigateToGame: (String) -> Unit
     ) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Button(onClick = { navigateToCreateGame(fieldId) }) {
-                Text("Field Screen for $fieldId - צור משחק")
-            }
-        }
-    }
-
-    @Composable
-    fun CreateGameScreen(
-        fieldId: String,
-        navigateBack: () -> Unit
-    ) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Button(onClick = navigateBack) {
-                Text("Create Game Screen for $fieldId - חזור")
-            }
         }
     }
 

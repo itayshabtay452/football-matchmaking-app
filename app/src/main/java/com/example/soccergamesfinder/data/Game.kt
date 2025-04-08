@@ -16,13 +16,15 @@ data class Game(
     val endTime: Timestamp = Timestamp.now(),  // Format: "yyyy-MM-dd HH:mm"
     val maxPlayers: Int = 10,
     val joinedPlayers: List<String> = emptyList(),
+    val fieldName: String? = null,
+    val fieldAddress: String? = null,
+    val creatorName: String? = null,
+
 
     val description: String? = null,
     val players: List<String>? = null,
 
     // Not stored in Firestore – calculated locally
     val status: GameStatus = GameStatus.OPEN,   // Can be OPEN / FULL / ENDED
-    val field: Field? = null,                   // Optional: can be filled locally
-    val creatorName: String? = null,            // Optional: for display
     val rating: Double? = null                  // Future: average rating
 )

@@ -75,6 +75,23 @@ class GameDetailsViewModel @Inject constructor(
         }
     }
 
+    fun createGame(game: Game, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true, error = null)
+
+            val result = gameRepository.createGame(game)
+
+            if (result.isSuccess) {
+                _state.value = _state.value.copy(isLoading = false)
+                onResult(true)
+            } else {
+                _state.value = _state.value.copy(isLoading = false, error = "שגיאה ביצירת המשחק")
+                onResult(false)
+            }
+        }
+    }
+
+
     private fun showError(message: String) {
         _state.value = _state.value.copy(isLoading = false, error = message)
     }
