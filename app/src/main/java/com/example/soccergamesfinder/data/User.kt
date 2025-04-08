@@ -1,11 +1,10 @@
 package com.example.soccergamesfinder.data
 
 data class User(
-    val age: Int= 0,
-    val name: String = "",
+    val id: String = "",
+    val fullName: String = "",
     val nickname: String = "",
-    val latitude: Double? = null,
-    val longitude: Double? = null,
-    val profileImageUrl: String? = null,
-    val games: List<String> = emptyList()
-    )
+    val latitude: Double = 0.0,
+    val longitude: Double = 0.0,
+    val profileImageUrl: String? = null
+)

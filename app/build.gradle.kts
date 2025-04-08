@@ -94,4 +94,6 @@ dependencies {
 
     implementation(libs.coil.compose)
 
+    implementation("androidx.compose.animation:animation:1.5.0")
+
 }

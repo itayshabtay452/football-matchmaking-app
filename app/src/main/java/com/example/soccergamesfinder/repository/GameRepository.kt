@@ -1,90 +1,136 @@
 package com.example.soccergamesfinder.repository
 
 import com.example.soccergamesfinder.data.Game
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
 class GameRepository @Inject constructor(
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val auth: FirebaseAuth
 ) {
+    private val gamesCollection = firestore.collection("games")
 
-    suspend fun getGamesForField(fieldId: String): List<Game> {
-
+    /**
+     * Retrieves all games from Firestore.
+     */
+    suspend fun getAllGames(): List<Game> {
         return try {
-            val snapshot = firestore.collection("games")
-                .whereEqualTo("fieldId", fieldId)
-                .orderBy("startTime")
-                .get()
-                .await()
 
-            val gamesList = snapshot.documents.mapNotNull { it.toObject(Game::class.java) }
+            val snapshot = gamesCollection.get().await()
 
-            gamesList
+            val games = snapshot.toObjects(Game::class.java)
+
+            games
         } catch (e: Exception) {
-            println("⚠️ שגיאה בשליפת משחקים: ${e.message}")
+            e.printStackTrace()
             emptyList()
         }
     }
 
-    suspend fun getUserGames(userId: String): List<Game> {
+
+    /**
+     * Retrieves games for a specific field.
+     */
+    suspend fun getGamesByFieldId(fieldId: String): List<Game> {
         return try {
-            val snapshot = firestore.collection("games")
-                .whereArrayContains("players", userId)
+            val snapshot = gamesCollection
+                .whereEqualTo("fieldId", fieldId)
                 .get()
                 .await()
-
             snapshot.toObjects(Game::class.java)
         } catch (e: Exception) {
-            println("⚠️ שגיאה בשליפת משחקי המשתמש: ${e.message}")
             emptyList()
         }
     }
 
+    /**
+     * Retrieves games created or joined by the current user.
+     */
+    suspend fun getGamesForCurrentUser(): List<Game> {
+        val userId = auth.currentUser?.uid ?: return emptyList()
 
-    suspend fun createGame(game: Game): Boolean {
         return try {
-            val newGameRef = firestore.collection("games").document()
-            newGameRef.set(game.copy(id = newGameRef.id)).await()
-            true
-        } catch (e: Exception) {
-            false
-        }
-    }
-
-
-    suspend fun deleteGame(gameId: String): Boolean {
-        return try {
-            firestore.collection("games").document(gameId).delete().await()
-            true
-        } catch (e: Exception) {
-            println("⚠️ שגיאה במחיקת המשחק: ${e.message}")
-            false
-        }
-    }
-
-    suspend fun updatePlayersList(gameId: String, updatedPlayers: List<String>): Boolean {
-        return try {
-            firestore.collection("games").document(gameId)
-                .update("players", updatedPlayers)
+            val snapshot = gamesCollection
+                .whereArrayContains("joinedPlayers", userId)
+                .get()
                 .await()
-            true
+            snapshot.toObjects(Game::class.java)
         } catch (e: Exception) {
-            false
+            emptyList()
+        }
+    }
+
+    /**
+     * Creates a new game in Firestore.
+     */
+    suspend fun createGame(game: Game): Result<Unit> {
+        return try {
+            gamesCollection.document(game.id).set(game).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Adds a player to a game, without checking any business logic.
+     */
+    suspend fun joinGame(gameId: String, userId: String): Result<Unit> {
+        return try {
+            val gameRef = gamesCollection.document(gameId)
+            firestore.runTransaction { transaction ->
+                val snapshot = transaction.get(gameRef)
+                val game = snapshot.toObject(Game::class.java) ?: return@runTransaction
+                val updatedPlayers = game.joinedPlayers + userId
+                transaction.update(gameRef, "joinedPlayers", updatedPlayers)
+            }.await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 
 
-    suspend  fun getGameById(gameId: String): Game? {
+    /**
+     * Leaves the current user from a game.
+     */
+    suspend fun leaveGame(gameId: String): Result<Unit> {
+        val userId = auth.currentUser?.uid ?: return Result.failure(Exception("Not authenticated"))
+
         return try {
-            val snapshot = firestore.collection("games").document(gameId).get().await()
-            val game = snapshot.toObject(Game::class.java)
-            game
+            val gameRef = gamesCollection.document(gameId)
+            firestore.runTransaction { transaction ->
+                val snapshot = transaction.get(gameRef)
+                val game = snapshot.toObject(Game::class.java) ?: return@runTransaction
+                val updatedPlayers = game.joinedPlayers.filter { it != userId }
+                transaction.update(gameRef, "joinedPlayers", updatedPlayers)
+            }.await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun deleteGame(gameId: String): Result<Unit> {
+        return try {
+            gamesCollection.document(gameId).delete().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Retrieves a game by its ID.
+     */
+    suspend fun getGameById(gameId: String): Game? {
+        return try {
+            val snapshot = gamesCollection.document(gameId).get().await()
+            snapshot.toObject(Game::class.java)
         } catch (e: Exception) {
             null
         }
     }
-
 }

@@ -1,59 +1,42 @@
 package com.example.soccergamesfinder.repository
 
-import android.content.Intent
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
-import javax.inject.Singleton
 
-
-@Singleton
+/**
+ * Handles authentication-related operations with Firebase.
+ */
 class AuthRepository @Inject constructor(
-    private val auth: FirebaseAuth,
-    private val googleSignInClient: GoogleSignInClient
+    private val firebaseAuth: FirebaseAuth
 ) {
-    fun getCurrentUser(): FirebaseUser? = auth.currentUser
-
-    suspend fun login(email: String, password: String): FirebaseUser? {
+    suspend fun loginWithEmailPassword(email: String, password: String): Result<Unit> {
         return try {
-            val result = auth.signInWithEmailAndPassword(email, password).await()
-            result.user
+            firebaseAuth.signInWithEmailAndPassword(email, password).await()
+            Result.success(Unit)
         } catch (e: Exception) {
-            null
+            Result.failure(e)
         }
     }
 
-    suspend fun register(email: String, password: String): FirebaseUser? {
+    suspend fun registerWithEmailPassword(email: String, password: String): Result<Unit> {
         return try {
-            val result = auth.createUserWithEmailAndPassword(email, password).await()
-            result.user
+            firebaseAuth.createUserWithEmailAndPassword(email, password).await()
+            Result.success(Unit)
         } catch (e: Exception) {
-            null
+            Result.failure(e)
         }
     }
 
-    fun logout() {
-        auth.signOut()
-        googleSignInClient.signOut()
 
-    }
-
-    fun getGoogleSignInIntent(): Intent = googleSignInClient.signInIntent
-
-    suspend fun signInWithGoogle(data: Intent?): FirebaseUser? {
-        val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-        return try{
-            val account: GoogleSignInAccount? = task.getResult(com.google.android.gms.common.api.ApiException::class.java)
-            val credential = GoogleAuthProvider.getCredential(account?.idToken, null)
-            val result = auth.signInWithCredential(credential).await()
-            result.user
+    suspend fun loginWithGoogle(idToken: String): Result<Unit> {
+        return try {
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
+            firebaseAuth.signInWithCredential(credential).await()
+            Result.success(Unit)
         } catch (e: Exception) {
-            null
+            Result.failure(e)
         }
     }
 }

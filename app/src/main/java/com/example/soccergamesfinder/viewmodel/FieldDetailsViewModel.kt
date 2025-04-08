@@ -39,8 +39,5 @@ class FieldDetailsViewModel @Inject constructor(
             }
         }
     }
-
-
-
 }
 
