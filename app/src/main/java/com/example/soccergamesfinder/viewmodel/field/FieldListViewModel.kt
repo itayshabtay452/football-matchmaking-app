@@ -55,4 +55,17 @@ class FieldListViewModel @Inject constructor(
             }
         }
     }
+
+    fun updateFieldWithNewGame(fieldId: String, gameId: String) {
+        val currentFields = _state.value.fields.toMutableList()
+        val index = currentFields.indexOfFirst { it.id == fieldId }
+
+        if (index != -1) {
+            val field = currentFields[index]
+            val updatedField = field.copy(games = field.games + gameId)
+            currentFields[index] = updatedField
+            _state.update { it.copy(fields = currentFields) }
+        }
+    }
+
 }

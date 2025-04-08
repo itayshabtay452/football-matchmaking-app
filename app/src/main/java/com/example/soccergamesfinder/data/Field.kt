@@ -1,41 +1,16 @@
 package com.example.soccergamesfinder.data
 
-import com.google.firebase.firestore.PropertyName
-
 data class Field(
     val id: String = "",
-
-    @PropertyName("שם המתקן")
-    val name: String? = null,
-
-    @PropertyName("כתובת")
-    val address: String? = null,
-
-    @PropertyName("גודל")
-    val size: String? = null,
-
-    @PropertyName("גידור קיים")
-    val fencing: String? = null,
-
-    @PropertyName("דוא\"ל איש קשר")
-    val email: String? = null,
-
-    @PropertyName("טלפון איש קשר")
-    val phone: String? = null,
-
-    @PropertyName("חניה לרכבים")
-    val parking: String? = null,
-
-    @PropertyName("תאורה קיימת")
-    val lighting: String? = null,
-
-    @PropertyName("latitude")
+    val name: String = "",
+    val address: String = "",
+    val size: String? = null,         // e.g., "Small", "Medium", "Large"
+    val lighting: Boolean = false,    // whether the field has lighting
     val latitude: Double? = null,
-
-    @PropertyName("longitude")
     val longitude: Double? = null,
+    val games: List<String> = emptyList(), // list of game IDs
+    val rating: Double? = null,       // average rating, e.g., 4.2
 
-    val distance: Double? = null
-
-
+    // Client-side only (not stored in Firestore)
+    val distance: Double? = null      // distance from current user in km
 )

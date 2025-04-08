@@ -1,6 +1,7 @@
 package com.example.soccergamesfinder.repository
 
 import com.example.soccergamesfinder.data.Game
+import com.example.soccergamesfinder.data.GameStatus
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
@@ -133,4 +134,10 @@ class GameRepository @Inject constructor(
             null
         }
     }
+
+    suspend fun updateGameStatus(gameId: String, status: GameStatus) {
+        gamesCollection.document(gameId).update("status", status.name).await()
+    }
+
+
 }

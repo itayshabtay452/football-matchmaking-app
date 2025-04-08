@@ -4,6 +4,7 @@ package com.example.soccergamesfinder.viewmodel.game
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.soccergamesfinder.data.Game
+import com.example.soccergamesfinder.repository.FieldRepository
 import com.example.soccergamesfinder.repository.GameRepository
 import com.example.soccergamesfinder.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,7 +26,8 @@ data class GameDetailsState(
 @HiltViewModel
 class GameDetailsViewModel @Inject constructor(
     private val gameRepository: GameRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val fieldRepository: FieldRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(GameDetailsState())
@@ -79,9 +81,15 @@ class GameDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
 
-            val result = gameRepository.createGame(game)
+            val gameResult = gameRepository.createGame(game)
+            if (gameResult.isSuccess) {
+                val fieldUpdateResult = fieldRepository.addGameToField(game.fieldId, game.id)
+                if (fieldUpdateResult.isFailure) {
+                    showError("המשחק נוצר, אך לא נקשר למגרש")
+                    onResult(false)
+                    return@launch
+                }
 
-            if (result.isSuccess) {
                 _state.value = _state.value.copy(isLoading = false)
                 onResult(true)
             } else {
@@ -90,6 +98,7 @@ class GameDetailsViewModel @Inject constructor(
             }
         }
     }
+
 
 
     private fun showError(message: String) {

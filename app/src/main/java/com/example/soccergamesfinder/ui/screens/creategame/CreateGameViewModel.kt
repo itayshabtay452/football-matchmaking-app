@@ -18,8 +18,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CreateGameViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val gameRepository: GameRepository,
-    private val fieldRepository: FieldRepository
+    private val gameRepository: GameRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CreateGameFormState())

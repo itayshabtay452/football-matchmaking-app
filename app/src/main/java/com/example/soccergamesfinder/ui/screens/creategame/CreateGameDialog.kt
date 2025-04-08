@@ -11,6 +11,7 @@ import com.example.soccergamesfinder.ui.screens.creategame.components.DatePicker
 import com.example.soccergamesfinder.ui.screens.creategame.components.EndTimePickerDropdown
 import com.example.soccergamesfinder.ui.screens.creategame.components.MaxPlayersDropdown
 import com.example.soccergamesfinder.ui.screens.creategame.components.TimePickerDropdown
+import com.example.soccergamesfinder.viewmodel.field.FieldListViewModel
 import com.example.soccergamesfinder.viewmodel.game.GameDetailsViewModel
 import com.example.soccergamesfinder.viewmodel.game.GameListViewModel
 
@@ -22,6 +23,7 @@ fun CreateGameDialog(
     val viewModel: CreateGameViewModel = hiltViewModel()
     val gameDetailsViewModel: GameDetailsViewModel = hiltViewModel()
     val gameListViewModel: GameListViewModel = hiltViewModel()
+    val fieldListViewModel: FieldListViewModel = hiltViewModel()
 
     val state = viewModel.state.collectAsState().value
 
@@ -34,6 +36,7 @@ fun CreateGameDialog(
                         gameDetailsViewModel.createGame(game) { success ->
                             if (success) {
                                 gameListViewModel.addGame(game)
+                                fieldListViewModel.updateFieldWithNewGame(field.id, game.id)
                                 onDismiss()
                             }
                         }
