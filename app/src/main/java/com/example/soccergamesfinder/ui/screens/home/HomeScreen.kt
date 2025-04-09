@@ -37,22 +37,19 @@ fun HomeScreen(
     val userState = currentUserViewModel.state.collectAsState().value
     val fieldState = fieldListViewModel.state.collectAsState().value
     val gameState = gameListViewModel.state.collectAsState().value
-    val gameDetailsState = gameDetailsViewModel.state.collectAsState().value
 
-    val isLoading = userState.isLoading || fieldState.isLoading || gameState.isLoading || gameDetailsState.isLoading
-    val error = userState.error ?: fieldState.error ?: gameState.error ?: gameDetailsState.error
-
-    // Update HomeViewModel with combined state
-    LaunchedEffect(userState, fieldState, gameState) {
+    LaunchedEffect(userState.user, fieldState.fields, gameState.games) {
         homeViewModel.updateState(
             userNickname = userState.user?.nickname ?: "",
             userProfileImageUrl = userState.user?.profileImageUrl,
             fields = fieldState.fields,
             games = gameState.games,
-            isLoading = isLoading,
-            error = error
+            isLoading = userState.isLoading || fieldState.isLoading || gameState.isLoading,
+            error = userState.error ?: fieldState.error ?: gameState.error
         )
+        println(">>> HomeScreen returned ${fieldState.fields.size} fields and ${gameState.games.size} games")
     }
+
 
     val state = homeViewModel.state.collectAsState().value
 
@@ -145,7 +142,9 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(8.dp))
             FieldList(
                 fields = state.fields.take(5),
-                onViewGamesClick = { field -> navActions.navigateToField(field.id) }
+                onViewGamesClick = { field -> navActions.navigateToField(field.id) },
+                fieldListViewModel = fieldListViewModel,
+                gameListViewModel = gameListViewModel
             )
         }
 
@@ -178,7 +177,7 @@ fun HomeScreen(
                 },
                 onDeleteClick = { game ->
                     gameDetailsViewModel.deleteGame(game) {
-                        gameListViewModel.updateSingleGame(game.id)
+                        gameListViewModel.removeGame(game.id)
                     }
                 },
                 onChatClick = { game -> navActions.navigateToGame(game.id) }

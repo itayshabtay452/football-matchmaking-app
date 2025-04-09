@@ -13,12 +13,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.soccergamesfinder.data.Field
 import com.example.soccergamesfinder.ui.screens.creategame.CreateGameDialog
+import com.example.soccergamesfinder.viewmodel.field.FieldListViewModel
+import com.example.soccergamesfinder.viewmodel.game.GameListViewModel
 
 @SuppressLint("DefaultLocale")
 @Composable
 fun FieldCard(
     field: Field,
-    onViewGamesClick: () -> Unit
+    onViewGamesClick: () -> Unit,
+    fieldListViewModel: FieldListViewModel,
+    gameListViewModel: GameListViewModel
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
@@ -67,7 +71,9 @@ fun FieldCard(
     if (showDialog) {
         CreateGameDialog(
             field = field,
-            onDismiss = { showDialog = false }
+            onDismiss = { showDialog = false },
+            fieldListViewModel = fieldListViewModel,
+            gameListViewModel = gameListViewModel
         )
     }
 }

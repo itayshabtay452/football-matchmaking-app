@@ -18,12 +18,12 @@ import com.example.soccergamesfinder.viewmodel.game.GameListViewModel
 @Composable
 fun CreateGameDialog(
     field: Field,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    fieldListViewModel: FieldListViewModel,
+    gameListViewModel: GameListViewModel
 ) {
     val viewModel: CreateGameViewModel = hiltViewModel()
     val gameDetailsViewModel: GameDetailsViewModel = hiltViewModel()
-    val gameListViewModel: GameListViewModel = hiltViewModel()
-    val fieldListViewModel: FieldListViewModel = hiltViewModel()
 
     val state = viewModel.state.collectAsState().value
 

@@ -11,14 +11,6 @@ import androidx.compose.ui.Modifier
 
 object DemoScreens {
 
-    @Composable
-    fun AllFieldsScreen(navigateToField: (String) -> Unit) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Button(onClick = { navigateToField("demo_field") }) {
-                Text("All Fields Screen")
-            }
-        }
-    }
 
     @Composable
     fun AllGamesScreen(navigateToGame: (String) -> Unit) {

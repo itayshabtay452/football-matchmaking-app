@@ -1,6 +1,9 @@
 package com.example.soccergamesfinder.navigation
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.runtime.remember
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -8,11 +11,17 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
 import androidx.navigation.NavType
 import com.example.soccergamesfinder.ui.screens.DemoScreens
+import com.example.soccergamesfinder.ui.screens.allfields.AllFieldsScreen
 import com.example.soccergamesfinder.ui.screens.home.HomeScreen
 import com.example.soccergamesfinder.ui.screens.home.HomeScreenNavActions
+import com.example.soccergamesfinder.viewmodel.field.FieldListViewModel
+import com.example.soccergamesfinder.viewmodel.game.GameListViewModel
 
+@SuppressLint("UnrememberedGetBackStackEntry")
 @OptIn(ExperimentalAnimationApi::class)
-fun NavGraphBuilder.mainNavGraph(navController: NavController) {
+fun NavGraphBuilder.mainNavGraph(
+    navController: NavController
+) {
     navigation(
         startDestination = Routes.Home.route,
         route = Routes.MainGraph.route
@@ -25,6 +34,10 @@ fun NavGraphBuilder.mainNavGraph(navController: NavController) {
             popEnterTransition = defaultPopEnterTransition(),
             popExitTransition = defaultPopExitTransition()
         ) {
+            val mainGraphBackStackEntry = remember { navController.getBackStackEntry(Routes.MainGraph.route) }
+            val fieldListViewModel: FieldListViewModel = hiltViewModel(mainGraphBackStackEntry)
+            val gameListViewModel: GameListViewModel = hiltViewModel(mainGraphBackStackEntry)
+
             HomeScreen(
                 navActions = HomeScreenNavActions(
                     navigateToProfile = { navController.navigate(Routes.EditProfile.route) },
@@ -37,7 +50,9 @@ fun NavGraphBuilder.mainNavGraph(navController: NavController) {
                             popUpTo(Routes.Home.route) { inclusive = true }
                         }
                     }
-                )
+                ),
+                fieldListViewModel = fieldListViewModel,
+                gameListViewModel = gameListViewModel
             )
         }
         // All Fields Screen
@@ -48,9 +63,18 @@ fun NavGraphBuilder.mainNavGraph(navController: NavController) {
             popEnterTransition = defaultPopEnterTransition(),
             popExitTransition = defaultPopExitTransition()
         ) {
-            DemoScreens.AllFieldsScreen { fieldId ->
-                navController.navigate("${Routes.Field.route}/$fieldId")
-            }
+            val mainGraphBackStackEntry = remember { navController.getBackStackEntry(Routes.MainGraph.route) }
+            val fieldListViewModel: FieldListViewModel = hiltViewModel(mainGraphBackStackEntry)
+            val gameListViewModel: GameListViewModel = hiltViewModel(mainGraphBackStackEntry)
+
+
+            AllFieldsScreen(
+                fieldListViewModel = fieldListViewModel,
+                gameListViewModel = gameListViewModel,
+                onViewGamesClick = { fieldId ->
+                    navController.navigate("${Routes.Field.route}/$fieldId")
+                }
+            )
         }
         // All Games Screen
         composable(

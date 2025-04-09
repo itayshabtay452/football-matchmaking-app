@@ -89,5 +89,13 @@ class GameListViewModel @Inject constructor(
         }
     }
 
+    fun removeGame(gameId: String) {
+        _state.update { current ->
+            val updatedGames = current.games.filterNot { it.id == gameId }
+            current.copy(games = updatedGames)
+        }
+    }
+
+
 
 }
