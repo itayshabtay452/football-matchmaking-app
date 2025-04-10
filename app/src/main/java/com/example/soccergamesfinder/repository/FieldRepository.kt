@@ -49,5 +49,19 @@ class FieldRepository @Inject constructor(
         }
     }
 
-
+    // FieldRepository.kt
+    suspend fun removeGameFromField(fieldId: String, gameId: String): Result<Unit> {
+        return try {
+            val fieldRef = firestore.collection("facilities").document(fieldId)
+            firestore.runTransaction { transaction ->
+                val snapshot = transaction.get(fieldRef)
+                val field = snapshot.toObject(Field::class.java) ?: return@runTransaction
+                val updatedGames = field.games.filterNot { it == gameId }
+                transaction.update(fieldRef, "games", updatedGames)
+            }.await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

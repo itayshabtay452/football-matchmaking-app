@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.soccergamesfinder.ui.components.FieldCard
+import com.example.soccergamesfinder.ui.components.FieldSection
 import com.example.soccergamesfinder.viewmodel.field.FieldListViewModel
 import com.example.soccergamesfinder.viewmodel.game.GameListViewModel
 
@@ -99,20 +100,15 @@ fun AllFieldsScreen(
                             text = "נמצאו ${state.filteredFields.size} מגרשים מתאימים",
                             style = MaterialTheme.typography.titleMedium
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
-                    }
-
-                    items(state.filteredFields) { field ->
-                        FieldCard(
-                            field = field,
-                            onViewGamesClick = { onViewGamesClick(field.id) },
-                            fieldListViewModel = fieldListViewModel,
-                            gameListViewModel = gameListViewModel
+                        Spacer(modifier = Modifier.height(8.dp))
+                        FieldSection(
+                            fields = state.filteredFields,
+                            onCreateGame = { field, newGame ->
+                                // כאן תוכל לעדכן את GameListViewModel ו־FieldListViewModel לפי הצורך
+                                gameListViewModel.addGame(newGame)
+                                fieldListViewModel.updateFieldWithNewGame(field.id, newGame.id) // תעדכן עם המזהה הנכון
+                            }
                         )
-                    }
-
-                    item {
-                        Spacer(modifier = Modifier.height(100.dp))
                     }
                 }
             }

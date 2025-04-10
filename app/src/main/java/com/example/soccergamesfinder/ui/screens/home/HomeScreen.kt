@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.example.soccergamesfinder.ui.components.FieldList
+import com.example.soccergamesfinder.ui.components.FieldSection
 import com.example.soccergamesfinder.ui.components.GameList
 import com.example.soccergamesfinder.viewmodel.field.FieldListViewModel
 import com.example.soccergamesfinder.viewmodel.game.GameDetailsViewModel
@@ -140,11 +140,13 @@ fun HomeScreen(
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
-            FieldList(
+            FieldSection(
                 fields = state.fields.take(5),
-                onViewGamesClick = { field -> navActions.navigateToField(field.id) },
-                fieldListViewModel = fieldListViewModel,
-                gameListViewModel = gameListViewModel
+                onCreateGame = { field, newGame ->
+                    // כאן תוכל לעדכן את GameListViewModel ו־FieldListViewModel לפי הצורך
+                    gameListViewModel.addGame(newGame)
+                    fieldListViewModel.updateFieldWithNewGame(field.id, newGame.id) // תעדכן עם המזהה הנכון
+                }
             )
         }
 
@@ -165,6 +167,7 @@ fun HomeScreen(
             GameList(
                 games = state.games.take(5),
                 currentUser = userState.user,
+                fields = fieldState.fields,
                 onJoinClick = { game ->
                     gameDetailsViewModel.joinGame(game) {
                         gameListViewModel.updateSingleGame(game.id)
@@ -178,10 +181,14 @@ fun HomeScreen(
                 onDeleteClick = { game ->
                     gameDetailsViewModel.deleteGame(game) {
                         gameListViewModel.removeGame(game.id)
+                        fieldListViewModel.removeGameFromField(game.fieldId, game.id)
                     }
                 },
-                onChatClick = { game -> navActions.navigateToGame(game.id) }
+                onCardClick  = { game ->
+                    navActions.navigateToGame(game.id)
+                }
             )
+
         }
     }
 }

@@ -1,5 +1,5 @@
 // DatePickerField.kt
-package com.example.soccergamesfinder.ui.screens.creategame.components
+package com.example.soccergamesfinder.ui.components.shared
 
 import android.app.DatePickerDialog
 import android.widget.DatePicker

@@ -7,20 +7,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.soccergamesfinder.data.Field
-import com.example.soccergamesfinder.ui.screens.creategame.components.DatePickerField
+import com.example.soccergamesfinder.data.Game
+import com.example.soccergamesfinder.ui.components.shared.DatePickerField
 import com.example.soccergamesfinder.ui.screens.creategame.components.EndTimePickerDropdown
 import com.example.soccergamesfinder.ui.screens.creategame.components.MaxPlayersDropdown
 import com.example.soccergamesfinder.ui.screens.creategame.components.TimePickerDropdown
-import com.example.soccergamesfinder.viewmodel.field.FieldListViewModel
 import com.example.soccergamesfinder.viewmodel.game.GameDetailsViewModel
-import com.example.soccergamesfinder.viewmodel.game.GameListViewModel
 
 @Composable
 fun CreateGameDialog(
     field: Field,
     onDismiss: () -> Unit,
-    fieldListViewModel: FieldListViewModel,
-    gameListViewModel: GameListViewModel
+    onCreateSuccess: ((Game) -> Unit)? = null
 ) {
     val viewModel: CreateGameViewModel = hiltViewModel()
     val gameDetailsViewModel: GameDetailsViewModel = hiltViewModel()
@@ -35,9 +33,7 @@ fun CreateGameDialog(
                     viewModel.onEvent(CreateGameEvent.Submit, field) { game ->
                         gameDetailsViewModel.createGame(game) { success ->
                             if (success) {
-                                gameListViewModel.addGame(game)
-                                fieldListViewModel.updateFieldWithNewGame(field.id, game.id)
-                                onDismiss()
+                                onCreateSuccess?.invoke(game)
                             }
                         }
                     }
@@ -58,7 +54,6 @@ fun CreateGameDialog(
         title = { Text("צור משחק חדש") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                // תאריך
                 DatePickerField(
                     selectedDate = state.date,
                     onDateSelected = { viewModel.onEvent(CreateGameEvent.DateSelected(it), field) {} }
@@ -77,14 +72,11 @@ fun CreateGameDialog(
                     label = "שעת סיום"
                 )
 
-
-                // מספר שחקנים
                 MaxPlayersDropdown(
                     selected = state.maxPlayers,
                     onSelected = { viewModel.onEvent(CreateGameEvent.MaxPlayersChanged(it), field) {} }
                 )
 
-                // תיאור
                 OutlinedTextField(
                     value = state.description,
                     onValueChange = { viewModel.onEvent(CreateGameEvent.DescriptionChanged(it), field) {} },
@@ -92,7 +84,6 @@ fun CreateGameDialog(
                     enabled = !state.isLoading
                 )
 
-                // שגיאה
                 state.error?.let {
                     Text(text = it, color = MaterialTheme.colorScheme.error)
                 }

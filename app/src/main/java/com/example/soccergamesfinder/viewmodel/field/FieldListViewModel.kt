@@ -68,4 +68,28 @@ class FieldListViewModel @Inject constructor(
         }
     }
 
+    // FieldListViewModel.kt
+    fun removeGameFromField(fieldId: String, gameId: String) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null) }
+            val result = fieldRepository.removeGameFromField(fieldId, gameId)
+            if (result.isSuccess) {
+                _state.update { current ->
+                    val updatedFields = current.fields.map { field ->
+                        if (field.id == fieldId) {
+                            field.copy(games = field.games.filterNot { it == gameId })
+                        } else field
+                    }
+                    current.copy(fields = updatedFields, isLoading = false)
+                }
+            } else {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "שגיאה במחיקת המשחק מהמגרש: ${result.exceptionOrNull()?.message}"
+                    )
+                }
+            }
+        }
+    }
 }
