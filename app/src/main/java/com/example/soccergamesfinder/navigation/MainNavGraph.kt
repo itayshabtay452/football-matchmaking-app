@@ -15,6 +15,7 @@ import androidx.navigation.NavType
 import com.example.soccergamesfinder.ui.screens.DemoScreens
 import com.example.soccergamesfinder.ui.screens.allfields.AllFieldsScreen
 import com.example.soccergamesfinder.ui.screens.allgames.AllGamesScreen
+import com.example.soccergamesfinder.ui.screens.field.FieldDetailsScreen
 import com.example.soccergamesfinder.ui.screens.home.HomeScreen
 import com.example.soccergamesfinder.ui.screens.home.HomeScreenNavActions
 import com.example.soccergamesfinder.viewmodel.field.FieldListViewModel
@@ -107,47 +108,8 @@ fun NavGraphBuilder.mainNavGraph(
             )
 
         }
-        // Edit Profile Screen
-        composable(
-            route = Routes.EditProfile.route,
-            enterTransition = defaultEnterTransition(),
-            exitTransition = defaultExitTransition(),
-            popEnterTransition = defaultPopEnterTransition(),
-            popExitTransition = defaultPopExitTransition()
-        ) {
-            DemoScreens.EditProfileScreen(navigateBack = { navController.popBackStack() })
-        }
-        // Notifications Screen
-        composable(
-            route = Routes.Notifications.route,
-            enterTransition = defaultEnterTransition(),
-            exitTransition = defaultExitTransition(),
-            popEnterTransition = defaultPopEnterTransition(),
-            popExitTransition = defaultPopExitTransition()
-        ) {
-            DemoScreens.NotificationsScreen(navigateBack = { navController.popBackStack() })
-        }
-        // User History Screen
-        composable(
-            route = Routes.UserHistory.route,
-            enterTransition = defaultEnterTransition(),
-            exitTransition = defaultExitTransition(),
-            popEnterTransition = defaultPopEnterTransition(),
-            popExitTransition = defaultPopExitTransition()
-        ) {
-            DemoScreens.UserHistoryScreen(navigateBack = { navController.popBackStack() })
-        }
-        // Add Field Screen
-        composable(
-            route = Routes.AddField.route,
-            enterTransition = defaultEnterTransition(),
-            exitTransition = defaultExitTransition(),
-            popEnterTransition = defaultPopEnterTransition(),
-            popExitTransition = defaultPopExitTransition()
-        ) {
-            DemoScreens.AddFieldScreen(navigateBack = { navController.popBackStack() })
-        }
-        // Field Screen
+
+        // Field Details Screen
         composable(
             route = "${Routes.Field.route}/{fieldId}",
             arguments = listOf(navArgument("fieldId") { type = NavType.StringType }),
@@ -156,12 +118,25 @@ fun NavGraphBuilder.mainNavGraph(
             popEnterTransition = defaultPopEnterTransition(),
             popExitTransition = defaultPopExitTransition()
         ) { backStackEntry ->
-            val fieldId = backStackEntry.arguments?.getString("fieldId") ?: ""
-            DemoScreens.FieldScreen(
+
+            val fieldId = backStackEntry.arguments?.getString("fieldId") ?: return@composable
+
+            val mainGraphBackStackEntry = remember { navController.getBackStackEntry(Routes.MainGraph.route) }
+            val fieldListViewModel: FieldListViewModel = hiltViewModel(mainGraphBackStackEntry)
+            val gameListViewModel: GameListViewModel = hiltViewModel(mainGraphBackStackEntry)
+            val currentUserViewModel: CurrentUserViewModel = hiltViewModel(mainGraphBackStackEntry)
+
+            FieldDetailsScreen(
                 fieldId = fieldId,
-                navigateToGame = { navController.navigate("${Routes.Game.route}/$it") }
+                fieldListViewModel = fieldListViewModel,
+                gameListViewModel = gameListViewModel,
+                currentUserViewModel = currentUserViewModel,
+                onNavigateToGame = { gameId ->
+                    navController.navigate("${Routes.Game.route}/$gameId")
+                }
             )
         }
+
         // Game Screen
         composable(
             route = "${Routes.Game.route}/{gameId}",

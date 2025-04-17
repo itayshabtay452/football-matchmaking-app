@@ -1,5 +1,6 @@
 package com.example.soccergamesfinder.ui.components
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -13,8 +14,9 @@ import com.example.soccergamesfinder.ui.screens.creategame.CreateGameDialog
 @Composable
 fun FieldSection(
     fields: List<Field>,
+    onFieldClick: ((Field) -> Unit)? = null,
     onCreateGame: (Field, Game) -> Unit,
-    modifier: Modifier = Modifier
+    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier
 ) {
     var selectedField by remember { mutableStateOf<Field?>(null) }
 
@@ -26,7 +28,7 @@ fun FieldSection(
             items(fields) { field ->
                 FieldCard(
                     field = field,
-                    onClick = {  },
+                    onClick = { onFieldClick?.invoke(field) },
                     onCreateGameClick = { selectedField = field }
                 )
             }

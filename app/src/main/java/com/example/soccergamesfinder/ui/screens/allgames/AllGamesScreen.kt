@@ -35,9 +35,7 @@ fun AllGamesScreen(
 
     // אתחול ראשוני
     LaunchedEffect(gameState.games, fieldState.fields) {
-        if (gameState.games.isNotEmpty() && fieldState.fields.isNotEmpty()) {
-            allGamesViewModel.setInitialGames(gameState.games, fieldState.fields)
-        }
+        allGamesViewModel.onDataChanged(gameState.games, fieldState.fields)
     }
 
     // UI ראשי

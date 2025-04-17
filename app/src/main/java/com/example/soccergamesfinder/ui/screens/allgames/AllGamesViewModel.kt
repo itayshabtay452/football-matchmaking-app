@@ -19,11 +19,23 @@ class AllGamesViewModel @Inject constructor() : ViewModel() {
     private val _state = MutableStateFlow(AllGamesState())
     val state: StateFlow<AllGamesState> = _state.asStateFlow()
 
+
+    private var lastGames: List<Game> = emptyList()
+    private var lastFields: List<Field> = emptyList()
+
     @RequiresApi(Build.VERSION_CODES.O)
-    fun setInitialGames(games: List<Game>, fields: List<Field>) {
-        _state.update { it.copy(originalGames = games) }
-        _state.update { it.copy(fields = fields) }
-        applyFiltersAndSorting()
+    fun onDataChanged(games: List<Game>, fields: List<Field>) {
+        if (games != lastGames || fields != lastFields) {
+            lastGames = games
+            lastFields = fields
+            _state.update {
+                it.copy(
+                    originalGames = games,
+                    fields = fields
+                )
+            }
+            applyFiltersAndSorting()
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

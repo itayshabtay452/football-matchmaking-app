@@ -39,15 +39,6 @@ object DemoScreens {
     }
 
     @Composable
-    fun AddFieldScreen(navigateBack: () -> Unit) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Button(onClick = navigateBack) {
-                Text("Add Field Screen - חזור")
-            }
-        }
-    }
-
-    @Composable
     fun FieldScreen(
         fieldId: String,
         navigateToGame: (String) -> Unit

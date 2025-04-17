@@ -146,6 +146,9 @@ fun HomeScreen(
                     // כאן תוכל לעדכן את GameListViewModel ו־FieldListViewModel לפי הצורך
                     gameListViewModel.addGame(newGame)
                     fieldListViewModel.updateFieldWithNewGame(field.id, newGame.id) // תעדכן עם המזהה הנכון
+                },
+                onFieldClick = { field ->
+                    navActions.navigateToField(field.id)
                 }
             )
         }

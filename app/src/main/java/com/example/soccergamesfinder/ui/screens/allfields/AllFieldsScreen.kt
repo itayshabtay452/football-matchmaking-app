@@ -3,14 +3,12 @@ package com.example.soccergamesfinder.ui.screens.allfields
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.soccergamesfinder.ui.components.FieldCard
 import com.example.soccergamesfinder.ui.components.FieldSection
 import com.example.soccergamesfinder.viewmodel.field.FieldListViewModel
 import com.example.soccergamesfinder.viewmodel.game.GameListViewModel
@@ -107,6 +105,9 @@ fun AllFieldsScreen(
                                 // כאן תוכל לעדכן את GameListViewModel ו־FieldListViewModel לפי הצורך
                                 gameListViewModel.addGame(newGame)
                                 fieldListViewModel.updateFieldWithNewGame(field.id, newGame.id) // תעדכן עם המזהה הנכון
+                            },
+                            onFieldClick = { field ->
+                                onViewGamesClick(field.id)
                             }
                         )
                     }
