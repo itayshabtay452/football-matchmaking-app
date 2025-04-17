@@ -10,9 +10,6 @@ sealed class Routes(val route: String) {
     object AllFields : Routes("all_fields")
     object AllGames : Routes("all_games")
     object EditProfile : Routes("edit_profile")
-    object Notifications : Routes("notifications")
-    object UserHistory : Routes("user_history")
-    object AddField : Routes("add_field")
     object Field : Routes("fieldScreen")
     object Game : Routes("gameScreen")
 }

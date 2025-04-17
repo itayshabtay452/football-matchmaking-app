@@ -1,9 +1,11 @@
 package com.example.soccergamesfinder.repository
 
+import com.example.soccergamesfinder.data.Field
 import com.example.soccergamesfinder.data.Game
 import com.example.soccergamesfinder.data.GameStatus
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -16,20 +18,47 @@ class GameRepository @Inject constructor(
     /**
      * Retrieves all games from Firestore.
      */
-    suspend fun getAllGames(): List<Game> {
-        return try {
+    fun listenToGames(onChange: (List<Game>) -> Unit, onError: (Throwable) -> Unit): ListenerRegistration {
+        return firestore.collection("games")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    onError(error)
+                    return@addSnapshotListener
+                }
 
-            val snapshot = gamesCollection.get().await()
-
-            val games = snapshot.toObjects(Game::class.java)
-
-            games
-        } catch (e: Exception) {
-            e.printStackTrace()
-            emptyList()
-        }
+                if (snapshot != null && !snapshot.isEmpty) {
+                    val games = snapshot.toObjects(Game::class.java)
+                    onChange(games)
+                }
+            }
     }
 
+    suspend fun createGameAndAttachToField(game: Game): Result<Unit> {
+        return try {
+            val gameRef = firestore.collection("games").document(game.id)
+            val fieldRef = firestore.collection("facilities").document(game.fieldId)
+
+            firestore.runTransaction { transaction ->
+                // 🔁 1. קודם כל קראה את המגרש
+                val fieldSnap = transaction.get(fieldRef)
+                val field = fieldSnap.toObject(Field::class.java)
+                    ?: throw Exception("Field not found")
+
+                val updatedGames = field.games + game.id
+
+                // ✅ 2. עכשיו כתוב את המשחק ועדכן את המגרש
+                transaction.set(gameRef, game)
+                transaction.update(fieldRef, "games", updatedGames)
+            }.await()
+
+            println(">>> המשחק נשמר בהצלחה עם ID: ${game.id}")
+            Result.success(Unit)
+
+        } catch (e: Exception) {
+            println(">>> שמירת המשחק נכשלה: ${e.message}")
+            Result.failure(e)
+        }
+    }
 
     /**
      * Retrieves games for a specific field.
@@ -63,17 +92,6 @@ class GameRepository @Inject constructor(
         }
     }
 
-    /**
-     * Creates a new game in Firestore.
-     */
-    suspend fun createGame(game: Game): Result<Unit> {
-        return try {
-            gamesCollection.document(game.id).set(game).await()
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
 
     /**
      * Adds a player to a game, without checking any business logic.
@@ -123,21 +141,50 @@ class GameRepository @Inject constructor(
         }
     }
 
-    /**
-     * Retrieves a game by its ID.
-     */
-    suspend fun getGameById(gameId: String): Game? {
-        return try {
-            val snapshot = gamesCollection.document(gameId).get().await()
-            snapshot.toObject(Game::class.java)
-        } catch (e: Exception) {
-            null
-        }
+    fun listenToGamesByFieldId(
+        fieldId: String,
+        onChange: (List<Game>) -> Unit,
+        onError: (Throwable) -> Unit
+    ): ListenerRegistration {
+        return firestore.collection("games")
+            .whereEqualTo("fieldId", fieldId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    onError(error)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null && !snapshot.isEmpty) {
+                    val games = snapshot.toObjects(Game::class.java)
+                    onChange(games)
+                } else {
+                    onChange(emptyList())
+                }
+            }
     }
 
-    suspend fun updateGameStatus(gameId: String, status: GameStatus) {
-        gamesCollection.document(gameId).update("status", status.name).await()
+    fun listenToGameById(
+        gameId: String,
+        onChange: (Game) -> Unit,
+        onError: (Exception) -> Unit
+    ): ListenerRegistration {
+        return firestore.collection("games")
+            .document(gameId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    onError(error)
+                    return@addSnapshotListener
+                }
+
+                val game = snapshot?.toObject(Game::class.java)
+                if (game != null) {
+                    onChange(game)
+                } else {
+                    onError(Exception("המשחק לא נמצא"))
+                }
+            }
     }
+
 
 
 }

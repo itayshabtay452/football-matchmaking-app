@@ -15,7 +15,7 @@ import com.example.soccergamesfinder.ui.screens.creategame.CreateGameDialog
 fun FieldSection(
     fields: List<Field>,
     onFieldClick: ((Field) -> Unit)? = null,
-    onCreateGame: (Field, Game) -> Unit,
+    onCreateGame: ((Field, Game) -> Unit)? = null, // 👈 חדש
     @SuppressLint("ModifierParameter") modifier: Modifier = Modifier
 ) {
     var selectedField by remember { mutableStateOf<Field?>(null) }
@@ -38,8 +38,8 @@ fun FieldSection(
             CreateGameDialog(
                 field = field,
                 onDismiss = { selectedField = null },
-                onCreateSuccess = { game ->
-                    onCreateGame(field, game)
+                onCreateSuccess = { newGame ->
+                    onCreateGame?.invoke(field, newGame)
                     selectedField = null
                 }
             )

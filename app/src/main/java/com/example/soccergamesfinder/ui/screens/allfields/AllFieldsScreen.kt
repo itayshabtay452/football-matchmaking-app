@@ -101,11 +101,6 @@ fun AllFieldsScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         FieldSection(
                             fields = state.filteredFields,
-                            onCreateGame = { field, newGame ->
-                                // כאן תוכל לעדכן את GameListViewModel ו־FieldListViewModel לפי הצורך
-                                gameListViewModel.addGame(newGame)
-                                fieldListViewModel.updateFieldWithNewGame(field.id, newGame.id) // תעדכן עם המזהה הנכון
-                            },
                             onFieldClick = { field ->
                                 onViewGamesClick(field.id)
                             }

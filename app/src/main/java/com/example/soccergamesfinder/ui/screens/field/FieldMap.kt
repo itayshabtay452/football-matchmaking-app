@@ -6,7 +6,6 @@ import androidx.compose.ui.unit.dp
 import com.google.maps.android.compose.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.ui.Alignment
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 

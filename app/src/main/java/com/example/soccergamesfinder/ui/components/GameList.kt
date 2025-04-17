@@ -38,7 +38,7 @@ fun GameList(
                 onJoinClick = { onJoinClick(game) },
                 onLeaveClick = { onLeaveClick(game) },
                 onDeleteClick = { onDeleteClick(game) },
-                onCardClick  = {  }
+                onCardClick  = { onCardClick(game) }
             )
         }
     }

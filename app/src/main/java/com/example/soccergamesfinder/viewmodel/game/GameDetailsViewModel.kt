@@ -1,4 +1,4 @@
-// GameDetailsViewModel.kt
+// GameViewModel.kt
 package com.example.soccergamesfinder.viewmodel.game
 
 import androidx.lifecycle.ViewModel
@@ -67,37 +67,42 @@ class GameDetailsViewModel @Inject constructor(
     fun deleteGame(game: Game, onSuccess: () -> Unit = {}) {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true)
-            val result = gameRepository.deleteGame(game.id)
-            if (result.isSuccess) {
-                _state.value = _state.value.copy(isLoading = false, error = null)
-                onSuccess()
-            } else {
-                showError("מחיקת המשחק נכשלה")
-            }
-        }
-    }
 
-    fun createGame(game: Game, onResult: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            _state.value = _state.value.copy(isLoading = true, error = null)
-
-            val gameResult = gameRepository.createGame(game)
-            if (gameResult.isSuccess) {
-                val fieldUpdateResult = fieldRepository.addGameToField(game.fieldId, game.id)
-                if (fieldUpdateResult.isFailure) {
-                    showError("המשחק נוצר, אך לא נקשר למגרש")
-                    onResult(false)
-                    return@launch
-                }
-
+            val deleteResult = gameRepository.deleteGame(game.id)
+            if (deleteResult.isFailure) {
                 _state.value = _state.value.copy(isLoading = false)
-                onResult(true)
+                showError("מחיקת המשחק נכשלה")
+                return@launch
+            }
+
+            val removeFromFieldResult = fieldRepository.removeGameFromField(
+                fieldId = game.fieldId,
+                gameId = game.id
+            )
+
+            _state.value = _state.value.copy(isLoading = false)
+
+            if (removeFromFieldResult.isFailure) {
+                showError("המשחק נמחק, אך לא הוסר מהמגרש")
             } else {
-                _state.value = _state.value.copy(isLoading = false, error = "שגיאה ביצירת המשחק")
-                onResult(false)
+                onSuccess()
             }
         }
     }
+
+
+    fun createGameAndAttach(game: Game, onResult: (Boolean) -> Unit) {
+        println(">>> התחלה: יצירת המשחק בפועל ב־Firestore")
+        viewModelScope.launch {
+            val result = gameRepository.createGameAndAttachToField(game)
+            if (result.isSuccess) {
+                onResult(result.isSuccess)
+            } else {
+                println(">>> שמירת המשחק נכשלה: ${result.exceptionOrNull()?.message}")
+            }
+        }
+    }
+
 
 
 

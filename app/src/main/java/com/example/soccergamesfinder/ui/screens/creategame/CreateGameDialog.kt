@@ -31,7 +31,7 @@ fun CreateGameDialog(
             Button(
                 onClick = {
                     viewModel.onEvent(CreateGameEvent.Submit, field) { game ->
-                        gameDetailsViewModel.createGame(game) { success ->
+                        gameDetailsViewModel.createGameAndAttach(game) { success ->
                             if (success) {
                                 onCreateSuccess?.invoke(game)
                             }

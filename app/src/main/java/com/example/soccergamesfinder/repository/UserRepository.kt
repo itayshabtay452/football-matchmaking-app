@@ -117,4 +117,27 @@ class UserRepository @Inject constructor(
             false // אם יש שגיאה נניח שהכינוי פנוי כדי לא לחסום
         }
     }
+
+    suspend fun getUsersByIds(userIds: List<String>): List<User> {
+        return try {
+            val chunks = userIds.chunked(10) // מחלק את הרשימה לחלקים של עד 10 מזהים
+            val users = mutableListOf<User>()
+
+            for (chunk in chunks) {
+                val snapshot = firestore.collection("users")
+                    .whereIn("id", chunk)
+                    .get()
+                    .await()
+
+                users += snapshot.toObjects(User::class.java)
+            }
+
+            users
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+
+
 }

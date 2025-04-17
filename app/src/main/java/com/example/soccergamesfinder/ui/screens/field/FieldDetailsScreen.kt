@@ -30,23 +30,12 @@ fun FieldDetailsScreen(
     val fieldState = fieldDetailsViewModel.state.collectAsState().value
     val userState = currentUserViewModel.state.collectAsState().value
     val currentUser = userState.user
-    val fields = fieldListViewModel.state.collectAsState().value.fields
-    val games = gameListViewModel.state.collectAsState().value.games
 
     val openDialog = remember { mutableStateOf(false) }
-    val loadedAllGamesOnce = remember { mutableStateOf(false) }
-
     LaunchedEffect(fieldId) {
-        if (!loadedAllGamesOnce.value) {
-            fieldDetailsViewModel.loadAllGamesForField(fieldId)
-            loadedAllGamesOnce.value = true
-        }
+        fieldDetailsViewModel.startListening(fieldId)
     }
 
-    // עוקב אחרי שינויים ברשימות ומעדכן את התצוגה לפי הצורך
-    LaunchedEffect(fieldId, fields, games) {
-        fieldDetailsViewModel.onDataChanged(fieldId, fields, games)
-    }
 
     when {
         fieldState.isLoading -> {
@@ -123,21 +112,13 @@ fun FieldDetailsScreen(
                         currentUser = currentUser,
                         fields = listOf(field),
                         onJoinClick = { game ->
-                            gameDetailsViewModel.joinGame(game) {
-                                gameListViewModel.updateSingleGame(game.id)
-                            }
+                            gameDetailsViewModel.joinGame(game)
                         },
                         onLeaveClick = { game ->
-                            gameDetailsViewModel.leaveGame(game) {
-                                gameListViewModel.updateSingleGame(game.id)
-                            }
+                            gameDetailsViewModel.leaveGame(game)
                         },
                         onDeleteClick = { game ->
-                            gameDetailsViewModel.deleteGame(game) {
-                                gameListViewModel.removeGame(game.id)
-                                fieldListViewModel.removeGameFromField(game.fieldId, game.id)
-                                fieldDetailsViewModel.removeGameFromAllGames(game.id)
-                            }
+                            gameDetailsViewModel.deleteGame(game)
                         },
                         onCardClick = { game ->
                             onNavigateToGame(game.id)
@@ -150,9 +131,6 @@ fun FieldDetailsScreen(
                     field = fieldState.field,
                     onDismiss = { openDialog.value = false },
                     onCreateSuccess = { game ->
-                        gameListViewModel.addGame(game)
-                        fieldListViewModel.updateFieldWithNewGame(game.fieldId, game.id)
-                        fieldDetailsViewModel.addGameToAllGames(game)
                         openDialog.value = false
                     }
                 )

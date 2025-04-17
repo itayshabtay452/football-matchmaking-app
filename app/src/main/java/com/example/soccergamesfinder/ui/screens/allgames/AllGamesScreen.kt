@@ -84,22 +84,15 @@ fun AllGamesScreen(
                         currentUser = currentUserState.user,
                         fields = state.fields,
                         onJoinClick = { game ->
-                            gameDetailsViewModel.joinGame(game) {
-                                gameListViewModel.updateSingleGame(game.id)
-                            }
+                            gameDetailsViewModel.joinGame(game)
                         },
                         onLeaveClick = { game ->
-                            gameDetailsViewModel.leaveGame(game) {
-                                gameListViewModel.updateSingleGame(game.id)
-                            }
+                            gameDetailsViewModel.leaveGame(game)
                         },
                         onDeleteClick = { game ->
-                            gameDetailsViewModel.deleteGame(game) {
-                                gameListViewModel.removeGame(game.id)
-                                fieldListViewModel.removeGameFromField(game.fieldId, game.id)
-                            }
+                            gameDetailsViewModel.deleteGame(game)
                         },
-                        onCardClick  = { game ->
+                        onCardClick = { game ->
                             onGameClick(game.id)
                         }
                     )

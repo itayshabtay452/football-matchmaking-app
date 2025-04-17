@@ -1,80 +1,75 @@
 package com.example.soccergamesfinder.ui.screens.field
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.soccergamesfinder.data.Field
 import com.example.soccergamesfinder.data.Game
 import com.example.soccergamesfinder.data.GameStatus
+import com.example.soccergamesfinder.repository.FieldRepository
 import com.example.soccergamesfinder.repository.GameRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.google.firebase.firestore.ListenerRegistration
 
 @HiltViewModel
 class FieldDetailsViewModel @Inject constructor(
+    private val fieldRepository: FieldRepository,
     private val gameRepository: GameRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(FieldDetailsState())
     val state: StateFlow<FieldDetailsState> = _state.asStateFlow()
 
-    private var lastField: Field? = null
-    private var lastGames: List<Game> = emptyList()
+    private var fieldListener: ListenerRegistration? = null
+    private var gamesListener: ListenerRegistration? = null
 
-    fun onDataChanged(fieldId: String, knownFields: List<Field>, knownGames: List<Game>) {
-        val field = knownFields.firstOrNull { it.id == fieldId }
-        val games = knownGames.filter { it.fieldId == fieldId }
-
-        if (field != lastField || games != lastGames) {
-            lastField = field
-            lastGames = games
-
-            if (field == null) {
-                _state.update { it.copy(field = null, games = emptyList(), error = "המגרש לא נמצא") }
-            } else {
-                _state.update {
-                    it.copy(
-                        field = field,
-                        games = games,
-                        isLoading = false,
-                        error = null
-                    )
-                }
+    fun startListening(fieldId: String) {
+        // מאזין לשינויים במגרש
+        fieldListener?.remove()
+        fieldListener = fieldRepository.listenToFieldById(
+            fieldId = fieldId,
+            onChange = { field ->
+                _state.update { it.copy(field = field, isLoading = false, error = null) }
+            },
+            onError = { e ->
+                _state.update { it.copy(error = e.message ?: "שגיאה בטעינת המגרש", isLoading = false) }
             }
-        }
-    }
+        )
 
-    fun loadAllGamesForField(fieldId: String) {
-        viewModelScope.launch {
-            try {
-                val allGames = gameRepository.getGamesByFieldId(fieldId)
-                updateStatisticsFromAllGames(allGames)
-            } catch (e: Exception) {
-                // טיפול בשגיאה בעתיד
+        // מאזין לשינויים במשחקים של המגרש
+        gamesListener?.remove()
+        gamesListener = gameRepository.listenToGamesByFieldId(
+            fieldId = fieldId,
+            onChange = { games ->
+                _state.update { it.copy(games = games) }
+                updateStatistics(games)
+            },
+            onError = { e ->
+                _state.update { it.copy(error = e.message ?: "שגיאה בטעינת המשחקים") }
             }
-        }
+        )
     }
 
-    fun addGameToAllGames(game: Game) {
-        val updated = _state.value.allGames + game
-        updateStatisticsFromAllGames(updated)
-    }
+    private fun updateStatistics(games: List<Game>) {
+        val total = games.size
+        val open = games.count { it.status == GameStatus.OPEN }
+        val full = games.count { it.joinedPlayers.size >= it.maxPlayers }
+        val avg = if (games.isNotEmpty()) {
+            games.sumOf { it.joinedPlayers.size }.toDouble() / games.size
+        } else 0.0
 
-    fun removeGameFromAllGames(gameId: String) {
-        val updated = _state.value.allGames.filterNot { it.id == gameId }
-        updateStatisticsFromAllGames(updated)
-    }
-
-    private fun updateStatisticsFromAllGames(games: List<Game>) {
         _state.update {
             it.copy(
-                allGames = games,
-                totalGames = games.size,
-                avgPlayers = games.map { g -> g.joinedPlayers.size }.average().toInt(),
-                fullGames = games.count { g -> g.joinedPlayers.size >= g.maxPlayers },
-                openGames = games.count { g -> g.status == GameStatus.OPEN }
+                totalGames = total,
+                openGames = open,
+                fullGames = full,
+                avgPlayers = avg
             )
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        fieldListener?.remove()
+        gamesListener?.remove()
     }
 }

@@ -6,6 +6,7 @@ import com.example.soccergamesfinder.data.Field
 import com.example.soccergamesfinder.repository.FieldRepository
 import com.example.soccergamesfinder.services.LocationService
 import com.example.soccergamesfinder.utils.DistanceCalculator
+import com.google.firebase.firestore.ListenerRegistration
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -21,75 +22,47 @@ class FieldListViewModel @Inject constructor(
     val state: StateFlow<FieldListState> = _state.asStateFlow()
 
     init {
-        loadFieldsWithDistance()
+        startListeningToFields()
     }
 
-    private fun loadFieldsWithDistance() {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
 
-            val fields = fieldRepository.getAllFields()
+    private var listener: ListenerRegistration? = null
 
-            val locationResult = locationService.getCurrentLocation()
-            val userLocation = locationResult.getOrNull()
+    private fun startListeningToFields() {
+        if (listener != null) return // כבר מאזין
 
-            val updatedFields = if (userLocation != null) {
-                fields.map { field ->
-                    val distance = DistanceCalculator.calculate(
-                        userLat = userLocation.first,
-                        userLng = userLocation.second,
-                        fieldLat = field.latitude ?: 0.0,
-                        fieldLng = field.longitude ?: 0.0
-                    )
-                    field.copy(distance = distance)
-                }.sortedBy { it.distance }
-            } else {
-                fields
-            }
+        listener = fieldRepository.listenToFields(
+            onChange = { fields ->
+                viewModelScope.launch {
+                    val locationResult = locationService.getCurrentLocation()
+                    val userLocation = locationResult.getOrNull()
 
-            _state.update {
-                it.copy(
-                    isLoading = false,
-                    fields = updatedFields
-                )
-            }
-        }
-    }
-
-    fun updateFieldWithNewGame(fieldId: String, gameId: String) {
-        val currentFields = _state.value.fields.toMutableList()
-        val index = currentFields.indexOfFirst { it.id == fieldId }
-
-        if (index != -1) {
-            val field = currentFields[index]
-            val updatedField = field.copy(games = field.games + gameId)
-            currentFields[index] = updatedField
-            _state.update { it.copy(fields = currentFields) }
-        }
-    }
-
-    // FieldListViewModel.kt
-    fun removeGameFromField(fieldId: String, gameId: String) {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
-            val result = fieldRepository.removeGameFromField(fieldId, gameId)
-            if (result.isSuccess) {
-                _state.update { current ->
-                    val updatedFields = current.fields.map { field ->
-                        if (field.id == fieldId) {
-                            field.copy(games = field.games.filterNot { it == gameId })
-                        } else field
+                    val updatedFields = if (userLocation != null) {
+                        fields.map { field ->
+                            val distance = DistanceCalculator.calculate(
+                                userLat = userLocation.first,
+                                userLng = userLocation.second,
+                                fieldLat = field.latitude ?: 0.0,
+                                fieldLng = field.longitude ?: 0.0
+                            )
+                            field.copy(distance = distance)
+                        }.sortedBy { it.distance }
+                    } else {
+                        fields
                     }
-                    current.copy(fields = updatedFields, isLoading = false)
+
+                    _state.update { it.copy(fields = updatedFields, isLoading = false, error = null) }
                 }
-            } else {
-                _state.update {
-                    it.copy(
-                        isLoading = false,
-                        error = "שגיאה במחיקת המשחק מהמגרש: ${result.exceptionOrNull()?.message}"
-                    )
-                }
+            },
+            onError = { e ->
+                _state.update { it.copy(error = e.message ?: "שגיאה בהאזנה למגרשים") }
             }
-        }
+        )
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        listener?.remove()
+    }
+
 }

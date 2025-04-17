@@ -12,10 +12,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
 import androidx.navigation.NavType
-import com.example.soccergamesfinder.ui.screens.DemoScreens
 import com.example.soccergamesfinder.ui.screens.allfields.AllFieldsScreen
 import com.example.soccergamesfinder.ui.screens.allgames.AllGamesScreen
 import com.example.soccergamesfinder.ui.screens.field.FieldDetailsScreen
+import com.example.soccergamesfinder.ui.screens.game.GameDetailsScreen
 import com.example.soccergamesfinder.ui.screens.home.HomeScreen
 import com.example.soccergamesfinder.ui.screens.home.HomeScreenNavActions
 import com.example.soccergamesfinder.viewmodel.field.FieldListViewModel
@@ -145,12 +145,28 @@ fun NavGraphBuilder.mainNavGraph(
             exitTransition = defaultExitTransition(),
             popEnterTransition = defaultPopEnterTransition(),
             popExitTransition = defaultPopExitTransition()
-        ) { backStackEntry ->
-            val gameId = backStackEntry.arguments?.getString("gameId") ?: ""
-            DemoScreens.GameScreen(
+        ) {
+            val gameId = it.arguments?.getString("gameId") ?: return@composable
+
+            val mainGraphEntry = remember { navController.getBackStackEntry(Routes.MainGraph.route) }
+
+            val gameListViewModel: GameListViewModel = hiltViewModel(mainGraphEntry)
+            val fieldListViewModel: FieldListViewModel = hiltViewModel(mainGraphEntry)
+            val currentUserViewModel: CurrentUserViewModel = hiltViewModel(mainGraphEntry)
+
+            GameDetailsScreen(
                 gameId = gameId,
-                navigateBack = { navController.popBackStack() }
+                gameListViewModel = gameListViewModel,
+                fieldListViewModel = fieldListViewModel,
+                currentUserViewModel = currentUserViewModel,
+                onNavigateToField = { fieldId ->
+                    navController.navigate("${Routes.Field.route}/$fieldId")
+                },
+                onNavigateToUser = { userId ->
+
+                }
             )
         }
+
     }
 }

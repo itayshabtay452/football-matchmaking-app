@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun FieldStatisticsSection(
     totalGames: Int,
-    avgPlayers: Int,
+    avgPlayers: Double,
     fullGames: Int,
     openGames: Int
 ) {

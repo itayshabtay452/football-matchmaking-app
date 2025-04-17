@@ -28,7 +28,6 @@ import com.example.soccergamesfinder.viewmodel.user.CurrentUserViewModel
 @Composable
 fun HomeScreen(
     navActions: HomeScreenNavActions,
-    homeViewModel: HomeViewModel = hiltViewModel(),
     currentUserViewModel: CurrentUserViewModel = hiltViewModel(),
     fieldListViewModel: FieldListViewModel = hiltViewModel(),
     gameListViewModel: GameListViewModel = hiltViewModel(),
@@ -38,64 +37,54 @@ fun HomeScreen(
     val fieldState = fieldListViewModel.state.collectAsState().value
     val gameState = gameListViewModel.state.collectAsState().value
 
-    LaunchedEffect(userState.user, fieldState.fields, gameState.games) {
-        homeViewModel.updateState(
-            userNickname = userState.user?.nickname ?: "",
-            userProfileImageUrl = userState.user?.profileImageUrl,
-            fields = fieldState.fields,
-            games = gameState.games,
-            isLoading = userState.isLoading || fieldState.isLoading || gameState.isLoading,
-            error = userState.error ?: fieldState.error ?: gameState.error
-        )
-        println(">>> HomeScreen returned ${fieldState.fields.size} fields and ${gameState.games.size} games")
-    }
+    val isLoading = userState.isLoading || fieldState.isLoading || gameState.isLoading
+    val error = userState.error ?: fieldState.error ?: gameState.error
 
-
-    val state = homeViewModel.state.collectAsState().value
-
-    if (state.isLoading) {
+    if (isLoading) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
         return
     }
 
-    if (state.error != null) {
+    if (error != null) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("שגיאה: ${state.error}", color = MaterialTheme.colorScheme.error)
+            Text("שגיאה: $error", color = MaterialTheme.colorScheme.error)
         }
         return
     }
 
+    val currentUser = userState.user
+    val fields = fieldState.fields
+    val games = gameState.games
+
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp)) {
 
         item {
-            // Greeting row with profile image
+            // ברכת שלום עם תמונת פרופיל
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "שלום, ${state.userNickname}",
+                        text = "שלום, ${currentUser?.nickname ?: "אורח"}",
                         style = MaterialTheme.typography.headlineSmall
                     )
                 }
 
-                state.userProfileImageUrl?.let { imageUrl ->
+                currentUser?.profileImageUrl?.let { imageUrl ->
                     AsyncImage(
                         model = imageUrl,
                         contentDescription = "תמונת פרופיל",
-                        modifier = Modifier
-                            .size(48.dp)
-                            .padding(start = 8.dp)
+                        modifier = Modifier.size(48.dp).padding(start = 8.dp)
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Profile and logout buttons
+            // כפתורים
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Button(onClick = navActions.navigateToProfile, modifier = Modifier.weight(1f)) {
                     Text("👤 פרופיל")
@@ -107,7 +96,7 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Add new field CTA card
+            // כפתור הוספת מגרש
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
@@ -116,7 +105,7 @@ fun HomeScreen(
                     Text("מכיר מגרש שלא קיים אצלנו?")
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
-                        onClick = { /* TODO: Navigate to add field screen */ },
+                        onClick = { /* TODO: מעבר למסך הוספת מגרש */ },
                         modifier = Modifier.align(Alignment.End)
                     ) {
                         Text("➕ הוסף מגרש")
@@ -127,7 +116,7 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // Recommended Fields Section
+        // 🏟️ מגרשים
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -139,23 +128,29 @@ fun HomeScreen(
                     Text("הצג הכל")
                 }
             }
+
             Spacer(modifier = Modifier.height(8.dp))
+
             FieldSection(
-                fields = state.fields.take(5),
-                onCreateGame = { field, newGame ->
-                    // כאן תוכל לעדכן את GameListViewModel ו־FieldListViewModel לפי הצורך
-                    gameListViewModel.addGame(newGame)
-                    fieldListViewModel.updateFieldWithNewGame(field.id, newGame.id) // תעדכן עם המזהה הנכון
-                },
+                fields = fields.take(5),
                 onFieldClick = { field ->
                     navActions.navigateToField(field.id)
+                },
+                onCreateGame = { field, newGame ->
+                    gameDetailsViewModel.createGameAndAttach(newGame) { success ->
+                        if (!success) {
+                            // אפשר להראות הודעת שגיאה או טוסט
+                        }
+                    }
                 }
             )
+
         }
 
-        // Recommended Games Section
+        // 🕹️ משחקים
         item {
             Spacer(modifier = Modifier.height(24.dp))
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -166,32 +161,27 @@ fun HomeScreen(
                     Text("הצג הכל")
                 }
             }
+
             Spacer(modifier = Modifier.height(8.dp))
+
             GameList(
-                games = state.games.take(5),
-                currentUser = userState.user,
-                fields = fieldState.fields,
+                games = games.take(5),
+                currentUser = currentUser,
+                fields = fields,
                 onJoinClick = { game ->
-                    gameDetailsViewModel.joinGame(game) {
-                        gameListViewModel.updateSingleGame(game.id)
-                    }
+                    gameDetailsViewModel.joinGame(game)
                 },
                 onLeaveClick = { game ->
-                    gameDetailsViewModel.leaveGame(game) {
-                        gameListViewModel.updateSingleGame(game.id)
-                    }
+                    gameDetailsViewModel.leaveGame(game)
                 },
                 onDeleteClick = { game ->
-                    gameDetailsViewModel.deleteGame(game) {
-                        gameListViewModel.removeGame(game.id)
-                        fieldListViewModel.removeGameFromField(game.fieldId, game.id)
-                    }
+                    gameDetailsViewModel.deleteGame(game)
                 },
-                onCardClick  = { game ->
+                onCardClick = { game ->
                     navActions.navigateToGame(game.id)
                 }
             )
-
         }
     }
 }
+
