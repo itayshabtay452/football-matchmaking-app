@@ -2,7 +2,6 @@ package com.example.soccergamesfinder.viewmodel.field
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.soccergamesfinder.data.Field
 import com.example.soccergamesfinder.repository.FieldRepository
 import com.example.soccergamesfinder.services.LocationService
 import com.example.soccergamesfinder.utils.DistanceCalculator

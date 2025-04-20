@@ -18,6 +18,7 @@ import com.example.soccergamesfinder.ui.screens.field.FieldDetailsScreen
 import com.example.soccergamesfinder.ui.screens.game.GameDetailsScreen
 import com.example.soccergamesfinder.ui.screens.home.HomeScreen
 import com.example.soccergamesfinder.ui.screens.home.HomeScreenNavActions
+import com.example.soccergamesfinder.ui.screens.user.UserViewScreen
 import com.example.soccergamesfinder.viewmodel.field.FieldListViewModel
 import com.example.soccergamesfinder.viewmodel.game.GameListViewModel
 import com.example.soccergamesfinder.viewmodel.user.CurrentUserViewModel
@@ -47,7 +48,7 @@ fun NavGraphBuilder.mainNavGraph(
 
             HomeScreen(
                 navActions = HomeScreenNavActions(
-                    navigateToProfile = { navController.navigate(Routes.EditProfile.route) },
+                    navigateToProfile = { userId -> navController.navigate("${Routes.UserProfile.route}/$userId")},
                     navigateToAllFields = { navController.navigate(Routes.AllFields.route) },
                     navigateToAllGames = { navController.navigate(Routes.AllGames.route) },
                     navigateToField = { fieldId -> navController.navigate("${Routes.Field.route}/$fieldId") },
@@ -73,12 +74,9 @@ fun NavGraphBuilder.mainNavGraph(
         ) {
             val mainGraphBackStackEntry = remember { navController.getBackStackEntry(Routes.MainGraph.route) }
             val fieldListViewModel: FieldListViewModel = hiltViewModel(mainGraphBackStackEntry)
-            val gameListViewModel: GameListViewModel = hiltViewModel(mainGraphBackStackEntry)
-
 
             AllFieldsScreen(
                 fieldListViewModel = fieldListViewModel,
-                gameListViewModel = gameListViewModel,
                 onViewGamesClick = { fieldId ->
                     navController.navigate("${Routes.Field.route}/$fieldId")
                 }
@@ -122,14 +120,10 @@ fun NavGraphBuilder.mainNavGraph(
             val fieldId = backStackEntry.arguments?.getString("fieldId") ?: return@composable
 
             val mainGraphBackStackEntry = remember { navController.getBackStackEntry(Routes.MainGraph.route) }
-            val fieldListViewModel: FieldListViewModel = hiltViewModel(mainGraphBackStackEntry)
-            val gameListViewModel: GameListViewModel = hiltViewModel(mainGraphBackStackEntry)
             val currentUserViewModel: CurrentUserViewModel = hiltViewModel(mainGraphBackStackEntry)
 
             FieldDetailsScreen(
                 fieldId = fieldId,
-                fieldListViewModel = fieldListViewModel,
-                gameListViewModel = gameListViewModel,
                 currentUserViewModel = currentUserViewModel,
                 onNavigateToGame = { gameId ->
                     navController.navigate("${Routes.Game.route}/$gameId")
@@ -148,22 +142,33 @@ fun NavGraphBuilder.mainNavGraph(
         ) {
             val gameId = it.arguments?.getString("gameId") ?: return@composable
 
-            val mainGraphEntry = remember { navController.getBackStackEntry(Routes.MainGraph.route) }
-
-            val gameListViewModel: GameListViewModel = hiltViewModel(mainGraphEntry)
-            val fieldListViewModel: FieldListViewModel = hiltViewModel(mainGraphEntry)
-            val currentUserViewModel: CurrentUserViewModel = hiltViewModel(mainGraphEntry)
-
             GameDetailsScreen(
                 gameId = gameId,
-                gameListViewModel = gameListViewModel,
-                fieldListViewModel = fieldListViewModel,
-                currentUserViewModel = currentUserViewModel,
                 onNavigateToField = { fieldId ->
                     navController.navigate("${Routes.Field.route}/$fieldId")
                 },
                 onNavigateToUser = { userId ->
+                    navController.navigate("${Routes.UserProfile.route}/$userId")
 
+                }
+            )
+        }
+
+        // User Profile Screen
+        composable(
+            route = "${Routes.UserProfile.route}/{userId}",
+            arguments = listOf(navArgument("userId") { type = NavType.StringType }),
+            enterTransition = defaultEnterTransition(),
+            exitTransition = defaultExitTransition(),
+            popEnterTransition = defaultPopEnterTransition(),
+            popExitTransition = defaultPopExitTransition()
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: return@composable
+
+            UserViewScreen(
+                userId = userId,
+                onNavigateToGame = { gameId ->
+                    navController.navigate("${Routes.Game.route}/$gameId")
                 }
             )
         }

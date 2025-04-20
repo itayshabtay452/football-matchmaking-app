@@ -92,6 +92,21 @@ class GameRepository @Inject constructor(
         }
     }
 
+    suspend fun getGamesForUser(userId: String): List<Game> {
+        return try {
+            val snapshot = firestore.collection("games")
+                .whereArrayContains("joinedPlayers", userId)
+                .get()
+                .await()
+
+            snapshot.toObjects(Game::class.java)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+
+
 
     /**
      * Adds a player to a game, without checking any business logic.

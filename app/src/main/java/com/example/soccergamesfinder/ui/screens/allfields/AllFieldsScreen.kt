@@ -19,7 +19,6 @@ import com.example.soccergamesfinder.viewmodel.game.GameListViewModel
 fun AllFieldsScreen(
     onViewGamesClick: (String) -> Unit,
     fieldListViewModel: FieldListViewModel = hiltViewModel(),
-    gameListViewModel: GameListViewModel = hiltViewModel()
 ) {
     val allFieldsViewModel: AllFieldsViewModel = hiltViewModel()
 

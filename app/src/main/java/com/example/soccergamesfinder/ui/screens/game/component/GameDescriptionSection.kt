@@ -1,5 +1,5 @@
 // GameDescriptionSection.kt
-package com.example.soccergamesfinder.ui.screens.game
+package com.example.soccergamesfinder.ui.screens.game.component
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*

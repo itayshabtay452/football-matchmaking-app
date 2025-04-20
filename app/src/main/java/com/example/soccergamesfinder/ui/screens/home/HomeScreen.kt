@@ -86,7 +86,7 @@ fun HomeScreen(
 
             // כפתורים
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Button(onClick = navActions.navigateToProfile, modifier = Modifier.weight(1f)) {
+                Button(onClick = { navActions.navigateToProfile(currentUser?.id ?: "") }, modifier = Modifier.weight(1f)) {
                     Text("👤 פרופיל")
                 }
                 OutlinedButton(onClick = navActions.navigateToLogin, modifier = Modifier.weight(1f)) {

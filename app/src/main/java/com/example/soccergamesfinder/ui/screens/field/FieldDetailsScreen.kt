@@ -22,8 +22,6 @@ fun FieldDetailsScreen(
     fieldId: String,
     currentUserViewModel: CurrentUserViewModel = hiltViewModel(),
     fieldDetailsViewModel: FieldDetailsViewModel = hiltViewModel(),
-    fieldListViewModel: FieldListViewModel = hiltViewModel(),
-    gameListViewModel: GameListViewModel = hiltViewModel(),
     gameDetailsViewModel: GameDetailsViewModel = hiltViewModel(),
     onNavigateToGame: (String) -> Unit
 ) {

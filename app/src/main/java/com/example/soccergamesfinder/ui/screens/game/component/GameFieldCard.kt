@@ -1,4 +1,4 @@
-package com.example.soccergamesfinder.ui.screens.game
+package com.example.soccergamesfinder.ui.screens.game.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*

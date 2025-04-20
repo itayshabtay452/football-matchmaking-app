@@ -1,12 +1,11 @@
 // ui/components/game/GameHeaderSection.kt
-package com.example.soccergamesfinder.ui.screens.game
+package com.example.soccergamesfinder.ui.screens.game.component
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.example.soccergamesfinder.data.Game
 import com.example.soccergamesfinder.data.GameStatus
 import java.text.SimpleDateFormat
