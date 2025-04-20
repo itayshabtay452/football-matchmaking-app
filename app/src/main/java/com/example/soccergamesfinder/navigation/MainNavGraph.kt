@@ -19,6 +19,7 @@ import com.example.soccergamesfinder.ui.screens.field.FieldDetailsScreen
 import com.example.soccergamesfinder.ui.screens.game.GameDetailsScreen
 import com.example.soccergamesfinder.ui.screens.home.HomeScreen
 import com.example.soccergamesfinder.ui.screens.home.HomeScreenNavActions
+import com.example.soccergamesfinder.ui.screens.notifications.NotificationsScreen
 import com.example.soccergamesfinder.ui.screens.user.UserViewScreen
 import com.example.soccergamesfinder.viewmodel.field.FieldListViewModel
 import com.example.soccergamesfinder.viewmodel.game.GameListViewModel
@@ -28,7 +29,10 @@ import com.example.soccergamesfinder.viewmodel.user.CurrentUserViewModel
 @SuppressLint("UnrememberedGetBackStackEntry")
 @OptIn(ExperimentalAnimationApi::class)
 fun NavGraphBuilder.mainNavGraph(
-    navController: NavController
+    navController: NavController,
+    fieldListViewModel: FieldListViewModel,
+    gameListViewModel: GameListViewModel,
+    currentUserViewModel: CurrentUserViewModel
 ) {
     navigation(
         startDestination = Routes.Home.route,
@@ -42,10 +46,6 @@ fun NavGraphBuilder.mainNavGraph(
             popEnterTransition = defaultPopEnterTransition(),
             popExitTransition = defaultPopExitTransition()
         ) {
-            val mainGraphBackStackEntry = remember { navController.getBackStackEntry(Routes.MainGraph.route) }
-            val fieldListViewModel: FieldListViewModel = hiltViewModel(mainGraphBackStackEntry)
-            val gameListViewModel: GameListViewModel = hiltViewModel(mainGraphBackStackEntry)
-            val currentUserViewModel: CurrentUserViewModel = hiltViewModel(mainGraphBackStackEntry)
 
             HomeScreen(
                 navActions = HomeScreenNavActions(
@@ -74,9 +74,6 @@ fun NavGraphBuilder.mainNavGraph(
             popEnterTransition = defaultPopEnterTransition(),
             popExitTransition = defaultPopExitTransition()
         ) {
-            val mainGraphBackStackEntry = remember { navController.getBackStackEntry(Routes.MainGraph.route) }
-            val fieldListViewModel: FieldListViewModel = hiltViewModel(mainGraphBackStackEntry)
-
             AllFieldsScreen(
                 fieldListViewModel = fieldListViewModel,
                 onViewGamesClick = { fieldId ->
@@ -93,10 +90,6 @@ fun NavGraphBuilder.mainNavGraph(
             popEnterTransition = defaultPopEnterTransition(),
             popExitTransition = defaultPopExitTransition()
         ) {
-            val mainGraphBackStackEntry = remember { navController.getBackStackEntry(Routes.MainGraph.route) }
-            val fieldListViewModel: FieldListViewModel = hiltViewModel(mainGraphBackStackEntry)
-            val gameListViewModel: GameListViewModel = hiltViewModel(mainGraphBackStackEntry)
-            val currentUserViewModel: CurrentUserViewModel = hiltViewModel(mainGraphBackStackEntry)
 
             AllGamesScreen(
                 onGameClick = { gameId ->
@@ -120,9 +113,6 @@ fun NavGraphBuilder.mainNavGraph(
         ) { backStackEntry ->
 
             val fieldId = backStackEntry.arguments?.getString("fieldId") ?: return@composable
-
-            val mainGraphBackStackEntry = remember { navController.getBackStackEntry(Routes.MainGraph.route) }
-            val currentUserViewModel: CurrentUserViewModel = hiltViewModel(mainGraphBackStackEntry)
 
             FieldDetailsScreen(
                 fieldId = fieldId,
@@ -190,6 +180,19 @@ fun NavGraphBuilder.mainNavGraph(
                 }
             )
         }
+
+        //Notification screen
+        composable(
+            route = Routes.Notifications.route,
+            enterTransition = defaultEnterTransition(),
+            exitTransition = defaultExitTransition(),
+            popEnterTransition = defaultPopEnterTransition(),
+            popExitTransition = defaultPopExitTransition()
+        ) {
+            NotificationsScreen()
+        }
+
+
 
     }
 }

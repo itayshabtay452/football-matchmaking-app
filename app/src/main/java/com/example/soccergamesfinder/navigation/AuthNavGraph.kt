@@ -9,7 +9,7 @@ import com.example.soccergamesfinder.ui.screens.login.LoginScreen
 import com.example.soccergamesfinder.ui.screens.profile.CompleteProfileScreen
 
 @OptIn(ExperimentalAnimationApi::class)
-fun NavGraphBuilder.authNavGraph(navController: NavController) {
+fun NavGraphBuilder.authNavGraph(navController: NavController, onLoginSuccess: () -> Unit) {
     navigation(
         startDestination = Routes.Login.route,
         route = Routes.AuthGraph.route
@@ -22,7 +22,7 @@ fun NavGraphBuilder.authNavGraph(navController: NavController) {
             popExitTransition = defaultPopExitTransition()
         ) {
             LoginScreen(
-                onNavigateToHome = { navController.navigate(Routes.MainGraph.route) },
+                onNavigateToHome = { onLoginSuccess() },
                 onNavigateToCompleteProfile = { navController.navigate(Routes.CompleteProfile.route) }
             )
         }
@@ -34,7 +34,7 @@ fun NavGraphBuilder.authNavGraph(navController: NavController) {
             popExitTransition = defaultPopExitTransition()
         ) {
             CompleteProfileScreen(
-                onNavigateToHome = { navController.navigate(Routes.MainGraph.route) }
+                onNavigateToHome = { onLoginSuccess() }
             )
         }
     }

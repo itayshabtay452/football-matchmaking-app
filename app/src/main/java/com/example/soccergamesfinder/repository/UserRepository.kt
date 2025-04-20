@@ -139,5 +139,10 @@ class UserRepository @Inject constructor(
         }
     }
 
+    fun signOut() {
+        firebaseAuth.signOut()
+    }
+
+
 
 }

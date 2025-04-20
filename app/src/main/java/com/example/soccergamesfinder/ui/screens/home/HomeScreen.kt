@@ -28,9 +28,9 @@ import com.example.soccergamesfinder.viewmodel.user.CurrentUserViewModel
 @Composable
 fun HomeScreen(
     navActions: HomeScreenNavActions,
-    currentUserViewModel: CurrentUserViewModel = hiltViewModel(),
-    fieldListViewModel: FieldListViewModel = hiltViewModel(),
-    gameListViewModel: GameListViewModel = hiltViewModel(),
+    fieldListViewModel: FieldListViewModel,
+    gameListViewModel: GameListViewModel,
+    currentUserViewModel: CurrentUserViewModel,
     gameDetailsViewModel: GameDetailsViewModel = hiltViewModel()
 ) {
     val userState = currentUserViewModel.state.collectAsState().value
@@ -89,7 +89,7 @@ fun HomeScreen(
                 Button(onClick = { navActions.navigateToProfile(currentUser?.id ?: "") }, modifier = Modifier.weight(1f)) {
                     Text("👤 פרופיל")
                 }
-                OutlinedButton(onClick = navActions.navigateToLogin, modifier = Modifier.weight(1f)) {
+                OutlinedButton(onClick = { currentUserViewModel.signOut() }, modifier = Modifier.weight(1f)) {
                     Text("🚪 התנתקות")
                 }
             }

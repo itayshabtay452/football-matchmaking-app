@@ -18,7 +18,7 @@ import com.example.soccergamesfinder.viewmodel.game.GameListViewModel
 @Composable
 fun AllFieldsScreen(
     onViewGamesClick: (String) -> Unit,
-    fieldListViewModel: FieldListViewModel = hiltViewModel(),
+    fieldListViewModel: FieldListViewModel,
 ) {
     val allFieldsViewModel: AllFieldsViewModel = hiltViewModel()
 
