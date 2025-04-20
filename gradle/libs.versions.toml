@@ -1,11 +1,13 @@
 [versions]
 # 🔹 גרסאות כלליות
 androidGradlePlugin = "8.5.2"
+animation = "1.7.8"
 kotlin = "2.1.0"
 hilt = "2.55"
 composeBom = "2025.03.00"
 lifecycle = "2.8.7"
 activityCompose = "1.10.1"
+mapsCompose = "2.11.4"
 navigationCompose = "2.8.9"
 composeCompiler = "1.5.15"
 firebaseBom = "33.10.0"
@@ -16,10 +18,12 @@ dagger = "2.51"
 kotlinxMetadata = "0.5.0"
 ksp = "2.0.21-1.0.27" # שים לב לגרסה המעודכנת ביותר
 coil = "2.5.0"
+playServicesMaps = "19.2.0"
 
 
 [libraries]
 # 🔹 AndroidX Core
+androidx-animation = { module = "androidx.compose.animation:animation", version.ref = "animation" }
 androidx-core = { module = "androidx.core:core-ktx", version = "1.15.0" }
 androidx-lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
@@ -48,6 +52,7 @@ coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-androi
 
 # 🔹 Google Services
 google-signin = { module = "com.google.android.gms:play-services-auth", version.ref = "googleSignIn" }
+maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 
 # 🔹 Dagger
@@ -60,6 +65,7 @@ ksp-symbol-processing = { module = "com.google.devtools.ksp:symbol-processing-ap
 kotlinx-metadata = { module = "org.jetbrains.kotlinx:kotlinx-metadata-jvm", version.ref = "kotlinxMetadata" }
 
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
+play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }

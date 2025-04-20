@@ -74,5 +74,21 @@ class FieldRepository @Inject constructor(
             }
     }
 
+    suspend fun submitFieldSuggestion(field: Field): Result<Unit> {
+        return try {
+            // שומר את ההצעה באוסף נפרד
+            firestore.collection("field_suggestions")
+                .document(field.id)
+                .set(field)
+                .await()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Result.failure(e)
+        }
+    }
+
+
 
 }

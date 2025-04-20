@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
 import androidx.navigation.NavType
+import com.example.soccergamesfinder.ui.screens.addfield.AddFieldScreen
 import com.example.soccergamesfinder.ui.screens.allfields.AllFieldsScreen
 import com.example.soccergamesfinder.ui.screens.allgames.AllGamesScreen
 import com.example.soccergamesfinder.ui.screens.field.FieldDetailsScreen
@@ -57,7 +58,8 @@ fun NavGraphBuilder.mainNavGraph(
                         navController.navigate(Routes.AuthGraph.route) {
                             popUpTo(Routes.Home.route) { inclusive = true }
                         }
-                    }
+                    },
+                    navigateToAddField = { navController.navigate(Routes.AddField.route) }
                 ),
                 fieldListViewModel = fieldListViewModel,
                 gameListViewModel = gameListViewModel,
@@ -169,6 +171,22 @@ fun NavGraphBuilder.mainNavGraph(
                 userId = userId,
                 onNavigateToGame = { gameId ->
                     navController.navigate("${Routes.Game.route}/$gameId")
+                }
+            )
+        }
+
+        // Add field screen
+        composable(
+            route = Routes.AddField.route,
+            enterTransition = defaultEnterTransition(),
+            exitTransition = defaultExitTransition(),
+            popEnterTransition = defaultPopEnterTransition(),
+            popExitTransition = defaultPopExitTransition()
+        )
+        {
+            AddFieldScreen (
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }

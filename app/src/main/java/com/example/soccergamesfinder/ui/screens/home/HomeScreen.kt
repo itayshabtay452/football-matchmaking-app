@@ -105,7 +105,7 @@ fun HomeScreen(
                     Text("מכיר מגרש שלא קיים אצלנו?")
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
-                        onClick = { /* TODO: מעבר למסך הוספת מגרש */ },
+                        onClick = { navActions.navigateToAddField() },
                         modifier = Modifier.align(Alignment.End)
                     ) {
                         Text("➕ הוסף מגרש")

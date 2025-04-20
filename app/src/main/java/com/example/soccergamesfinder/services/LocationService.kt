@@ -11,4 +11,5 @@ interface LocationService {
      */
     suspend fun getCurrentLocation(): Result<Pair<Double, Double>>
     suspend fun getAddressFromLocation(latitude: Double, longitude: Double): String?
+    suspend fun getLocationFromAddress(address: String): Result<Pair<Double, Double>>
 }

@@ -66,5 +66,19 @@ class LocationServiceImpl @Inject constructor(
         }
     }
 
+    override suspend fun getLocationFromAddress(address: String): Result<Pair<Double, Double>> {
+        return try {
+            val geocoder = Geocoder(context, Locale.getDefault())
+            val results = geocoder.getFromLocationName(address, 1)
 
+            if (results?.isNotEmpty() == true) {
+                val location = results[0]
+                Result.success(Pair(location.latitude, location.longitude))
+            } else {
+                Result.failure(Exception("Address not found"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

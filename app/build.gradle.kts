@@ -94,10 +94,10 @@ dependencies {
 
     implementation(libs.coil.compose)
 
-    implementation("androidx.compose.animation:animation:1.5.0")
+    implementation(libs.androidx.animation)
 
-    implementation ("com.google.maps.android:maps-compose:2.11.4")
-    implementation ("com.google.android.gms:play-services-maps:18.1.0")
+    implementation (libs.maps.compose)
+    implementation (libs.play.services.maps)
 
 
 }

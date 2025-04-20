@@ -51,4 +51,12 @@ object Validators {
             else -> ValidationResult(true)
         }
     }
+
+    fun validateNotBlank(value: String, errorMessage: String): ValidationResult {
+        return if (value.isBlank()) {
+            ValidationResult(false, errorMessage)
+        } else {
+            ValidationResult(true)
+        }
+    }
 }
