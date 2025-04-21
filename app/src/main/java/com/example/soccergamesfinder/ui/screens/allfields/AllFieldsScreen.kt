@@ -2,16 +2,17 @@
 package com.example.soccergamesfinder.ui.screens.allfields
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.soccergamesfinder.ui.components.FieldSection
+import com.example.soccergamesfinder.ui.components.FieldCarousel
 import com.example.soccergamesfinder.viewmodel.field.FieldListViewModel
-import com.example.soccergamesfinder.viewmodel.game.GameListViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -30,82 +31,47 @@ fun AllFieldsScreen(
             allFieldsViewModel.setInitialFields(fieldState.fields)
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("כל המגרשים") }
-            )
+    when {
+        state.isLoading -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
         }
-    ) { paddingValues ->
-        when {
-            state.isLoading -> {
-                Box(modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+
+        state.error != null -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("שגיאה: ${state.error}", color = MaterialTheme.colorScheme.error)
             }
+        }
 
-            state.error != null -> {
-                Box(modifier = Modifier
+        else -> {
+            Column(
+                modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues),
-                    contentAlignment = Alignment.Center
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ElevatedCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    Text("שגיאה: ${state.error}", color = MaterialTheme.colorScheme.error)
+                    AllFieldsFilterSection(
+                        state = state,
+                        onEvent = allFieldsViewModel::onEvent
+                    )
                 }
-            }
 
-            else -> {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-
-                    item {
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
-                        ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text(
-                                    text = "סינון ומיון מתקדמים",
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-
-                                AllFieldsFilterSection(
-                                    state = state,
-                                    onEvent = allFieldsViewModel::onEvent
-                                )
-                            }
-                        }
+                Text(
+                    text = "🎯 נמצאו ${state.filteredFields.size} מגרשים מתאימים",
+                    style = MaterialTheme.typography.labelSmall
+                )
+                FieldCarousel(
+                    fields = state.filteredFields,
+                    onFieldClick = { field -> onViewGamesClick(field.id) },
+                    onCreateGame = { field ->
                     }
-
-                    item {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "נמצאו ${state.filteredFields.size} מגרשים מתאימים",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        FieldSection(
-                            fields = state.filteredFields,
-                            onFieldClick = { field ->
-                                onViewGamesClick(field.id)
-                            }
-                        )
-                    }
-                }
+                )
             }
         }
     }

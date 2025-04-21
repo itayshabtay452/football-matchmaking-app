@@ -28,6 +28,7 @@ androidx-animation = { module = "androidx.compose.animation:animation", version.
 androidx-core = { module = "androidx.core:core-ktx", version = "1.15.0" }
 androidx-lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 compose-compiler = { module = "androidx.compose.compiler:compiler", version.ref = "composeCompiler" }
 
 # 🔹 Jetpack Compose

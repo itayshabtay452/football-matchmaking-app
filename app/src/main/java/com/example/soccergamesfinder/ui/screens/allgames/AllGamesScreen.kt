@@ -3,14 +3,16 @@ package com.example.soccergamesfinder.ui.screens.allgames
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.soccergamesfinder.ui.components.GameList
+import com.example.soccergamesfinder.ui.components.GameCarousel
 import com.example.soccergamesfinder.viewmodel.field.FieldListViewModel
 import com.example.soccergamesfinder.viewmodel.game.GameDetailsViewModel
 import com.example.soccergamesfinder.viewmodel.game.GameListViewModel
@@ -30,15 +32,12 @@ fun AllGamesScreen(
     val gameState = gameListViewModel.state.collectAsState().value
     val fieldState = fieldListViewModel.state.collectAsState().value
     val currentUserState = currentUserViewModel.state.collectAsState().value
-
     val state = allGamesViewModel.state.collectAsState().value
 
-    // אתחול ראשוני
     LaunchedEffect(gameState.games, fieldState.fields) {
         allGamesViewModel.onDataChanged(gameState.games, fieldState.fields)
     }
 
-    // UI ראשי
     when {
         state.isLoading -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -53,50 +52,37 @@ fun AllGamesScreen(
         }
 
         else -> {
-            LazyColumn(
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                item {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        text = "סינון ומיון משחקים",
-                        style = MaterialTheme.typography.headlineSmall
+                ElevatedCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    AllGamesFilterSection(
+                        state = state,
+                        onEvent = allGamesViewModel::onEvent
                     )
-                    AllGamesFilterSection(state = state, onEvent = allGamesViewModel::onEvent)
                 }
 
-                item {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        text = "נמצאו ${state.filteredGames.size} משחקים מתאימים",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
+                Text(
+                    text = "🎯 נמצאו ${state.filteredGames.size} משחקים מתאימים",
+                    style = MaterialTheme.typography.labelSmall
+                )
 
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    GameList(
-                        games = state.filteredGames,
-                        currentUser = currentUserState.user,
-                        fields = state.fields,
-                        onJoinClick = { game ->
-                            gameDetailsViewModel.joinGame(game)
-                        },
-                        onLeaveClick = { game ->
-                            gameDetailsViewModel.leaveGame(game)
-                        },
-                        onDeleteClick = { game ->
-                            gameDetailsViewModel.deleteGame(game)
-                        },
-                        onCardClick = { game ->
-                            onGameClick(game.id)
-                        }
-                    )
-                }
+                GameCarousel(
+                    games = state.filteredGames,
+                    fields = state.fields,
+                    currentUser = currentUserState.user,
+                    onJoinClick = { gameDetailsViewModel.joinGame(it) },
+                    onLeaveClick = { gameDetailsViewModel.leaveGame(it) },
+                    onDeleteClick = { gameDetailsViewModel.deleteGame(it) },
+                    onCardClick = { onGameClick(it.id) }
+                )
             }
         }
     }
