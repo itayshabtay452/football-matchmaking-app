@@ -43,6 +43,7 @@ class GameDetailsViewModel @Inject constructor(
             }
             val result = gameRepository.joinGame(game.id, userId)
             if (result.isSuccess) {
+                userRepository.followGame(userId, game.id) // ➡️ מעקב אחרי המשחק
                 _state.value = _state.value.copy(isLoading = false, error = null)
                 onSuccess()
             } else {
@@ -51,11 +52,18 @@ class GameDetailsViewModel @Inject constructor(
         }
     }
 
+
     fun leaveGame(game: Game, onSuccess: () -> Unit = {}) {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true)
+            val userId = userRepository.getCurrentUserId()
+            if (userId == null) {
+                showError("User not authenticated")
+                return@launch
+            }
             val result = gameRepository.leaveGame(game.id)
             if (result.isSuccess) {
+                userRepository.unfollowGame(userId, game.id) // ➡️ להסיר מעקב
                 _state.value = _state.value.copy(isLoading = false, error = null)
                 onSuccess()
             } else {
@@ -80,10 +88,12 @@ class GameDetailsViewModel @Inject constructor(
                 gameId = game.id
             )
 
+            val removeFromUsersResult = userRepository.removeGameFromAllUsers(game.id) // ➡️ הסרת המשחק מכל המשתמשים
+
             _state.value = _state.value.copy(isLoading = false)
 
-            if (removeFromFieldResult.isFailure) {
-                showError("המשחק נמחק, אך לא הוסר מהמגרש")
+            if (removeFromFieldResult.isFailure || removeFromUsersResult.isFailure) {
+                showError("המשחק נמחק, אך לא הוסר לגמרי מהמגרש או מהמשתמשים")
             } else {
                 onSuccess()
             }
@@ -91,11 +101,15 @@ class GameDetailsViewModel @Inject constructor(
     }
 
 
+
     fun createGameAndAttach(game: Game, onResult: (Boolean) -> Unit) {
-        println(">>> התחלה: יצירת המשחק בפועל ב־Firestore")
         viewModelScope.launch {
             val result = gameRepository.createGameAndAttachToField(game)
             if (result.isSuccess) {
+                val userId = userRepository.getCurrentUserId()
+                if (userId != null) {
+                    userRepository.followGame(userId, game.id) // ➡️ עוקב אחרי המשחק שנוצר
+                }
                 onResult(result.isSuccess)
             } else {
                 println(">>> שמירת המשחק נכשלה: ${result.exceptionOrNull()?.message}")

@@ -12,6 +12,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.soccergamesfinder.data.GameStatus
 import com.example.soccergamesfinder.ui.components.GameCard
+import com.example.soccergamesfinder.ui.components.GameCarousel
 
 @Composable
 fun UserViewScreen(
@@ -50,57 +51,30 @@ fun UserViewScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 item {
-                    // 🔹 פרטי משתמש
-                    Text("פרופיל משתמש", style = MaterialTheme.typography.headlineSmall)
-                    user?.profileImageUrl?.let {
-                        AsyncImage(
-                            model = it,
-                            contentDescription = "תמונת פרופיל",
-                            modifier = Modifier.size(96.dp)
-                        )
-                    }
                     if (user != null) {
-                        Text("שם: ${user.fullName}")
-                    }
-                    if (user != null) {
-                        Text("כינוי: ${user.nickname}")
+                        UserProfileHeader(user)
                     }
                 }
 
-                // 🔹 משחקים עתידיים
+                item {
+                    UserStatisticsSection(
+                        totalGames = state.games.size,
+                        futureGames = futureGames.size,
+                        pastGames = pastGames.size
+                    )
+                }
+
                 if (futureGames.isNotEmpty()) {
                     item {
-                        Text("משחקים עתידיים", style = MaterialTheme.typography.titleMedium)
-                    }
-                    items(futureGames.size) { index ->
-                        val game = futureGames[index]
-                        GameCard(
-                            game = game,
-                            showJoinButton = false,
-                            showLeaveButton = false,
-                            showDeleteButton = false,
-                            onCardClick = { onNavigateToGame(game.id) }
+                        UserGamesSection(
+                            title = "משחקים עתידיים",
+                            games = futureGames,
+                            onGameClick = { game -> onNavigateToGame(game.id) }
                         )
                     }
                 }
 
-                // 🔹 היסטוריית משחקים
-                if (pastGames.isNotEmpty()) {
-                    item {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text("היסטוריית משחקים", style = MaterialTheme.typography.titleMedium)
-                    }
-                    items(pastGames.size) { index ->
-                        val game = pastGames[index]
-                        GameCard(
-                            game = game,
-                            showJoinButton = false,
-                            showLeaveButton = false,
-                            showDeleteButton = false,
-                            onCardClick = { onNavigateToGame(game.id) }
-                        )
-                    }
-                }
+
             }
         }
     }

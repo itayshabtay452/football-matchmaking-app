@@ -8,10 +8,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Place
-import androidx.compose.material.icons.outlined.SportsSoccer
-import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,12 +28,14 @@ import kotlin.math.roundToInt
 @Composable
 fun FieldCard(
     field: Field,
+    isFollowed: Boolean,
+    onFollowClick: () -> Unit,
     onClick: (() -> Unit)? = null,
     onCreateGameClick: () -> Unit
 ) {
     ElevatedCard(
         modifier = Modifier
-            .width(182.dp) // ⟵ 70% מרוחב מקורי
+            .width(182.dp)
             .wrapContentHeight()
             .clickable(enabled = onClick != null) { onClick?.invoke() },
         shape = RoundedCornerShape(24.dp),
@@ -43,81 +45,95 @@ fun FieldCard(
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
         )
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.field),
-                contentDescription = "תמונה של מגרש",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(80.dp) // ⟵ מוקטן מ־120.dp
-                    .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
+        Box {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(12.dp), // במקום padding נפרד
-                verticalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.fillMaxSize()
             ) {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(
-                        text = field.name ?: "מגרש ללא שם",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onSurface
+                Box {
+                    Image(
+                        painter = painterResource(id = R.drawable.field),
+                        contentDescription = "תמונה של מגרש",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(80.dp)
+                            .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                     )
+                    IconButton(
+                        onClick = { onFollowClick() },
+                        modifier = Modifier.align(Alignment.TopEnd)
+                    ) {
+                        Icon(
+                            imageVector = if (isFollowed) Icons.Filled.Star else Icons.Filled.StarBorder,
+                            contentDescription = if (isFollowed) "בטל מעקב" else "עקוב",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
 
-                    field.address?.let {
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(12.dp),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(
+                            text = field.name ?: "מגרש ללא שם",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+
+                        field.address.let {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Outlined.LocationOn, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    it,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Outlined.LocationOn, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Icon(Icons.Outlined.Place, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                it,
-                                style = MaterialTheme.typography.labelSmall,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                text = "מרחק: ${field.distance?.let { "${(it * 10).roundToInt() / 10.0} ק\"מ" } ?: "לא ידוע"}",
+                                style = MaterialTheme.typography.labelSmall
                             )
                         }
                     }
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Outlined.Place, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "מרחק: ${field.distance?.let { "${(it * 10).roundToInt() / 10.0} ק\"מ" } ?: "לא ידוע"}",
-                            style = MaterialTheme.typography.labelSmall
-                        )
+                    Spacer(modifier = Modifier.height(2.dp))
+
+                    if (onClick != null) {
+                        TextButton(
+                            onClick = { onClick.invoke() },
+                            modifier = Modifier.align(Alignment.CenterHorizontally),
+                            colors = ButtonDefaults.textButtonColors(
+                                contentColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Icon(Icons.Default.Info, contentDescription = null, modifier = Modifier.size(14.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("פרטים על המגרש", style = MaterialTheme.typography.labelSmall)
+                        }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.height(2.dp))
 
-                if (onClick != null) {
-                    TextButton(
-                        onClick = { onClick.invoke() },
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colorScheme.primary
-                        )
+                    Button(
+                        onClick = onCreateGameClick,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp)
                     ) {
-                        Icon(Icons.Default.Info, contentDescription = null, modifier = Modifier.size(14.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("פרטים על המגרש", style = MaterialTheme.typography.labelSmall)
+                        Text("צור משחק")
                     }
-                }
-
-                Spacer(modifier = Modifier.height(2.dp))
-
-                Button(
-                    onClick = onCreateGameClick,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Text("צור משחק")
                 }
             }
         }

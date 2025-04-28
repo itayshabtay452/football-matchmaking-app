@@ -63,13 +63,15 @@ fun HomeScreen(
             onLogoutClick = { currentUserViewModel.signOut() }
         )
         FieldCarousel(
-            fields = fields,
+            fields = fields.take(5),
+            followedFields = fieldState.followedFields,
+            onFollowFieldClick = { fieldListViewModel.toggleFollowField(it.id) },
             onFieldClick = { navActions.navigateToField(it.id) },
             onCreateGame = { field ->
             }
         )
         GameCarousel(
-            games = games,
+            games = games.take(5),
             fields = fields,
             currentUser = currentUser,
             onJoinClick = { gameDetailsViewModel.joinGame(it) },

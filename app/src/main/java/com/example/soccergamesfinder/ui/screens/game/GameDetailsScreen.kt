@@ -3,19 +3,18 @@ package com.example.soccergamesfinder.ui.screens.game
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.soccergamesfinder.ui.components.chat.ChatSection
-import com.example.soccergamesfinder.ui.screens.game.component.GameDescriptionSection
-import com.example.soccergamesfinder.ui.screens.game.component.GameFieldCard
-import com.example.soccergamesfinder.ui.screens.game.component.GameHeaderSection
-import com.example.soccergamesfinder.ui.screens.game.component.GameParticipantsSection
-import com.example.soccergamesfinder.viewmodel.chat.ChatViewModel
-import com.example.soccergamesfinder.viewmodel.game.GameDetailsViewModel
+import com.example.soccergamesfinder.ui.screens.game.component.GameTopSection
+import com.example.soccergamesfinder.ui.screens.game.component.ParticipantsRow
+import com.example.soccergamesfinder.ui.screens.chat.ChatViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -23,7 +22,8 @@ import com.example.soccergamesfinder.viewmodel.game.GameDetailsViewModel
 fun GameDetailsScreen(
     gameId: String,
     onNavigateToField: (String) -> Unit,
-    onNavigateToUser: (String) -> Unit
+    onNavigateToUser: (String) -> Unit,
+    onNavigateToChat: (String) -> Unit
 ) {
     val gameViewModel: GameViewModel = hiltViewModel()
     val chatViewModel: ChatViewModel = hiltViewModel()
@@ -33,7 +33,6 @@ fun GameDetailsScreen(
 
     LaunchedEffect(gameId) {
         gameViewModel.startListening(gameId)
-        chatViewModel.startListening(gameId)
     }
 
     Scaffold(
@@ -63,46 +62,45 @@ fun GameDetailsScreen(
                             .padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
+
                         item {
-                            GameHeaderSection(game = state.game)
+                            state.field?.let {
+                                GameTopSection(
+                                    game = state.game,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(200.dp),
+                                    onFieldClick = { onNavigateToField(state.field.id) },
+                                    field = it
+                                )
+                            }
                         }
 
                         item {
-                            GameDescriptionSection(
-                                description = state.game.description
-                            )
-                        }
-                        item {
-                            GameParticipantsSection(
+                            ParticipantsRow(
                                 creator = state.creator,
                                 participants = state.participants,
                                 onUserClick = { user -> onNavigateToUser(user.id) }
                             )
                         }
+
                         item {
-                            if (state.field != null) {
-                                GameFieldCard(
-                                    field = state.field,
-                                    onClick = { onNavigateToField(state.field.id) }
-                                )
+                            Button(
+                                onClick = { onNavigateToChat(gameId) },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp)
+                            ) {
+                                Icon(Icons.Default.Chat, contentDescription = null)
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("עבור לצ'אט המשחק")
                             }
                         }
-                        item {
-                            Divider()
-                            ChatSection(
-                                messages = chatState.messages,
-                                currentMessage = chatState.currentMessage,
-                                onMessageChange = chatViewModel::onMessageChange,
-                                onSendClick = { chatViewModel.sendMessage(gameId) },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(400.dp)
-                            )
-                        }
+
+
+                    }
 
                     }
                 }
             }
         }
     }
-}

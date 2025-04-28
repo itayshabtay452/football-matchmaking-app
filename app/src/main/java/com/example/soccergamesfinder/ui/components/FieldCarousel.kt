@@ -12,13 +12,17 @@ import com.example.soccergamesfinder.ui.components.FieldCard
 @Composable
 fun FieldCarousel(
     fields: List<Field>,
+    followedFields: List<String>,
     onFieldClick: (Field) -> Unit,
-    onCreateGame: (Field) -> Unit
+    onCreateGame: (Field) -> Unit,
+    onFollowFieldClick: (Field) -> Unit
 ) {
     LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        items(fields.take(5), key = { it.id }) { field ->
+        items(fields, key = { it.id }) { field ->
             FieldCard(
                 field = field,
+                isFollowed = followedFields.contains(field.id),
+                onFollowClick = { onFollowFieldClick(field) },
                 onClick = { onFieldClick(field) },
                 onCreateGameClick = { onCreateGame(field) }
             )

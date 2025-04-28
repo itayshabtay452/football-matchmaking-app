@@ -9,11 +9,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.soccergamesfinder.ui.components.GameList
+import com.example.soccergamesfinder.ui.components.GameCarousel
 import com.example.soccergamesfinder.ui.screens.creategame.CreateGameDialog
-import com.example.soccergamesfinder.viewmodel.field.FieldListViewModel
 import com.example.soccergamesfinder.viewmodel.game.GameDetailsViewModel
-import com.example.soccergamesfinder.viewmodel.game.GameListViewModel
 import com.example.soccergamesfinder.viewmodel.user.CurrentUserViewModel
 
 @SuppressLint("DefaultLocale")
@@ -60,67 +58,29 @@ fun FieldDetailsScreen(
             ) {
 
                 item {
-                    // מידע על המגרש
-                    Text(field.name ?: "מגרש ללא שם", style = MaterialTheme.typography.headlineSmall)
-                    Text("כתובת: ${field.address ?: "לא צוינה"}")
-                    Text("גודל: ${field.size ?: "לא צויין"}")
-                    Text("תאורה: ${if (field.lighting) "כן" else "לא"}")
-                    Text("מרחק: ${String.format("%.1f", field.distance ?: 0.0)} ק\"מ")
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    field.latitude?.let { lat ->
-                        field.longitude?.let { lng ->
-                            FieldMap(
-                                latitude = lat,
-                                longitude = lng,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(200.dp)
-                            )
-                            Spacer(modifier = Modifier.height(12.dp))
-                        }
-                    }
-
-                    // כפתור ליצירת משחק חדש
-                    Button(
-                        onClick = {  openDialog.value = true },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("צור משחק")
-                    }
-
-                    Divider(modifier = Modifier.padding(vertical = 16.dp))
-                    Text("משחקים במגרש זה:", style = MaterialTheme.typography.titleMedium)
+                    FieldHeaderSection(field)
                 }
 
                 item {
-                    FieldStatisticsSection(
+                    FieldStatsAndActionSection(
                         totalGames = fieldState.totalGames,
                         avgPlayers = fieldState.avgPlayers,
-                        fullGames = fieldState.fullGames,
-                        openGames = fieldState.openGames
+                        onAddGameClick = {
+                            openDialog.value = true
+                        }
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
                 item {
-                    GameList(
+                    GameCarousel(
                         games = fieldGames,
-                        currentUser = currentUser,
                         fields = listOf(field),
-                        onJoinClick = { game ->
-                            gameDetailsViewModel.joinGame(game)
-                        },
-                        onLeaveClick = { game ->
-                            gameDetailsViewModel.leaveGame(game)
-                        },
-                        onDeleteClick = { game ->
-                            gameDetailsViewModel.deleteGame(game)
-                        },
-                        onCardClick = { game ->
-                            onNavigateToGame(game.id)
-                        }
+                        currentUser = currentUser,
+                        onJoinClick = { gameDetailsViewModel.joinGame(it) },
+                        onLeaveClick = { gameDetailsViewModel.leaveGame(it) },
+                        onDeleteClick = { gameDetailsViewModel.deleteGame(it) },
+                        onCardClick = { game -> onNavigateToGame(game.id) }
                     )
                 }
             }
@@ -133,7 +93,6 @@ fun FieldDetailsScreen(
                     }
                 )
             }
-
         }
     }
 }

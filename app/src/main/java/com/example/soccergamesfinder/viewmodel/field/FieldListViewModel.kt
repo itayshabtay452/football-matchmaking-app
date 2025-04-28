@@ -3,6 +3,7 @@ package com.example.soccergamesfinder.viewmodel.field
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.soccergamesfinder.repository.FieldRepository
+import com.example.soccergamesfinder.repository.UserRepository
 import com.example.soccergamesfinder.services.LocationService
 import com.example.soccergamesfinder.utils.DistanceCalculator
 import com.google.firebase.firestore.ListenerRegistration
@@ -14,7 +15,8 @@ import javax.inject.Inject
 @HiltViewModel
 class FieldListViewModel @Inject constructor(
     private val fieldRepository: FieldRepository,
-    private val locationService: LocationService
+    private val locationService: LocationService,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(FieldListState())
@@ -22,6 +24,7 @@ class FieldListViewModel @Inject constructor(
 
     init {
         startListeningToFields()
+        loadFollowedFields() // ➡️ חדש
     }
 
 
@@ -58,6 +61,29 @@ class FieldListViewModel @Inject constructor(
             }
         )
     }
+
+    private fun loadFollowedFields() {
+        viewModelScope.launch {
+            val userId = userRepository.getCurrentUserId() ?: return@launch
+            val user = userRepository.getUserById(userId) ?: return@launch
+            _state.update { it.copy(followedFields = user.fieldsFollowing) }
+        }
+    }
+
+    fun toggleFollowField(fieldId: String) {
+        viewModelScope.launch {
+            val userId = userRepository.getCurrentUserId() ?: return@launch
+
+            if (_state.value.followedFields.contains(fieldId)) {
+                userRepository.unfollowField(userId, fieldId)
+                _state.update { it.copy(followedFields = _state.value.followedFields - fieldId) }
+            } else {
+                userRepository.followField(userId, fieldId)
+                _state.update { it.copy(followedFields = _state.value.followedFields + fieldId) }
+            }
+        }
+    }
+
 
     override fun onCleared() {
         super.onCleared()

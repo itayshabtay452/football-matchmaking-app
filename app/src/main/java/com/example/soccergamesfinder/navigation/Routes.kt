@@ -14,4 +14,5 @@ sealed class Routes(val route: String) {
     object Game : Routes("gameScreen")
     object AddField : Routes("add_field")
     object Notifications : Routes("notifications") // 🆕
+    object Chat : Routes("chat") // 🆕
 }

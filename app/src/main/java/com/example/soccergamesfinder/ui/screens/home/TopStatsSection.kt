@@ -3,6 +3,7 @@ package com.example.soccergamesfinder.ui.screens.home
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material3.*
@@ -36,7 +37,7 @@ fun TopStatsSection(
                 shape = RoundedCornerShape(16.dp),
                 contentPadding = PaddingValues(vertical = 6.dp)
             ) {
-                Icon(Icons.Default.Logout, contentDescription = null, modifier = Modifier.size(18.dp))
+                Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(6.dp))
                 Text("התנתקות", fontSize = 12.sp)
             }

@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -26,9 +27,8 @@ fun MainScreenWithBottomBar(navController: NavHostController, currentUserViewMod
 
     val bottomNavItems = listOf(
         BottomNavItem("בית", Routes.Home.route, Icons.Default.Home),
-        BottomNavItem("פרופיל", Routes.UserProfile.route, Icons.Default.Person),
         BottomNavItem("משחקים", Routes.AllGames.route, Icons.Default.Place),
-        BottomNavItem("מגרשים", Routes.AllFields.route, Icons.Default.List),
+        BottomNavItem("מגרשים", Routes.AllFields.route, Icons.AutoMirrored.Filled.List),
         BottomNavItem("התראות", Routes.Notifications.route, Icons.Default.Notifications)
     )
 
@@ -37,9 +37,11 @@ fun MainScreenWithBottomBar(navController: NavHostController, currentUserViewMod
             BottomNavigationBar(
                 items = bottomNavItems,
                 navController = navController,
-                onItemClick = {
-                    navController.navigate(it.route) {
-                        popUpTo(Routes.Home.route) { saveState = true }
+                onItemClick = { item ->
+                    navController.navigate(item.route) {
+                        popUpTo(item.route) {
+                            inclusive = true
+                        }
                         launchSingleTop = true
                         restoreState = true
                     }

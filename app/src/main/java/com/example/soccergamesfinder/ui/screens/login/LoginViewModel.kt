@@ -134,6 +134,7 @@ class LoginViewModel @Inject constructor(
     private fun navigateBasedOnProfile() {
         viewModelScope.launch {
             val hasProfile = userRepository.hasUserData()
+
             sendEvent(if (hasProfile) LoginUiEvent.NavigateToHome else LoginUiEvent.NavigateToCompleteProfile)
         }
     }

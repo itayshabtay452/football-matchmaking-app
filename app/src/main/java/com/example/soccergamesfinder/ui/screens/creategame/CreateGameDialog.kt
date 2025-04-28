@@ -8,7 +8,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.soccergamesfinder.data.Field
 import com.example.soccergamesfinder.data.Game
-import com.example.soccergamesfinder.ui.components.shared.DatePickerField
+import com.example.soccergamesfinder.ui.components.shared.DatePickerFieldModern
 import com.example.soccergamesfinder.ui.screens.creategame.components.EndTimePickerDropdown
 import com.example.soccergamesfinder.ui.screens.creategame.components.MaxPlayersDropdown
 import com.example.soccergamesfinder.ui.screens.creategame.components.TimePickerDropdown
@@ -54,7 +54,7 @@ fun CreateGameDialog(
         title = { Text("צור משחק חדש") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                DatePickerField(
+                DatePickerFieldModern(
                     selectedDate = state.date,
                     onDateSelected = { viewModel.onEvent(CreateGameEvent.DateSelected(it), field) {} }
                 )

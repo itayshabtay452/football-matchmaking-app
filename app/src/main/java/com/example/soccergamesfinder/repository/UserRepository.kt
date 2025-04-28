@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import com.example.soccergamesfinder.data.User
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -138,6 +139,77 @@ class UserRepository @Inject constructor(
             emptyList()
         }
     }
+
+    suspend fun followField(userId: String, fieldId: String): Result<Unit> {
+        return try {
+            firestore.collection("users")
+                .document(userId)
+                .update("fieldsFollowed", FieldValue.arrayUnion(fieldId))
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun unfollowField(userId: String, fieldId: String): Result<Unit> {
+        return try {
+            firestore.collection("users")
+                .document(userId)
+                .update("fieldsFollowed", FieldValue.arrayRemove(fieldId))
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun followGame(userId: String, gameId: String): Result<Unit> {
+        return try {
+            firestore.collection("users")
+                .document(userId)
+                .update("gamesFollowed", FieldValue.arrayUnion(gameId))
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun unfollowGame(userId: String, gameId: String): Result<Unit> {
+        return try {
+            firestore.collection("users")
+                .document(userId)
+                .update("gamesFollowed", FieldValue.arrayRemove(gameId))
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun removeGameFromAllUsers(gameId: String): Result<Unit> {
+        return try {
+            val usersSnapshot = firestore.collection("users")
+                .whereArrayContains("gamesFollowed", gameId)
+                .get()
+                .await()
+
+            val batch = firestore.batch()
+
+            for (doc in usersSnapshot.documents) {
+                val userRef = doc.reference
+                batch.update(userRef, "gamesFollowed", FieldValue.arrayRemove(gameId))
+            }
+
+            batch.commit().await()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
 
     fun signOut() {
         firebaseAuth.signOut()

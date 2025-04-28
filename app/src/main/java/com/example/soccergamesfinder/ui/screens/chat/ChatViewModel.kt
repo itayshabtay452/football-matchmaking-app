@@ -1,4 +1,4 @@
-package com.example.soccergamesfinder.viewmodel.chat
+package com.example.soccergamesfinder.ui.screens.chat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,6 +16,7 @@ data class ChatState(
     val messages: List<Message> = emptyList(),
     val currentMessage: String = "",
     val isLoading: Boolean = false,
+    val currentUserId: String = "",
     val error: String? = null
 )
 
@@ -29,6 +30,15 @@ class ChatViewModel @Inject constructor(
     val state: StateFlow<ChatState> = _state.asStateFlow()
 
     private var messageListener: ListenerRegistration? = null
+
+    init {
+        viewModelScope.launch {
+            val currentUserId = userRepository.getCurrentUserId()
+            if (currentUserId != null) {
+                _state.update { it.copy(currentUserId = currentUserId) }
+            }
+        }
+    }
 
     fun startListening(gameId: String) {
         messageListener?.remove()

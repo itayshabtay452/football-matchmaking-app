@@ -68,6 +68,8 @@ fun AllFieldsScreen(
                 )
                 FieldCarousel(
                     fields = state.filteredFields,
+                    followedFields = fieldState.followedFields,
+                    onFollowFieldClick = { fieldListViewModel.toggleFollowField(it.id) },
                     onFieldClick = { field -> onViewGamesClick(field.id) },
                     onCreateGame = { field ->
                     }

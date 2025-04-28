@@ -4,8 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.runtime.remember
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -15,6 +13,7 @@ import androidx.navigation.NavType
 import com.example.soccergamesfinder.ui.screens.addfield.AddFieldScreen
 import com.example.soccergamesfinder.ui.screens.allfields.AllFieldsScreen
 import com.example.soccergamesfinder.ui.screens.allgames.AllGamesScreen
+import com.example.soccergamesfinder.ui.screens.chat.ChatScreen
 import com.example.soccergamesfinder.ui.screens.field.FieldDetailsScreen
 import com.example.soccergamesfinder.ui.screens.game.GameDetailsScreen
 import com.example.soccergamesfinder.ui.screens.home.HomeScreen
@@ -49,7 +48,6 @@ fun NavGraphBuilder.mainNavGraph(
 
             HomeScreen(
                 navActions = HomeScreenNavActions(
-                    navigateToProfile = { userId -> navController.navigate("${Routes.UserProfile.route}/$userId")},
                     navigateToAllFields = { navController.navigate(Routes.AllFields.route) },
                     navigateToAllGames = { navController.navigate(Routes.AllGames.route) },
                     navigateToField = { fieldId -> navController.navigate("${Routes.Field.route}/$fieldId") },
@@ -141,7 +139,9 @@ fun NavGraphBuilder.mainNavGraph(
                 },
                 onNavigateToUser = { userId ->
                     navController.navigate("${Routes.UserProfile.route}/$userId")
-
+                },
+                onNavigateToChat = { gameId ->
+                    navController.navigate("${Routes.Chat.route}/$gameId")
                 }
             )
         }
@@ -190,6 +190,26 @@ fun NavGraphBuilder.mainNavGraph(
             popExitTransition = defaultPopExitTransition()
         ) {
             NotificationsScreen()
+        }
+
+        //Chat screen
+        composable(
+            route = "${Routes.Chat.route}/{gameId}",
+            arguments = listOf(navArgument("gameId") { type = NavType.StringType }),
+            enterTransition = defaultEnterTransition(),
+            exitTransition = defaultExitTransition(),
+            popEnterTransition = defaultPopEnterTransition(),
+            popExitTransition = defaultPopExitTransition()
+        )
+        { backStackEntry ->
+            val gameId = backStackEntry.arguments?.getString("gameId") ?: return@composable
+
+            ChatScreen(
+                gameId = gameId,
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
         }
 
 

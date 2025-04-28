@@ -23,13 +23,10 @@ fun GameCarousel(
     onCardClick: (Game) -> Unit
 ) {
     LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        items(games.take(5), key = { it.id }) { game ->
+        items(games, key = { it.id }) { game ->
             val isParticipant = currentUser?.id in game.joinedPlayers
             val isCreator = currentUser?.id == game.creatorId
             val field = fields.firstOrNull { it.id == game.fieldId }
-
-            Log.d("GameDebug", "isCreator = $isCreator")
-
 
             GameCard(
                 game = game,
