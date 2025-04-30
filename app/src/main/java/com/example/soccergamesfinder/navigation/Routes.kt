@@ -15,4 +15,5 @@ sealed class Routes(val route: String) {
     object AddField : Routes("add_field")
     object Notifications : Routes("notifications") // 🆕
     object Chat : Routes("chat") // 🆕
+    object Favorites : Routes("favorites") // 🆕
 }

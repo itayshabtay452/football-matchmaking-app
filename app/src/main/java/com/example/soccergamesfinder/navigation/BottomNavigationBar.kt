@@ -10,7 +10,8 @@ import com.example.soccergamesfinder.navigation.BottomNavItem
 fun BottomNavigationBar(
     items: List<BottomNavItem>,
     navController: NavController,
-    onItemClick: (BottomNavItem) -> Unit
+    onItemClick: (BottomNavItem) -> Unit,
+    unreadCount: Int = 0
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -20,9 +21,20 @@ fun BottomNavigationBar(
             NavigationBarItem(
                 selected = currentRoute?.startsWith(item.route) == true,
                 onClick = { onItemClick(item) },
-                icon = {
-                    Icon(item.icon, contentDescription = item.name)
+                icon = @Composable {
+                    if (item.name == "התראות" && unreadCount > 0) {
+                        BadgedBox(badge = {
+                            Badge {
+                                Text(unreadCount.toString())
+                            }
+                        }) {
+                            Icon(item.icon, contentDescription = item.name)
+                        }
+                    } else {
+                        Icon(item.icon, contentDescription = item.name)
+                    }
                 },
+
                 label = {
                     Text(item.name)
                 }

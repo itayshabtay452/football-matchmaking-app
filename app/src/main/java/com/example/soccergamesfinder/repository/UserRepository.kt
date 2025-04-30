@@ -6,6 +6,7 @@ import com.example.soccergamesfinder.data.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.tasks.await
@@ -27,6 +28,25 @@ class UserRepository @Inject constructor(
         val document = firestore.collection("users").document(uid).get().await()
         return document.exists()
     }
+
+    fun listenToUserById(
+        userId: String,
+        onChange: (User?) -> Unit,
+        onError: (Exception) -> Unit
+    ): ListenerRegistration {
+        return firestore.collection("users")
+            .document(userId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    onError(error)
+                    return@addSnapshotListener
+                }
+
+                val user = snapshot?.toObject(User::class.java)
+                onChange(user)
+            }
+    }
+
 
     /**
      * Creates a new user document in Firestore with optional profile image.
@@ -207,6 +227,30 @@ class UserRepository @Inject constructor(
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    suspend fun getUsersFollowingField(fieldId: String): List<String> {
+        return try {
+            val snapshot = firestore.collection("users")
+                .whereArrayContains("fieldsFollowed", fieldId)
+                .get()
+                .await()
+            snapshot.documents.mapNotNull { it.id }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    suspend fun getUsersFollowingGame(gameId: String): List<String> {
+        return try {
+            val snapshot = firestore.collection("users")
+                .whereArrayContains("gamesFollowed", gameId)
+                .get()
+                .await()
+            snapshot.documents.mapNotNull { it.id }
+        } catch (e: Exception) {
+            emptyList()
         }
     }
 

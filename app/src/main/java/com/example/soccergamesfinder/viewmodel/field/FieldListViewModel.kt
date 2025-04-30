@@ -66,7 +66,7 @@ class FieldListViewModel @Inject constructor(
         viewModelScope.launch {
             val userId = userRepository.getCurrentUserId() ?: return@launch
             val user = userRepository.getUserById(userId) ?: return@launch
-            _state.update { it.copy(followedFields = user.fieldsFollowing) }
+            _state.update { it.copy(followedFields = user.fieldsFollowed) }
         }
     }
 

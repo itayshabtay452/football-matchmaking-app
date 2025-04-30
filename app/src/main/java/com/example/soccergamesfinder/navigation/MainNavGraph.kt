@@ -14,11 +14,13 @@ import com.example.soccergamesfinder.ui.screens.addfield.AddFieldScreen
 import com.example.soccergamesfinder.ui.screens.allfields.AllFieldsScreen
 import com.example.soccergamesfinder.ui.screens.allgames.AllGamesScreen
 import com.example.soccergamesfinder.ui.screens.chat.ChatScreen
+import com.example.soccergamesfinder.ui.screens.favorites.FavoritesScreen
 import com.example.soccergamesfinder.ui.screens.field.FieldDetailsScreen
 import com.example.soccergamesfinder.ui.screens.game.GameDetailsScreen
 import com.example.soccergamesfinder.ui.screens.home.HomeScreen
 import com.example.soccergamesfinder.ui.screens.home.HomeScreenNavActions
 import com.example.soccergamesfinder.ui.screens.notifications.NotificationsScreen
+import com.example.soccergamesfinder.ui.screens.notifications.NotificationsViewModel
 import com.example.soccergamesfinder.ui.screens.user.UserViewScreen
 import com.example.soccergamesfinder.viewmodel.field.FieldListViewModel
 import com.example.soccergamesfinder.viewmodel.game.GameListViewModel
@@ -31,7 +33,8 @@ fun NavGraphBuilder.mainNavGraph(
     navController: NavController,
     fieldListViewModel: FieldListViewModel,
     gameListViewModel: GameListViewModel,
-    currentUserViewModel: CurrentUserViewModel
+    currentUserViewModel: CurrentUserViewModel,
+    notificationsViewModel: NotificationsViewModel
 ) {
     navigation(
         startDestination = Routes.Home.route,
@@ -189,7 +192,15 @@ fun NavGraphBuilder.mainNavGraph(
             popEnterTransition = defaultPopEnterTransition(),
             popExitTransition = defaultPopExitTransition()
         ) {
-            NotificationsScreen()
+            NotificationsScreen(
+                viewModel = notificationsViewModel,
+                navigateToGame = { gameId ->
+                    navController.navigate("${Routes.Game.route}/$gameId")
+                },
+                navigateToField = { fieldId ->
+                    navController.navigate("${Routes.Field.route}/$fieldId")
+                }
+            )
         }
 
         //Chat screen
@@ -208,6 +219,27 @@ fun NavGraphBuilder.mainNavGraph(
                 gameId = gameId,
                 onBackClick = {
                     navController.popBackStack()
+                }
+            )
+        }
+
+        //Favourite screen
+        composable(
+            route = Routes.Favorites.route,
+            enterTransition = defaultEnterTransition(),
+            exitTransition = defaultExitTransition(),
+            popEnterTransition = defaultPopEnterTransition(),
+            popExitTransition = defaultPopExitTransition()
+        ) {
+            FavoritesScreen(
+                currentUserViewModel = currentUserViewModel,
+                fieldListViewModel = fieldListViewModel,
+                gameListViewModel = gameListViewModel,
+                onNavigateToGame = { gameId ->
+                    navController.navigate("${Routes.Game.route}/$gameId")
+                },
+                onNavigateToField = { fieldId ->
+                    navController.navigate("${Routes.Field.route}/$fieldId")
                 }
             )
         }

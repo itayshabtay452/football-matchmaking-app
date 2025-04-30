@@ -200,6 +200,40 @@ class GameRepository @Inject constructor(
             }
     }
 
+    suspend fun moveGameToEndedCollection(gameId: String): Result<Unit> {
+        return try {
+            val gameSnapshot = firestore.collection("games")
+                .document(gameId)
+                .get()
+                .await()
+
+            if (!gameSnapshot.exists()) {
+                return Result.failure(Exception("המשחק לא קיים"))
+            }
+
+            val gameData = gameSnapshot.data ?: return Result.failure(Exception("אין נתונים במשחק"))
+
+            // הוספה ל- ended_games
+            firestore.collection("ended_games")
+                .document(gameId)
+                .set(gameData)
+                .await()
+
+            // מחיקה מה-games
+            firestore.collection("games")
+                .document(gameId)
+                .delete()
+                .await()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+
+
+
 
 
 }

@@ -4,30 +4,26 @@ package com.example.soccergamesfinder.viewmodel.game
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.soccergamesfinder.data.Game
+import com.example.soccergamesfinder.data.Notification
 import com.example.soccergamesfinder.repository.FieldRepository
 import com.example.soccergamesfinder.repository.GameRepository
+import com.example.soccergamesfinder.repository.NotificationsRepository
 import com.example.soccergamesfinder.repository.UserRepository
+import com.google.firebase.Timestamp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
-
-/**
- * ViewModel responsible for game actions like joining, leaving, and deleting games.
- */
-
-data class GameDetailsState(
-    val isLoading: Boolean = false,
-    val error: String? = null
-)
 
 @HiltViewModel
 class GameDetailsViewModel @Inject constructor(
     private val gameRepository: GameRepository,
     private val userRepository: UserRepository,
-    private val fieldRepository: FieldRepository
+    private val fieldRepository: FieldRepository,
+    private val notificationsRepository: NotificationsRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(GameDetailsState())
@@ -36,14 +32,17 @@ class GameDetailsViewModel @Inject constructor(
     fun joinGame(game: Game, onSuccess: () -> Unit = {}) {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true)
-            val userId = userRepository.getCurrentUserId()
-            if (userId == null) {
-                showError("User not authenticated")
-                return@launch
-            }
+            val userId = userRepository.getCurrentUserId() ?: return@launch showError("User not authenticated")
+            val user = userRepository.getUserById(userId) ?: return@launch showError("User not found")
+
             val result = gameRepository.joinGame(game.id, userId)
             if (result.isSuccess) {
-                userRepository.followGame(userId, game.id) // ➡️ מעקב אחרי המשחק
+                userRepository.followGame(userId, game.id)
+                sendNotificationToFollowersOfGame(
+                    game,
+                    senderId = userId,
+                    message = "${user.nickname} הצטרף למשחק ב-${game.fieldName}"
+                )
                 _state.value = _state.value.copy(isLoading = false, error = null)
                 onSuccess()
             } else {
@@ -52,18 +51,20 @@ class GameDetailsViewModel @Inject constructor(
         }
     }
 
-
     fun leaveGame(game: Game, onSuccess: () -> Unit = {}) {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true)
-            val userId = userRepository.getCurrentUserId()
-            if (userId == null) {
-                showError("User not authenticated")
-                return@launch
-            }
+            val userId = userRepository.getCurrentUserId() ?: return@launch showError("User not authenticated")
+            val user = userRepository.getUserById(userId) ?: return@launch showError("User not found")
+
             val result = gameRepository.leaveGame(game.id)
             if (result.isSuccess) {
-                userRepository.unfollowGame(userId, game.id) // ➡️ להסיר מעקב
+                userRepository.unfollowGame(userId, game.id)
+                sendNotificationToFollowersOfGame(
+                    game,
+                    senderId = userId,
+                    message = "${user.nickname} עזב את המשחק ב-${game.fieldName}"
+                )
                 _state.value = _state.value.copy(isLoading = false, error = null)
                 onSuccess()
             } else {
@@ -75,6 +76,8 @@ class GameDetailsViewModel @Inject constructor(
     fun deleteGame(game: Game, onSuccess: () -> Unit = {}) {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true)
+            val userId = userRepository.getCurrentUserId() ?: return@launch showError("User not authenticated")
+            val user = userRepository.getUserById(userId) ?: return@launch showError("User not found")
 
             val deleteResult = gameRepository.deleteGame(game.id)
             if (deleteResult.isFailure) {
@@ -83,24 +86,19 @@ class GameDetailsViewModel @Inject constructor(
                 return@launch
             }
 
-            val removeFromFieldResult = fieldRepository.removeGameFromField(
-                fieldId = game.fieldId,
-                gameId = game.id
+            fieldRepository.removeGameFromField(game.fieldId, game.id)
+            userRepository.removeGameFromAllUsers(game.id)
+
+            sendNotificationToFollowersOfGame(
+                game,
+                senderId = userId,
+                message = "${user.nickname} מחק את המשחק ב-${game.fieldName}"
             )
 
-            val removeFromUsersResult = userRepository.removeGameFromAllUsers(game.id) // ➡️ הסרת המשחק מכל המשתמשים
-
             _state.value = _state.value.copy(isLoading = false)
-
-            if (removeFromFieldResult.isFailure || removeFromUsersResult.isFailure) {
-                showError("המשחק נמחק, אך לא הוסר לגמרי מהמגרש או מהמשתמשים")
-            } else {
-                onSuccess()
-            }
+            onSuccess()
         }
     }
-
-
 
     fun createGameAndAttach(game: Game, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
@@ -108,19 +106,67 @@ class GameDetailsViewModel @Inject constructor(
             if (result.isSuccess) {
                 val userId = userRepository.getCurrentUserId()
                 if (userId != null) {
-                    userRepository.followGame(userId, game.id) // ➡️ עוקב אחרי המשחק שנוצר
+                    userRepository.followGame(userId, game.id)
+                    val user = userRepository.getUserById(userId)
+                    if (user != null) {
+                        sendNotificationToFollowersOfField(
+                            fieldId = game.fieldId,
+                            senderId = userId,
+                            message = "${user.nickname} יצר משחק חדש במגרש ${game.fieldName}"
+                        )
+                    }
                 }
-                onResult(result.isSuccess)
+                onResult(true)
             } else {
-                println(">>> שמירת המשחק נכשלה: ${result.exceptionOrNull()?.message}")
+                onResult(false)
             }
         }
     }
 
+    private suspend fun sendNotificationToFollowersOfGame(game: Game, senderId: String, message: String) {
+        val followers = userRepository.getUsersFollowingGame(game.id)
+        for (userId in followers) {
+            if (userId == senderId) continue
+            notificationsRepository.addNotification(
+                userId,
+                Notification(
+                    id = UUID.randomUUID().toString(),
+                    title = "עדכון במשחק",
+                    message = message,
+                    timestamp = Timestamp.now(),
+                    targetId = game.id,
+                    type = "game",
+                    isRead = false
+                )
+            )
+        }
+    }
 
-
+    private suspend fun sendNotificationToFollowersOfField(fieldId: String, senderId: String, message: String) {
+        val followers = userRepository.getUsersFollowingField(fieldId)
+        for (userId in followers) {
+            if (userId == senderId) continue
+            notificationsRepository.addNotification(
+                userId,
+                Notification(
+                    id = UUID.randomUUID().toString(),
+                    title = "משחק חדש!",
+                    message = message,
+                    timestamp = Timestamp.now(),
+                    targetId = fieldId,
+                    type = "field",
+                    isRead = false
+                )
+            )
+        }
+    }
 
     private fun showError(message: String) {
         _state.value = _state.value.copy(isLoading = false, error = message)
     }
 }
+
+data class GameDetailsState(
+    val isLoading: Boolean = false,
+    val error: String? = null
+)

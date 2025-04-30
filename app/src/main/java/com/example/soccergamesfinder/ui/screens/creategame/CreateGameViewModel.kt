@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.soccergamesfinder.data.Field
 import com.example.soccergamesfinder.data.Game
-import com.example.soccergamesfinder.repository.FieldRepository
 import com.example.soccergamesfinder.repository.GameRepository
 import com.example.soccergamesfinder.repository.UserRepository
 import com.example.soccergamesfinder.utils.GameValidationUtils
@@ -66,8 +65,6 @@ class CreateGameViewModel @Inject constructor(
     ) {
         val current = _state.value
 
-        println(">>> התחלת יצירת משחק")
-
         // שלב 1 – ולידציה בסיסית
         val basicValidations = listOf(
             GameValidationUtils.validateDate(current.date),
@@ -87,7 +84,6 @@ class CreateGameViewModel @Inject constructor(
 
             try {
                 val creatorId = userRepository.getCurrentUserId()
-                println(">>> creatorId: $creatorId")
                 if (creatorId == null) {
                     showError("המשתמש לא מחובר")
                     return@launch
@@ -96,14 +92,10 @@ class CreateGameViewModel @Inject constructor(
                 // המרת תאריך + שעת התחלה + שעת סיום ל־Timestamp
                 val start = GameValidationUtils.convertToTimestamp(current.date, current.startTime)
                 val end = GameValidationUtils.convertToTimestamp(current.date, current.endTime)
-                println(">>> startTime: $start")
-                println(">>> endTime: $end")
 
                 // שליפת משחקים מהמאגרים – של המגרש ושל המשתמש
                 val fieldGames = gameRepository.getGamesByFieldId(field.id)
-                println(">>> fieldGames: ${fieldGames.size} משחקים")
                 val userGames = gameRepository.getGamesForCurrentUser()
-                println(">>> userGames: ${userGames.size} משחקים")
 
                 // ולידציית זמינות מגרש
                 val fieldResult = GameValidationUtils.validateFieldAvailability(start, end, fieldGames)
@@ -133,7 +125,6 @@ class CreateGameViewModel @Inject constructor(
                     fieldAddress = field.address,
                     creatorName = userRepository.getUserById(creatorId)?.nickname ?: "לא ידוע"
                 )
-                println(">>> המשחק נוצר עם id: ${game.id}")
 
                 onSubmit(game)
                 _state.value = CreateGameFormState() // איפוס
