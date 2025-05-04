@@ -13,5 +13,9 @@ data class UserProfileState(
     val longitude: Double? = null,
     val profileImageUri: Uri? = null,
     val isLoading: Boolean = false,
-    val address: String? = null
+    val address: String? = null,
+    val preferredDays: List<String> = emptyList(),
+    val startHour: Int? = null,
+    val endHour: Int? = null,
+    val birthDate: String? = ""
 )

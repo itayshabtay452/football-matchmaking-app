@@ -4,12 +4,18 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
+import com.example.soccergamesfinder.ui.components.shared.BirthDatePickerField
+import com.example.soccergamesfinder.ui.components.shared.HourPickerDropdownModern
 
 /**
  * A reusable composable form for collecting or editing user profile data.
@@ -28,6 +34,9 @@ fun UserProfileForm(
     isEditMode: Boolean,
     onRequestLocationPermission: () -> Unit
 ) {
+    val scrollState = rememberScrollState()
+
+
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
@@ -38,6 +47,7 @@ fun UserProfileForm(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .verticalScroll(scrollState)
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -59,6 +69,34 @@ fun UserProfileForm(
             onValueChange = { onEvent(UserProfileEvent.NicknameChanged(it)) },
             label = { Text("Nickname") },
             modifier = Modifier.fillMaxWidth()
+        )
+
+        state.birthDate?.let {
+            BirthDatePickerField(
+                selectedDate = it,
+                onDateSelected = { onEvent(UserProfileEvent.BirthDateChanged(it)) },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        Text("ימים מועדפים")
+        PreferredDaysRow(
+            selectedDays = state.preferredDays,
+            onSelectionChanged = { onEvent(UserProfileEvent.PreferredDaysChanged(it)) }
+        )
+
+        Text("טווח שעות מועדף")
+
+        HourPickerDropdownModern(
+            selectedHour = state.startHour,
+            onHourSelected = { it?.let { hour -> onEvent(UserProfileEvent.StartHourChanged(hour)) } },
+            label = "שעת התחלה"
+        )
+
+        HourPickerDropdownModern(
+            selectedHour = state.endHour,
+            onHourSelected = { it?.let { hour -> onEvent(UserProfileEvent.EndHourChanged(hour)) } },
+            label = "שעת סיום"
         )
 
         Button(
@@ -101,3 +139,29 @@ fun UserProfileForm(
         }
     }
 }
+
+@Composable
+fun PreferredDaysRow(
+    selectedDays: List<String>,
+    onSelectionChanged: (List<String>) -> Unit
+) {
+    val days = listOf("ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת")
+
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        items(days) { day ->
+            val isSelected = selectedDays.contains(day)
+            FilterChip(
+                selected = isSelected,
+                onClick = {
+                    val updated = if (isSelected) selectedDays - day else selectedDays + day
+                    onSelectionChanged(updated)
+                },
+                label = { Text(day) }
+            )
+        }
+    }
+}
+

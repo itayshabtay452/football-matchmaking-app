@@ -57,7 +57,11 @@ class UserRepository @Inject constructor(
         nickname: String,
         latitude: Double,
         longitude: Double,
-        profileImageUri: Uri?
+        profileImageUri: Uri?,
+        birthDate: String?,
+        preferredDays: List<String>,
+        startHour: Int?,
+        endHour: Int?
     ): Result<Unit> {
         val userId = firebaseAuth.currentUser?.uid
             ?: return Result.failure(Exception("User is not authenticated"))
@@ -72,7 +76,11 @@ class UserRepository @Inject constructor(
             nickname = nickname,
             latitude = latitude,
             longitude = longitude,
-            profileImageUrl = imageUrl
+            profileImageUrl = imageUrl,
+            birthDate = birthDate,
+            preferredDays = preferredDays,
+            startHour = startHour,
+            endHour = endHour
         )
 
         return try {
@@ -85,6 +93,7 @@ class UserRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
 
     fun getCurrentUserId(): String? {
         return firebaseAuth.currentUser?.uid

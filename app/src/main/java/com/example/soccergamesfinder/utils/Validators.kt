@@ -52,6 +52,48 @@ object Validators {
         }
     }
 
+    fun validateAge(birthDate: String?): ValidationResult {
+        if (birthDate.isNullOrBlank()) return ValidationResult(false, "Birth date is required")
+
+        return try {
+            val formatter = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())
+            val birth = formatter.parse(birthDate)
+            val today = java.util.Calendar.getInstance()
+            val dob = java.util.Calendar.getInstance().apply { time = birth }
+
+            var age = today.get(java.util.Calendar.YEAR) - dob.get(java.util.Calendar.YEAR)
+            if (today.get(java.util.Calendar.DAY_OF_YEAR) < dob.get(java.util.Calendar.DAY_OF_YEAR)) {
+                age--
+            }
+
+            when {
+                age < 12 -> ValidationResult(false, "You must be at least 12 years old")
+                age > 100 -> ValidationResult(false, "Please enter a realistic age")
+                else -> ValidationResult(true)
+            }
+        } catch (e: Exception) {
+            ValidationResult(false, "Invalid birth date format")
+        }
+    }
+
+
+    fun validatePreferredDays(days: List<String>): ValidationResult {
+        return if (days.isEmpty()) {
+            ValidationResult(false, "Please select at least one preferred day")
+        } else {
+            ValidationResult(true)
+        }
+    }
+
+    fun validateHourRange(start: Int?, end: Int?): ValidationResult {
+        return when {
+            start == null || end == null -> ValidationResult(false, "Please select start and end hours")
+            start >= end -> ValidationResult(false, "Start hour must be before end hour")
+            else -> ValidationResult(true)
+        }
+    }
+
+
     fun validateNotBlank(value: String, errorMessage: String): ValidationResult {
         return if (value.isBlank()) {
             ValidationResult(false, errorMessage)

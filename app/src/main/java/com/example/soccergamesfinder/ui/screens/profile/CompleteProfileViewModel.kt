@@ -51,6 +51,22 @@ class CompleteProfileViewModel @Inject constructor(
                 _state.update { it.copy(latitude = event.latitude, longitude = event.longitude) }
             }
 
+            is UserProfileEvent.PreferredDaysChanged -> {
+                _state.update { it.copy(preferredDays = event.days) }
+            }
+
+            is UserProfileEvent.StartHourChanged -> {
+                _state.update { it.copy(startHour = event.hour) }
+            }
+
+            is UserProfileEvent.EndHourChanged -> {
+                _state.update { it.copy(endHour = event.hour) }
+            }
+
+            is UserProfileEvent.BirthDateChanged -> {
+                _state.update { it.copy(birthDate = event.date) }
+            }
+
             is UserProfileEvent.LocationPermissionDenied -> {
                 showError("Location permission denied")
             }
@@ -83,8 +99,11 @@ class CompleteProfileViewModel @Inject constructor(
         val fullNameResult = Validators.validateFullName(state.fullName)
         val nicknameFormatResult = Validators.validateNicknameFormat(state.nickname)
         val locationResult = Validators.validateLocation(state.latitude, state.longitude)
+        val ageResult = Validators.validateAge(state.birthDate)
+        val preferredDaysResult = Validators.validatePreferredDays(state.preferredDays)
+        val preferredHoursResult = Validators.validateHourRange(state.startHour, state.endHour)
 
-        val validations = listOf(fullNameResult, nicknameFormatResult, locationResult)
+        val validations = listOf(fullNameResult, nicknameFormatResult, locationResult, ageResult, preferredDaysResult, preferredHoursResult)
         val firstError = validations.firstOrNull { !it.isValid }
 
         if (firstError != null) {
@@ -108,8 +127,13 @@ class CompleteProfileViewModel @Inject constructor(
                 nickname = state.nickname,
                 latitude = state.latitude!!,
                 longitude = state.longitude!!,
-                profileImageUri = state.profileImageUri
+                profileImageUri = state.profileImageUri,
+                birthDate = state.birthDate,
+                preferredDays = state.preferredDays,
+                startHour = state.startHour,
+                endHour = state.endHour
             )
+
 
             _state.update { it.copy(isLoading = false) }
 
