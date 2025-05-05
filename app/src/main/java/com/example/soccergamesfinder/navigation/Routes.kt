@@ -16,4 +16,5 @@ sealed class Routes(val route: String) {
     object Notifications : Routes("notifications") // 🆕
     object Chat : Routes("chat") // 🆕
     object Favorites : Routes("favorites") // 🆕
+    object EditProfile : Routes("edit_profile") // 🆕
 }

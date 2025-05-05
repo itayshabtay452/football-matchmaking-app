@@ -17,7 +17,8 @@ import com.example.soccergamesfinder.ui.components.GameCarousel
 @Composable
 fun UserViewScreen(
     userId: String,
-    onNavigateToGame: (String) -> Unit
+    onNavigateToGame: (String) -> Unit,
+    onNavigateToEditProfile: () -> Unit
 ) {
     val viewModel = hiltViewModel<UserViewViewModel>()
     val state by viewModel.state.collectAsState()
@@ -73,6 +74,18 @@ fun UserViewScreen(
                         )
                     }
                 }
+
+                if (state.isOwnProfile) {
+                    item {
+                        Button(
+                            onClick = { onNavigateToEditProfile() },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("ערוך פרופיל")
+                        }
+                    }
+                }
+
 
 
             }

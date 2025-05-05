@@ -20,6 +20,7 @@ fun BirthDatePickerField(
     selectedDate: String,
     onDateSelected: (String) -> Unit,
     label: String = "תאריך לידה",
+    isEditMode: Boolean,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -49,7 +50,8 @@ fun BirthDatePickerField(
             .fillMaxWidth()
             .height(48.dp),
         shape = RoundedCornerShape(16.dp),
-        contentPadding = PaddingValues(horizontal = 12.dp)
+        contentPadding = PaddingValues(horizontal = 12.dp),
+        enabled = !isEditMode
     ) {
         Icon(Icons.Outlined.CalendarToday, contentDescription = null, modifier = Modifier.size(16.dp))
         Spacer(modifier = Modifier.width(6.dp))

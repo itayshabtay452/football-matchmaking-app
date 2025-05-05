@@ -14,6 +14,7 @@ import com.example.soccergamesfinder.ui.screens.addfield.AddFieldScreen
 import com.example.soccergamesfinder.ui.screens.allfields.AllFieldsScreen
 import com.example.soccergamesfinder.ui.screens.allgames.AllGamesScreen
 import com.example.soccergamesfinder.ui.screens.chat.ChatScreen
+import com.example.soccergamesfinder.ui.screens.editprofile.EditProfileScreen
 import com.example.soccergamesfinder.ui.screens.favorites.FavoritesScreen
 import com.example.soccergamesfinder.ui.screens.field.FieldDetailsScreen
 import com.example.soccergamesfinder.ui.screens.game.GameDetailsScreen
@@ -60,7 +61,8 @@ fun NavGraphBuilder.mainNavGraph(
                             popUpTo(Routes.Home.route) { inclusive = true }
                         }
                     },
-                    navigateToAddField = { navController.navigate(Routes.AddField.route) }
+                    navigateToAddField = { navController.navigate(Routes.AddField.route) },
+                    onNavigateToUser = { userId -> navController.navigate("${Routes.UserProfile.route}/$userId") }
                 ),
                 fieldListViewModel = fieldListViewModel,
                 gameListViewModel = gameListViewModel,
@@ -164,6 +166,9 @@ fun NavGraphBuilder.mainNavGraph(
                 userId = userId,
                 onNavigateToGame = { gameId ->
                     navController.navigate("${Routes.Game.route}/$gameId")
+                },
+                onNavigateToEditProfile = {
+                    navController.navigate(Routes.EditProfile.route)
                 }
             )
         }
@@ -240,6 +245,21 @@ fun NavGraphBuilder.mainNavGraph(
                 },
                 onNavigateToField = { fieldId ->
                     navController.navigate("${Routes.Field.route}/$fieldId")
+                }
+            )
+        }
+
+        //Edit profile screen
+        composable(
+            route = Routes.EditProfile.route,
+            enterTransition = defaultEnterTransition(),
+            exitTransition = defaultExitTransition(),
+            popEnterTransition = defaultPopEnterTransition(),
+            popExitTransition = defaultPopExitTransition()
+        ) {
+            EditProfileScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }

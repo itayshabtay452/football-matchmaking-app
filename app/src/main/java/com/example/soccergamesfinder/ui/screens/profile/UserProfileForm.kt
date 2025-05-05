@@ -75,7 +75,9 @@ fun UserProfileForm(
             BirthDatePickerField(
                 selectedDate = it,
                 onDateSelected = { onEvent(UserProfileEvent.BirthDateChanged(it)) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                isEditMode = isEditMode
+
             )
         }
 

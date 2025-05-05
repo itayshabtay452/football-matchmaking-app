@@ -94,6 +94,54 @@ class UserRepository @Inject constructor(
         }
     }
 
+    suspend fun updateCurrentUserProfile(
+        nickname: String,
+        latitude: Double,
+        longitude: Double,
+        profileImageUri: Uri?,
+        preferredDays: List<String>,
+        startHour: Int?,
+        endHour: Int?
+    ): Result<Unit> {
+        val userId = firebaseAuth.currentUser?.uid
+            ?: return Result.failure(Exception("User not authenticated"))
+
+        return try {
+            val userRef = firestore.collection("users").document(userId)
+            val currentUser = userRef.get().await().toObject(User::class.java)
+
+            val updates = mutableMapOf<String, Any>(
+                "nickname" to nickname,
+                "latitude" to latitude,
+                "longitude" to longitude,
+                "preferredDays" to preferredDays
+            )
+
+            startHour?.let { updates["startHour"] = it }
+            endHour?.let { updates["endHour"] = it }
+
+            if (profileImageUri != null) {
+                // מחיקת תמונה קודמת
+                currentUser?.profileImageUrl?.let { oldUrl ->
+                    val oldRef = firebaseStorage.getReferenceFromUrl(oldUrl)
+                    oldRef.delete().await()
+                }
+
+                val newImageUrl = uploadProfileImage(profileImageUri, userId)
+                if (newImageUrl != null) {
+                    updates["profileImageUrl"] = newImageUrl
+                }
+            }
+
+            userRef.update(updates).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Result.failure(e)
+        }
+    }
+
+
 
     fun getCurrentUserId(): String? {
         return firebaseAuth.currentUser?.uid
@@ -136,13 +184,15 @@ class UserRepository @Inject constructor(
      * Checks if a nickname is already in use by another user.
      */
     suspend fun isNicknameTaken(nickname: String, ): Boolean {
+        val currentUserId = firebaseAuth.currentUser?.uid
+
         return try {
             val result = firestore.collection("users")
                 .whereEqualTo("nickname", nickname)
                 .get()
                 .await()
 
-            !result.isEmpty
+            result.any { it.id != currentUserId }
         } catch (e: Exception) {
             false // אם יש שגיאה נניח שהכינוי פנוי כדי לא לחסום
         }

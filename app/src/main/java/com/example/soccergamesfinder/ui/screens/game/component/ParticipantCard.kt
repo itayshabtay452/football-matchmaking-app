@@ -49,7 +49,7 @@ fun ParticipantCard(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Text(user.nickname ?: "ללא שם", style = MaterialTheme.typography.labelSmall)
+                Text(user.nickname, style = MaterialTheme.typography.labelSmall)
                 if (isCreator) {
                     Text(
                         "יוצר המשחק",

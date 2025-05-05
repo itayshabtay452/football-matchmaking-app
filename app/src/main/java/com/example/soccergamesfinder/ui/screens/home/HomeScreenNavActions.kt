@@ -6,5 +6,6 @@ data class HomeScreenNavActions(
     val navigateToField: (String) -> Unit,
     val navigateToGame: (String) -> Unit,
     val navigateToLogin: () -> Unit,
-    val navigateToAddField: () -> Unit
+    val navigateToAddField: () -> Unit,
+    val onNavigateToUser: (String) -> Unit
 )
