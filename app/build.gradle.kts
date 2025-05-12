@@ -1,3 +1,4 @@
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -18,8 +19,8 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
     }
 
     buildTypes {
@@ -100,6 +101,9 @@ dependencies {
     implementation (libs.play.services.maps)
 
     implementation(libs.androidx.material.icons.extended)
+
+    implementation(libs.gson)
+
 
 
 }

@@ -5,10 +5,10 @@ package com.example.soccergamesfinder.ui.screens.allfields
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.LocationCity
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material.icons.outlined.SportsSoccer
 import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.material3.*
@@ -61,7 +61,7 @@ fun AllFieldsFilterSection(
             selectedOption = state.selectedSize,
             onOptionSelected = { onEvent(AllFieldsEvent.SizeChanged(it)) },
             leadingIcon = {
-                Icon(Icons.Default.Sort, contentDescription = null, modifier = Modifier.size(18.dp))
+                Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = null, modifier = Modifier.size(18.dp))
             }
         )
 
@@ -108,7 +108,7 @@ fun AllFieldsFilterSection(
                         ?.let { onEvent(AllFieldsEvent.SortOptionChanged(it)) }
                 },
                 leadingIcon = {
-                    Icon(Icons.Default.Sort, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = null, modifier = Modifier.size(18.dp))
                 },
                 modifier = Modifier.weight(1f)
             )

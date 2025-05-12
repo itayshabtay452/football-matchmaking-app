@@ -30,7 +30,8 @@ class UserViewViewModel @Inject constructor(
                     return@launch
                 }
 
-                val games = gameRepository.getGamesForUser(userId)
+                val futureGames = gameRepository.getGamesForUser(userId)
+                val pastGames = gameRepository.getEndedGamesForUser(userId)
 
                 val currentUserId = userRepository.getCurrentUserId()
                 val isOwnProfile = user.id == currentUserId
@@ -39,7 +40,8 @@ class UserViewViewModel @Inject constructor(
                     it.copy(
                         isLoading = false,
                         user = user,
-                        games = games,
+                        games = futureGames,
+                        pastGames = pastGames,
                         isOwnProfile = isOwnProfile
                     )
                 }

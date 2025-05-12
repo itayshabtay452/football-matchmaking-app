@@ -41,9 +41,8 @@ fun UserViewScreen(
         }
 
         state.user != null -> {
+            val futureGames = state.games.filter { it.status == GameStatus.OPEN }
             val user = state.user
-            val futureGames = state.games.filter { it.status != GameStatus.ENDED }
-            val pastGames = state.games.filter { it.status == GameStatus.ENDED }
 
             LazyColumn(
                 modifier = Modifier
@@ -59,9 +58,9 @@ fun UserViewScreen(
 
                 item {
                     UserStatisticsSection(
-                        totalGames = state.games.size,
-                        futureGames = futureGames.size,
-                        pastGames = pastGames.size
+                        totalGames = state.games.size + state.pastGames.size,
+                        futureGames = state.games.size,
+                        pastGames = state.pastGames.size
                     )
                 }
 

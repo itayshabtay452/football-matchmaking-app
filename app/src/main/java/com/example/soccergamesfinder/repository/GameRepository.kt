@@ -106,6 +106,19 @@ class GameRepository @Inject constructor(
         }
     }
 
+    suspend fun getEndedGamesForUser(userId: String): List<Game> {
+        return try {
+            firestore.collection("ended_games")
+                .whereArrayContains("joinedPlayers", userId)
+                .get()
+                .await()
+                .documents
+                .mapNotNull { it.toObject(Game::class.java)?.copy(id = it.id) }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
 
 
     /**

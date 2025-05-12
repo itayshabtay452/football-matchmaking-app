@@ -2,6 +2,7 @@
 # 🔹 גרסאות כלליות
 androidGradlePlugin = "8.5.2"
 animation = "1.7.8"
+gson = "2.10.1"
 kotlin = "2.1.0"
 hilt = "2.55"
 composeBom = "2025.03.00"
@@ -38,6 +39,7 @@ compose-material = { module = "androidx.compose.material3:material3", version = 
 compose-navigation = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 
 # 🔹 Hilt Dependency Injection
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
 hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version = "1.2.0" }

@@ -9,5 +9,6 @@ data class UserViewState(
     val error: String? = null,
     val user: User? = null,
     val games: List<Game> = emptyList(),
+    val pastGames: List<Game> = emptyList(),
     val isOwnProfile: Boolean = false
 )

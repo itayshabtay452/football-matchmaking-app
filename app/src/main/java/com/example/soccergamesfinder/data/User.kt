@@ -12,5 +12,6 @@ data class User(
     val preferredDays: List<String> = emptyList(),
     val startHour: Int? = null,
     val endHour: Int? = null,
-    val birthDate: String? = null
+    val birthDate: String? = null,
+    val address: String? = null
 )
