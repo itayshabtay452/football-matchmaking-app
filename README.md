@@ -51,7 +51,7 @@
 
 <div align="center">
   <img src="screenshots/home_screen.jpeg" width="200" style="margin: 8px;" />
-  <img src="screenshots/profile.jpeg" width="200" style="margin: 8px;" />
+  <img src="screenshots/pofile.jpeg" width="200" style="margin: 8px;" />
   <img src="screenshots/game.jpeg" width="200" style="margin: 8px;" />
   <img src="screenshots/field.jpeg" width="200" style="margin: 8px;" />
   <img src="screenshots/chat.jpeg" width="200" style="margin: 8px;" />
