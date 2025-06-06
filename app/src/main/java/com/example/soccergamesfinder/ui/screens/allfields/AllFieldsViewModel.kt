@@ -1,7 +1,7 @@
 package com.example.soccergamesfinder.ui.screens.allfields
 
 import androidx.lifecycle.ViewModel
-import com.example.soccergamesfinder.data.Field
+import com.example.soccergamesfinder.model.Field
 import com.example.soccergamesfinder.utils.FieldFilterManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

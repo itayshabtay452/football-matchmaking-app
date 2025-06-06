@@ -13,5 +13,5 @@ sealed class AllGamesEvent {
 
     object ClearFilters : AllGamesEvent()
     object LoadNextPage : AllGamesEvent() // אם תחליט להוסיף פאגינציה בהמשך
-    data class UpdateGames(val newGames: List<com.example.soccergamesfinder.data.Game>) : AllGamesEvent()
+    data class UpdateGames(val newGames: List<com.example.soccergamesfinder.model.Game>) : AllGamesEvent()
 }

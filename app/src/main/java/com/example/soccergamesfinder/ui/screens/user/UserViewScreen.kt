@@ -9,10 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
-import com.example.soccergamesfinder.data.GameStatus
-import com.example.soccergamesfinder.ui.components.GameCard
-import com.example.soccergamesfinder.ui.components.GameCarousel
+import com.example.soccergamesfinder.model.GameStatus
 
 @Composable
 fun UserViewScreen(

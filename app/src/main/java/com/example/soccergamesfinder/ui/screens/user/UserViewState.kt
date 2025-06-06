@@ -1,8 +1,8 @@
 // 📁 ui/screens/user/UserViewState.kt
 package com.example.soccergamesfinder.ui.screens.user
 
-import com.example.soccergamesfinder.data.Game
-import com.example.soccergamesfinder.data.User
+import com.example.soccergamesfinder.model.Game
+import com.example.soccergamesfinder.model.User
 
 data class UserViewState(
     val isLoading: Boolean = false,

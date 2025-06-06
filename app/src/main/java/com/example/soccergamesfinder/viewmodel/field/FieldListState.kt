@@ -1,6 +1,6 @@
 package com.example.soccergamesfinder.viewmodel.field
 
-import com.example.soccergamesfinder.data.Field
+import com.example.soccergamesfinder.model.Field
 
 data class FieldListState(
     val fields: List<Field> = emptyList(),

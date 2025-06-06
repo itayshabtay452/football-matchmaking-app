@@ -1,111 +1,89 @@
 package com.example.soccergamesfinder.repository
 
-import com.example.soccergamesfinder.data.Field
-import com.example.soccergamesfinder.data.Game
-import com.example.soccergamesfinder.data.GameStatus
+import com.example.soccergamesfinder.model.Field
+import com.example.soccergamesfinder.model.Game
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
+/**
+ * Repository responsible for managing game-related operations in Firestore.
+ *
+ * Includes real-time listeners, game creation, joining/leaving games,
+ * and managing ended games and relations with fields.
+ */
 class GameRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val auth: FirebaseAuth
 ) {
     private val gamesCollection = firestore.collection("games")
 
-    /**
-     * Retrieves all games from Firestore.
-     */
+    /** Listens to all games in Firestore. */
     fun listenToGames(onChange: (List<Game>) -> Unit, onError: (Throwable) -> Unit): ListenerRegistration {
-        return firestore.collection("games")
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    onError(error)
-                    return@addSnapshotListener
-                }
-
-                if (snapshot != null && !snapshot.isEmpty) {
-                    val games = snapshot.toObjects(Game::class.java)
-                    onChange(games)
-                }
+        return gamesCollection.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                onError(error)
+                return@addSnapshotListener
             }
+            if (snapshot != null && !snapshot.isEmpty) {
+                val games = snapshot.toObjects(Game::class.java)
+                onChange(games)
+            }
+        }
     }
 
+    /** Creates a new game and attaches it to a field in a transaction. */
     suspend fun createGameAndAttachToField(game: Game): Result<Unit> {
         return try {
-            val gameRef = firestore.collection("games").document(game.id)
+            val gameRef = gamesCollection.document(game.id)
             val fieldRef = firestore.collection("facilities").document(game.fieldId)
 
             firestore.runTransaction { transaction ->
-                // 🔁 1. קודם כל קראה את המגרש
                 val fieldSnap = transaction.get(fieldRef)
                 val field = fieldSnap.toObject(Field::class.java)
                     ?: throw Exception("Field not found")
-
                 val updatedGames = field.games + game.id
-
-                // ✅ 2. עכשיו כתוב את המשחק ועדכן את המגרש
                 transaction.set(gameRef, game)
                 transaction.update(fieldRef, "games", updatedGames)
             }.await()
 
-            println(">>> המשחק נשמר בהצלחה עם ID: ${game.id}")
             Result.success(Unit)
-
         } catch (e: Exception) {
-            println(">>> שמירת המשחק נכשלה: ${e.message}")
             Result.failure(e)
         }
     }
 
-    /**
-     * Retrieves games for a specific field.
-     */
+    /** Returns games for a specific field. */
     suspend fun getGamesByFieldId(fieldId: String): List<Game> {
         return try {
-            val snapshot = gamesCollection
-                .whereEqualTo("fieldId", fieldId)
-                .get()
-                .await()
-            snapshot.toObjects(Game::class.java)
+            gamesCollection.whereEqualTo("fieldId", fieldId).get().await().toObjects(Game::class.java)
         } catch (e: Exception) {
             emptyList()
         }
     }
 
-    /**
-     * Retrieves games created or joined by the current user.
-     */
+    /** Returns games the current user has joined. */
     suspend fun getGamesForCurrentUser(): List<Game> {
         val userId = auth.currentUser?.uid ?: return emptyList()
-
         return try {
-            val snapshot = gamesCollection
-                .whereArrayContains("joinedPlayers", userId)
-                .get()
-                .await()
-            snapshot.toObjects(Game::class.java)
+            gamesCollection.whereArrayContains("joinedPlayers", userId).get().await().toObjects(Game::class.java)
         } catch (e: Exception) {
             emptyList()
         }
     }
 
+    /** Returns games joined by a specific user. */
     suspend fun getGamesForUser(userId: String): List<Game> {
         return try {
-            val snapshot = firestore.collection("games")
-                .whereArrayContains("joinedPlayers", userId)
-                .get()
-                .await()
-
-            snapshot.toObjects(Game::class.java)
+            gamesCollection.whereArrayContains("joinedPlayers", userId).get().await().toObjects(Game::class.java)
         } catch (e: Exception) {
-            e.printStackTrace()
             emptyList()
         }
     }
 
+    /** Returns ended games for a specific user from the 'ended_games' collection. */
     suspend fun getEndedGamesForUser(userId: String): List<Game> {
         return try {
             firestore.collection("ended_games")
@@ -119,11 +97,7 @@ class GameRepository @Inject constructor(
         }
     }
 
-
-
-    /**
-     * Adds a player to a game, without checking any business logic.
-     */
+    /** Adds a player to a game. */
     suspend fun joinGame(gameId: String, userId: String): Result<Unit> {
         return try {
             val gameRef = gamesCollection.document(gameId)
@@ -139,13 +113,9 @@ class GameRepository @Inject constructor(
         }
     }
 
-
-    /**
-     * Leaves the current user from a game.
-     */
+    /** Removes the current user from a game. */
     suspend fun leaveGame(gameId: String): Result<Unit> {
         val userId = auth.currentUser?.uid ?: return Result.failure(Exception("Not authenticated"))
-
         return try {
             val gameRef = gamesCollection.document(gameId)
             firestore.runTransaction { transaction ->
@@ -160,6 +130,7 @@ class GameRepository @Inject constructor(
         }
     }
 
+    /** Deletes a game document. */
     suspend fun deleteGame(gameId: String): Result<Unit> {
         return try {
             gamesCollection.document(gameId).delete().await()
@@ -169,19 +140,19 @@ class GameRepository @Inject constructor(
         }
     }
 
+    /** Listens to all games for a given field. */
     fun listenToGamesByFieldId(
         fieldId: String,
         onChange: (List<Game>) -> Unit,
         onError: (Throwable) -> Unit
     ): ListenerRegistration {
-        return firestore.collection("games")
+        return gamesCollection
             .whereEqualTo("fieldId", fieldId)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     onError(error)
                     return@addSnapshotListener
                 }
-
                 if (snapshot != null && !snapshot.isEmpty) {
                     val games = snapshot.toObjects(Game::class.java)
                     onChange(games)
@@ -191,62 +162,41 @@ class GameRepository @Inject constructor(
             }
     }
 
+    /** Listens to a single game by ID. */
     fun listenToGameById(
         gameId: String,
         onChange: (Game) -> Unit,
         onError: (Exception) -> Unit
     ): ListenerRegistration {
-        return firestore.collection("games")
+        return gamesCollection
             .document(gameId)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     onError(error)
                     return@addSnapshotListener
                 }
-
                 val game = snapshot?.toObject(Game::class.java)
                 if (game != null) {
                     onChange(game)
                 } else {
-                    onError(Exception("המשחק לא נמצא"))
+                    onError(Exception("Game not found"))
                 }
             }
     }
 
+    /** Moves a game to the 'ended_games' collection and deletes it from 'games'. */
     suspend fun moveGameToEndedCollection(gameId: String): Result<Unit> {
         return try {
-            val gameSnapshot = firestore.collection("games")
-                .document(gameId)
-                .get()
-                .await()
+            val gameSnapshot = gamesCollection.document(gameId).get().await()
+            if (!gameSnapshot.exists()) return Result.failure(Exception("Game does not exist"))
+            val gameData = gameSnapshot.data ?: return Result.failure(Exception("Game has no data"))
 
-            if (!gameSnapshot.exists()) {
-                return Result.failure(Exception("המשחק לא קיים"))
-            }
-
-            val gameData = gameSnapshot.data ?: return Result.failure(Exception("אין נתונים במשחק"))
-
-            // הוספה ל- ended_games
-            firestore.collection("ended_games")
-                .document(gameId)
-                .set(gameData)
-                .await()
-
-            // מחיקה מה-games
-            firestore.collection("games")
-                .document(gameId)
-                .delete()
-                .await()
+            firestore.collection("ended_games").document(gameId).set(gameData).await()
+            gamesCollection.document(gameId).delete().await()
 
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
-
-
-
-
-
-
 }

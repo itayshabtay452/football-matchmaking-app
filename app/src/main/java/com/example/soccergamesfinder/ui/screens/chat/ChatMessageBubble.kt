@@ -1,7 +1,6 @@
 // ChatMessageBubble.kt
 package com.example.soccergamesfinder.ui.screens.chat
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -11,9 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.soccergamesfinder.data.Message
+import com.example.soccergamesfinder.model.Message
 import java.text.SimpleDateFormat
 import java.util.*
 

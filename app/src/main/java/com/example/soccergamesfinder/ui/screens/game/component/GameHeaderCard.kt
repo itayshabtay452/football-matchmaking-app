@@ -14,8 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.example.soccergamesfinder.data.Game
-import com.example.soccergamesfinder.data.GameStatus
+import com.example.soccergamesfinder.model.Game
+import com.example.soccergamesfinder.model.GameStatus
 import java.text.SimpleDateFormat
 import java.util.*
 

@@ -4,14 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.soccergamesfinder.ai.GameWithDetails
 import com.example.soccergamesfinder.ai.buildGameRecommendationPrompt
-import com.example.soccergamesfinder.data.*
+import com.example.soccergamesfinder.model.*
 import com.example.soccergamesfinder.repository.UserRepository
 import com.example.soccergamesfinder.services.GptService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import android.util.Log
 import com.example.soccergamesfinder.services.LocationService
 
 data class GameRecommendationState(

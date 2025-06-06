@@ -3,8 +3,8 @@ package com.example.soccergamesfinder.ui.screens.creategame
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.soccergamesfinder.data.Field
-import com.example.soccergamesfinder.data.Game
+import com.example.soccergamesfinder.model.Field
+import com.example.soccergamesfinder.model.Game
 import com.example.soccergamesfinder.repository.GameRepository
 import com.example.soccergamesfinder.repository.UserRepository
 import com.example.soccergamesfinder.utils.GameValidationUtils

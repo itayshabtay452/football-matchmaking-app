@@ -4,10 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.soccergamesfinder.data.Field
-import com.example.soccergamesfinder.ui.components.FieldCard
+import com.example.soccergamesfinder.model.Field
 
 @Composable
 fun FieldCarousel(

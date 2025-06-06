@@ -1,6 +1,6 @@
 package com.example.soccergamesfinder.viewmodel.game
 
-import com.example.soccergamesfinder.data.Game
+import com.example.soccergamesfinder.model.Game
 
 data class GameListState(
     val games: List<Game> = emptyList(),

@@ -1,6 +1,6 @@
 package com.example.soccergamesfinder.viewmodel.user
 
-import com.example.soccergamesfinder.data.User
+import com.example.soccergamesfinder.model.User
 
 data class CurrentUserState(
     val user: User? = null,

@@ -2,8 +2,8 @@ package com.example.soccergamesfinder.viewmodel.game
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.soccergamesfinder.data.Game
-import com.example.soccergamesfinder.data.GameStatus
+import com.example.soccergamesfinder.model.Game
+import com.example.soccergamesfinder.model.GameStatus
 import com.example.soccergamesfinder.repository.GameRepository
 import com.example.soccergamesfinder.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel

@@ -12,8 +12,13 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 /**
- * Implementation of [LocationService] using FusedLocationProviderClient.
- * Assumes location permission has already been granted before invocation.
+ * A concrete implementation of [LocationService] using Android's FusedLocationProviderClient
+ * and Geocoder. This class handles location retrieval and reverse geocoding.
+ *
+ * **Note:** This class assumes that the location permission has already been granted.
+ *
+ * @property locationClient The fused location provider used to access location data.
+ * @property context Application context used for geocoding operations.
  */
 class LocationServiceImpl @Inject constructor(
     private val locationClient: FusedLocationProviderClient,
@@ -21,8 +26,10 @@ class LocationServiceImpl @Inject constructor(
 ) : LocationService {
 
     /**
-     * Retrieves the current device location.
-     * @return Result containing Pair<latitude, longitude> or an exception.
+     * Returns the current location of the device as latitude and longitude.
+     *
+     * @return A [Result] containing a [Pair] of (latitude, longitude),
+     *         or a failure if location retrieval fails.
      */
     override suspend fun getCurrentLocation(): Result<Pair<Double, Double>> {
         return try {
@@ -34,9 +41,12 @@ class LocationServiceImpl @Inject constructor(
     }
 
     /**
-     * Uses cached last known location.
+     * Retrieves the last known location using FusedLocationProviderClient.
+     * If no location is available, the coroutine fails with an exception.
+     *
+     * @return A [Location] object if available, or throws an exception.
      */
-    @SuppressLint("MissingPermission")
+    @SuppressLint("MissingPermission") // Assumes permissions are handled externally
     private suspend fun getLastKnownLocation(): Location =
         suspendCancellableCoroutine { continuation ->
             locationClient.lastLocation
@@ -49,16 +59,23 @@ class LocationServiceImpl @Inject constructor(
                 }
         }
 
+    /**
+     * Converts latitude and longitude into a human-readable address string.
+     *
+     * @param latitude The latitude of the location.
+     * @param longitude The longitude of the location.
+     * @return A formatted address string, or `null` if the address could not be resolved.
+     */
     override suspend fun getAddressFromLocation(latitude: Double, longitude: Double): String? {
         return try {
             val geocoder = Geocoder(context, Locale.getDefault())
             val result = geocoder.getFromLocation(latitude, longitude, 1)
             result?.firstOrNull()?.let { address ->
                 listOfNotNull(
-                    address.thoroughfare,
-                    address.subThoroughfare,
-                    address.locality,
-                    address.adminArea
+                    address.thoroughfare,      // Street name
+                    address.subThoroughfare,   // Street number
+                    address.locality,          // City
+                    address.adminArea          // State/Region
                 ).joinToString(", ")
             }
         } catch (e: Exception) {
@@ -66,6 +83,12 @@ class LocationServiceImpl @Inject constructor(
         }
     }
 
+    /**
+     * Converts a string address into geographic coordinates (latitude, longitude).
+     *
+     * @param address A string representing the full or partial address.
+     * @return A [Result] containing the coordinates, or a failure if the address is not found.
+     */
     override suspend fun getLocationFromAddress(address: String): Result<Pair<Double, Double>> {
         return try {
             val geocoder = Geocoder(context, Locale.getDefault())

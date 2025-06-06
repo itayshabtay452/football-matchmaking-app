@@ -22,7 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.soccergamesfinder.R
-import com.example.soccergamesfinder.data.Field
+import com.example.soccergamesfinder.model.Field
 import kotlin.math.roundToInt
 
 @Composable

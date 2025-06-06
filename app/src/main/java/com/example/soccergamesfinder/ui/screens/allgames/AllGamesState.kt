@@ -1,7 +1,7 @@
 package com.example.soccergamesfinder.ui.screens.allgames
 
-import com.example.soccergamesfinder.data.Field
-import com.example.soccergamesfinder.data.Game
+import com.example.soccergamesfinder.model.Field
+import com.example.soccergamesfinder.model.Game
 import com.example.soccergamesfinder.utils.GameFilterManager
 import java.time.LocalDate
 

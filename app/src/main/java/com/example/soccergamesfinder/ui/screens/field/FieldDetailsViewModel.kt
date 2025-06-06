@@ -1,8 +1,8 @@
 package com.example.soccergamesfinder.ui.screens.field
 
 import androidx.lifecycle.ViewModel
-import com.example.soccergamesfinder.data.Game
-import com.example.soccergamesfinder.data.GameStatus
+import com.example.soccergamesfinder.model.Game
+import com.example.soccergamesfinder.model.GameStatus
 import com.example.soccergamesfinder.repository.FieldRepository
 import com.example.soccergamesfinder.repository.GameRepository
 import dagger.hilt.android.lifecycle.HiltViewModel

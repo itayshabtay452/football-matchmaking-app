@@ -27,6 +27,22 @@ import com.example.soccergamesfinder.viewmodel.field.FieldListViewModel
 import com.example.soccergamesfinder.viewmodel.game.GameListViewModel
 import com.example.soccergamesfinder.viewmodel.user.CurrentUserViewModel
 
+/**
+ * Defines the main navigation graph for logged-in users.
+ *
+ * Includes:
+ * - Home screen with bottom navigation
+ * - Game and field details
+ * - Chat, notifications, profile, favorites
+ * - Screen transitions and parameterized routes
+ *
+ * @param navController Used to perform navigation actions
+ * @param fieldListViewModel Shared ViewModel with all fields data
+ * @param gameListViewModel Shared ViewModel with all games data
+ * @param currentUserViewModel Current user's state and preferences
+ * @param notificationsViewModel Used for managing notification state
+ */
+
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnrememberedGetBackStackEntry")
 @OptIn(ExperimentalAnimationApi::class)

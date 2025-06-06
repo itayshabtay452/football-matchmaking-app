@@ -2,7 +2,7 @@ package com.example.soccergamesfinder.ui.screens.addfield
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.soccergamesfinder.data.Field
+import com.example.soccergamesfinder.model.Field
 import com.example.soccergamesfinder.repository.FieldRepository
 import com.example.soccergamesfinder.services.LocationService
 import com.example.soccergamesfinder.utils.Validators

@@ -2,7 +2,7 @@ package com.example.soccergamesfinder.repository
 
 import android.content.Context
 import android.net.Uri
-import com.example.soccergamesfinder.data.User
+import com.example.soccergamesfinder.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore

@@ -17,7 +17,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.example.soccergamesfinder.navigation.*
-import com.example.soccergamesfinder.ui.components.BottomNavigationBar
+import com.example.soccergamesfinder.navigation.BottomNavigationBar
 import com.example.soccergamesfinder.ui.screens.notifications.NotificationsViewModel
 import com.example.soccergamesfinder.viewmodel.field.FieldListViewModel
 import com.example.soccergamesfinder.viewmodel.game.GameListViewModel

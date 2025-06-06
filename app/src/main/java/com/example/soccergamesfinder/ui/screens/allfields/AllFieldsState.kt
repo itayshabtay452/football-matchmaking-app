@@ -1,6 +1,6 @@
 package com.example.soccergamesfinder.ui.screens.allfields
 
-import com.example.soccergamesfinder.data.Field
+import com.example.soccergamesfinder.model.Field
 import com.example.soccergamesfinder.utils.FieldFilterManager
 
 data class AllFieldsState(

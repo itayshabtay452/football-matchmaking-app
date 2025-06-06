@@ -1,7 +1,6 @@
 // UserProfileHeader.kt
 package com.example.soccergamesfinder.ui.screens.user
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
@@ -12,7 +11,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.example.soccergamesfinder.data.User
+import com.example.soccergamesfinder.model.User
 
 @Composable
 fun UserProfileHeader(user: User) {

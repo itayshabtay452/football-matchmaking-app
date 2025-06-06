@@ -1,7 +1,7 @@
 package com.example.soccergamesfinder.ui.screens.field
 
-import com.example.soccergamesfinder.data.Field
-import com.example.soccergamesfinder.data.Game
+import com.example.soccergamesfinder.model.Field
+import com.example.soccergamesfinder.model.Game
 
 data class FieldDetailsState(
     val field: Field? = null,

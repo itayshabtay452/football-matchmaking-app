@@ -3,8 +3,8 @@ package com.example.soccergamesfinder.viewmodel.game
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.soccergamesfinder.data.Game
-import com.example.soccergamesfinder.data.Notification
+import com.example.soccergamesfinder.model.Game
+import com.example.soccergamesfinder.model.Notification
 import com.example.soccergamesfinder.repository.FieldRepository
 import com.example.soccergamesfinder.repository.GameRepository
 import com.example.soccergamesfinder.repository.NotificationsRepository

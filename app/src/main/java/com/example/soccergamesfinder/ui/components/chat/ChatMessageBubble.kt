@@ -1,15 +1,13 @@
 package com.example.soccergamesfinder.ui.components.chat
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import com.example.soccergamesfinder.data.Message
+import com.example.soccergamesfinder.model.Message
 import java.text.SimpleDateFormat
 import java.util.*
 

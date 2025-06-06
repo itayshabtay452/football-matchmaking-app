@@ -1,8 +1,8 @@
 package com.example.soccergamesfinder.ai
 
-import com.example.soccergamesfinder.data.Field
-import com.example.soccergamesfinder.data.Game
-import com.example.soccergamesfinder.data.User
+import com.example.soccergamesfinder.model.Field
+import com.example.soccergamesfinder.model.Game
+import com.example.soccergamesfinder.model.User
 import java.text.SimpleDateFormat
 import java.util.*
 

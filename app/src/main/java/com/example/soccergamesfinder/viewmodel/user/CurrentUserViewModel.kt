@@ -2,7 +2,6 @@ package com.example.soccergamesfinder.viewmodel.user
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.soccergamesfinder.data.User
 import com.example.soccergamesfinder.repository.UserRepository
 import com.google.firebase.firestore.ListenerRegistration
 import dagger.hilt.android.lifecycle.HiltViewModel

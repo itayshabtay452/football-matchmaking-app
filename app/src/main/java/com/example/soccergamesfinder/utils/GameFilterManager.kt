@@ -2,7 +2,7 @@ package com.example.soccergamesfinder.utils
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.example.soccergamesfinder.data.Game
+import com.example.soccergamesfinder.model.Game
 import com.example.soccergamesfinder.ui.screens.allgames.GameStatusOption
 import java.time.LocalDate
 import java.time.ZoneId

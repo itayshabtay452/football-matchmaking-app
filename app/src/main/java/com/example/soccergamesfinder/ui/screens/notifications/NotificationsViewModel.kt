@@ -3,7 +3,7 @@ package com.example.soccergamesfinder.ui.screens.notifications
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.soccergamesfinder.data.Notification
+import com.example.soccergamesfinder.model.Notification
 import com.example.soccergamesfinder.repository.NotificationsRepository
 import com.example.soccergamesfinder.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel

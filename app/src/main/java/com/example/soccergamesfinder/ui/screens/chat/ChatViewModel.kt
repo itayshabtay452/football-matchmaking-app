@@ -2,7 +2,7 @@ package com.example.soccergamesfinder.ui.screens.chat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.soccergamesfinder.data.Message
+import com.example.soccergamesfinder.model.Message
 import com.example.soccergamesfinder.repository.ChatRepository
 import com.example.soccergamesfinder.repository.UserRepository
 import com.google.firebase.firestore.ListenerRegistration

@@ -3,8 +3,8 @@ package com.example.soccergamesfinder.ui.screens.allgames
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
-import com.example.soccergamesfinder.data.Field
-import com.example.soccergamesfinder.data.Game
+import com.example.soccergamesfinder.model.Field
+import com.example.soccergamesfinder.model.Game
 import com.example.soccergamesfinder.utils.GameFilterManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

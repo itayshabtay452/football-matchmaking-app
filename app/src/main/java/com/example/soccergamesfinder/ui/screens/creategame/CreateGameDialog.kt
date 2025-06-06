@@ -6,8 +6,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.soccergamesfinder.data.Field
-import com.example.soccergamesfinder.data.Game
+import com.example.soccergamesfinder.model.Field
+import com.example.soccergamesfinder.model.Game
 import com.example.soccergamesfinder.ui.components.shared.DatePickerFieldModern
 import com.example.soccergamesfinder.ui.screens.creategame.components.EndTimePickerDropdown
 import com.example.soccergamesfinder.ui.screens.creategame.components.MaxPlayersDropdown

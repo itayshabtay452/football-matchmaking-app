@@ -1,6 +1,6 @@
 package com.example.soccergamesfinder.utils
 
-import com.example.soccergamesfinder.data.Game
+import com.example.soccergamesfinder.model.Game
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.*

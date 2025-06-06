@@ -1,6 +1,6 @@
 package com.example.soccergamesfinder.utils
 
-import com.example.soccergamesfinder.data.Field
+import com.example.soccergamesfinder.model.Field
 
 object FieldFilterManager {
 
