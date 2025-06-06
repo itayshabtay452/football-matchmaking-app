@@ -57,9 +57,6 @@
   <img src="screenshots/chat.jpeg" width="200" style="margin: 8px;" />
 </div>
 
-
-(*Add more screenshots from the app for better impression.*)
-
 ## 📄 License
 
 This project is open-source and available under the MIT License.
