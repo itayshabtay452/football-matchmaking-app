@@ -49,11 +49,13 @@
 
 ## 🖼️ Screenshots
 
-<img src="screenshots/home_screen.jpeg" width="300">
-<img src="screenshots/profile.jpeg" width="300">
-<img src="screenshots/game.jpeg" width="300">
-<img src="screenshots/field.jpeg" width="300">
-<img src="screenshots/chat.jpeg" width="300">
+<div align="center">
+  <img src="screenshots/home_screen.jpeg" width="200" style="margin: 8px;" />
+  <img src="screenshots/profile.jpeg" width="200" style="margin: 8px;" />
+  <img src="screenshots/game.jpeg" width="200" style="margin: 8px;" />
+  <img src="screenshots/field.jpeg" width="200" style="margin: 8px;" />
+  <img src="screenshots/chat.jpeg" width="200" style="margin: 8px;" />
+</div>
 
 
 (*Add more screenshots from the app for better impression.*)
