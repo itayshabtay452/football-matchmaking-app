@@ -49,7 +49,7 @@
 
 ## 🖼️ Screenshots
 
-![Home Screen](screenshots/home_screen.png)
+<img src="screenshots/home_screen.jpeg" width="300">
 
 (*Add more screenshots from the app for better impression.*)
 
